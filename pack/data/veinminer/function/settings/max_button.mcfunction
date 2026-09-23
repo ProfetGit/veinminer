@@ -1,0 +1,2 @@
+$execute if score #max_blocks veinminer.config matches $(v) run return run data modify storage veinminer:menu row append value {text:"[$(v)]",color:"green",underlined:true}
+$data modify storage veinminer:menu row append value {text:"[$(v)]",color:"aqua",hover_event:{action:"show_text",value:"Set to $(v)"},click_event:{action:"run_command",command:"/function veinminer:settings/set {key:max_blocks,value:$(v)}"}}

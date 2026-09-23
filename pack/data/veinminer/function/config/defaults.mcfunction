@@ -1,0 +1,19 @@
+function veinminer:config/default {key:"max_blocks",value:64}
+function veinminer:config/default {key:"require_sneak",value:1}
+function veinminer:config/default {key:"drops",value:0}
+function veinminer:config/default {key:"durability",value:1}
+function veinminer:config/default {key:"diagonal",value:1}
+function veinminer:config/default {key:"feedback",value:1}
+function veinminer:config/default {key:"welcome",value:1}
+function veinminer:config/default {key:"ore.coal",value:1}
+function veinminer:config/default {key:"ore.copper",value:1}
+function veinminer:config/default {key:"ore.iron",value:1}
+function veinminer:config/default {key:"ore.gold",value:1}
+function veinminer:config/default {key:"ore.nether_gold",value:1}
+function veinminer:config/default {key:"ore.redstone",value:1}
+function veinminer:config/default {key:"ore.lapis",value:1}
+function veinminer:config/default {key:"ore.diamond",value:1}
+function veinminer:config/default {key:"ore.emerald",value:1}
+function veinminer:config/default {key:"ore.quartz",value:1}
+function veinminer:config/default {key:"ore.ancient_debris",value:1}
+function veinminer:config/validate

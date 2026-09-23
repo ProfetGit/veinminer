@@ -1,0 +1,2 @@
+$execute if score #$(key) veinminer.config matches $(v) run return run data modify storage veinminer:menu row append value {text:"[$(label)]",color:"green",underlined:true,hover_event:{action:"show_text",value:"$(hint)"}}
+$data modify storage veinminer:menu row append value {text:"[$(label)]",color:"aqua",hover_event:{action:"show_text",value:"$(hint)"},click_event:{action:"run_command",command:"/function veinminer:settings/set {key:$(key),value:$(v)}"}}
