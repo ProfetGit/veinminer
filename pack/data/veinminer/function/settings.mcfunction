@@ -1,4 +1,4 @@
-tellraw @s ["",{text:"\n⛏ Veinminer settings ",color:"gold",bold:true},{text:"v1.1.0",color:"dark_gray"}]
+tellraw @s ["",{text:"\n⛏ Veinminer settings ",color:"gold",bold:true},{text:"v1.2.0",color:"dark_gray"}]
 execute if data storage veinminer:meta requires[0] run tellraw @s ["",{text:" "},{storage:"veinminer:meta",nbt:"requires[]",interpret:true,separator:""}]
 data modify storage veinminer:menu row set value []
 function veinminer:settings/max_button {v:16}
@@ -12,6 +12,7 @@ data modify storage veinminer:menu row set value []
 function veinminer:settings/choice {key:"drops",v:0,label:"At mined block",hint:"Drops and XP appear where you broke the first block"}
 function veinminer:settings/choice {key:"drops",v:1,label:"At player",hint:"Drops and XP appear at your feet"}
 tellraw @s ["",{text:" Drops: ",color:"gray"},{storage:"veinminer:menu",nbt:"row[]",interpret:true,separator:" "}]
+function veinminer:settings/row_bool {key:"animation",label:"Chain animation",hint:"The vein breaks block by block and each block throws its loot out. Off: the whole vein breaks at once"}
 function veinminer:settings/row_bool {key:"durability",label:"Use tool durability",hint:"Each extra block costs durability (Unbreaking applies); stops before the tool breaks"}
 function veinminer:settings/row_bool {key:"diagonal",label:"Diagonal connections",hint:"Treat ores touching only at edges/corners as one vein"}
 function veinminer:settings/row_bool {key:"feedback",label:"Action bar message",hint:"Show how many blocks were mined"}

@@ -3,6 +3,7 @@ function veinminer:config/default {key:"require_sneak",value:1}
 function veinminer:config/default {key:"drops",value:0}
 function veinminer:config/default {key:"durability",value:1}
 function veinminer:config/default {key:"diagonal",value:1}
+function veinminer:config/default {key:"animation",value:1}
 function veinminer:config/default {key:"feedback",value:1}
 function veinminer:config/default {key:"welcome",value:1}
 function veinminer:config/default {key:"ore.coal",value:1}

@@ -1,10 +1,16 @@
-data modify storage veinminer:meta version set value "1.1.0"
-data modify storage veinminer:meta version_id set value 10100
+data modify storage veinminer:meta version set value "1.2.0"
+data modify storage veinminer:meta version_id set value 10200
 data remove storage veinminer:meta requires
 scoreboard objectives add veinminer trigger {text:"Veinminer"}
 scoreboard objectives add veinminer.off dummy
 scoreboard objectives add veinminer.config dummy
 scoreboard objectives add veinminer.data dummy
+scoreboard objectives add veinminer.t dummy
+scoreboard objectives add veinminer.op dummy
+scoreboard objectives add veinminer.end dummy
+scoreboard objectives add veinminer.ring dummy
+scoreboard objectives add veinminer.xp dummy
+scoreboard players set #7 veinminer.data 7
 scoreboard objectives add veinminer.mined.coal_ore minecraft.mined:minecraft.coal_ore
 scoreboard objectives add veinminer.mined.deepslate_coal_ore minecraft.mined:minecraft.deepslate_coal_ore
 scoreboard objectives add veinminer.mined.copper_ore minecraft.mined:minecraft.copper_ore
@@ -25,15 +31,15 @@ scoreboard objectives add veinminer.mined.deepslate_emerald_ore minecraft.mined:
 scoreboard objectives add veinminer.mined.nether_quartz_ore minecraft.mined:minecraft.nether_quartz_ore
 scoreboard objectives add veinminer.mined.ancient_debris minecraft.mined:minecraft.ancient_debris
 function veinminer:config/defaults
-data modify storage veinminer:groups coal set value {id:"coal",a:"minecraft:coal_ore",b:"minecraft:deepslate_coal_ore",xp:"0..2",hasxp:1b}
-data modify storage veinminer:groups copper set value {id:"copper",a:"minecraft:copper_ore",b:"minecraft:deepslate_copper_ore",xp:"0..1",hasxp:0b}
-data modify storage veinminer:groups iron set value {id:"iron",a:"minecraft:iron_ore",b:"minecraft:deepslate_iron_ore",xp:"0..1",hasxp:0b}
-data modify storage veinminer:groups gold set value {id:"gold",a:"minecraft:gold_ore",b:"minecraft:deepslate_gold_ore",xp:"0..1",hasxp:0b}
-data modify storage veinminer:groups nether_gold set value {id:"nether_gold",a:"minecraft:nether_gold_ore",b:"minecraft:nether_gold_ore",xp:"0..1",hasxp:1b}
-data modify storage veinminer:groups redstone set value {id:"redstone",a:"minecraft:redstone_ore",b:"minecraft:deepslate_redstone_ore",xp:"1..5",hasxp:1b}
-data modify storage veinminer:groups lapis set value {id:"lapis",a:"minecraft:lapis_ore",b:"minecraft:deepslate_lapis_ore",xp:"2..5",hasxp:1b}
-data modify storage veinminer:groups diamond set value {id:"diamond",a:"minecraft:diamond_ore",b:"minecraft:deepslate_diamond_ore",xp:"3..7",hasxp:1b}
-data modify storage veinminer:groups emerald set value {id:"emerald",a:"minecraft:emerald_ore",b:"minecraft:deepslate_emerald_ore",xp:"3..7",hasxp:1b}
-data modify storage veinminer:groups quartz set value {id:"quartz",a:"minecraft:nether_quartz_ore",b:"minecraft:nether_quartz_ore",xp:"2..5",hasxp:1b}
-data modify storage veinminer:groups ancient_debris set value {id:"ancient_debris",a:"minecraft:ancient_debris",b:"minecraft:ancient_debris",xp:"0..1",hasxp:0b}
+data modify storage veinminer:groups coal set value {id:"coal",sa:"minecraft:block.stone.break",sb:"minecraft:block.deepslate.break",a:"minecraft:coal_ore",b:"minecraft:deepslate_coal_ore",xp:"0..2",hasxp:1b}
+data modify storage veinminer:groups copper set value {id:"copper",sa:"minecraft:block.stone.break",sb:"minecraft:block.deepslate.break",a:"minecraft:copper_ore",b:"minecraft:deepslate_copper_ore",xp:"0..1",hasxp:0b}
+data modify storage veinminer:groups iron set value {id:"iron",sa:"minecraft:block.stone.break",sb:"minecraft:block.deepslate.break",a:"minecraft:iron_ore",b:"minecraft:deepslate_iron_ore",xp:"0..1",hasxp:0b}
+data modify storage veinminer:groups gold set value {id:"gold",sa:"minecraft:block.stone.break",sb:"minecraft:block.deepslate.break",a:"minecraft:gold_ore",b:"minecraft:deepslate_gold_ore",xp:"0..1",hasxp:0b}
+data modify storage veinminer:groups nether_gold set value {id:"nether_gold",sa:"minecraft:block.nether_gold_ore.break",sb:"minecraft:block.nether_gold_ore.break",a:"minecraft:nether_gold_ore",b:"minecraft:nether_gold_ore",xp:"0..1",hasxp:1b}
+data modify storage veinminer:groups redstone set value {id:"redstone",sa:"minecraft:block.stone.break",sb:"minecraft:block.deepslate.break",a:"minecraft:redstone_ore",b:"minecraft:deepslate_redstone_ore",xp:"1..5",hasxp:1b}
+data modify storage veinminer:groups lapis set value {id:"lapis",sa:"minecraft:block.stone.break",sb:"minecraft:block.deepslate.break",a:"minecraft:lapis_ore",b:"minecraft:deepslate_lapis_ore",xp:"2..5",hasxp:1b}
+data modify storage veinminer:groups diamond set value {id:"diamond",sa:"minecraft:block.stone.break",sb:"minecraft:block.deepslate.break",a:"minecraft:diamond_ore",b:"minecraft:deepslate_diamond_ore",xp:"3..7",hasxp:1b}
+data modify storage veinminer:groups emerald set value {id:"emerald",sa:"minecraft:block.stone.break",sb:"minecraft:block.deepslate.break",a:"minecraft:emerald_ore",b:"minecraft:deepslate_emerald_ore",xp:"3..7",hasxp:1b}
+data modify storage veinminer:groups quartz set value {id:"quartz",sa:"minecraft:block.nether_ore.break",sb:"minecraft:block.nether_ore.break",a:"minecraft:nether_quartz_ore",b:"minecraft:nether_quartz_ore",xp:"2..5",hasxp:1b}
+data modify storage veinminer:groups ancient_debris set value {id:"ancient_debris",sa:"minecraft:block.ancient_debris.break",sb:"minecraft:block.ancient_debris.break",a:"minecraft:ancient_debris",b:"minecraft:ancient_debris",xp:"0..1",hasxp:0b}
 function #veinminer:api/loaded

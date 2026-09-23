@@ -1,5 +1,6 @@
 {
   "values": [
+    "veinminer:anim/tick",
     "veinminer:tick"
   ]
 }

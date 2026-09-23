@@ -14,19 +14,20 @@ Veinminer is a lightweight, fully vanilla data pack for **Minecraft Java 26.2 an
 
 **One zip, nothing else.** No mod loader, no companion resource pack, no client install and no experimental features. Drop it in, run `/reload`, and it works.
 
-**Built to stay out of the way.** When nobody is mining, it only checks a few scoreboards each tick. The actual work happens in the single tick an ore breaks: a 64-block vein takes about 6 ms, measured on a real server.
+**Built to stay out of the way.** When nobody is mining, it only checks a few scoreboards and looks for running animations each tick. A 64-block vein costs about 4 ms in the tick you break it, then about 3 ms per tick while its animation plays, measured on a real server.
 
-**Tested, not hoped.** Every release is checked by 73 automated tests on real 26.2 and 26.3 servers. A simulated player mines actual veins and checks drops, durability, tool tiers, enchantments and every setting.
+**Tested, not hoped.** Every release is checked by 94 automated tests on real 26.2 and 26.3 servers. A simulated player mines actual veins and checks drops, durability, tool tiers, enchantments and every setting.
 
 **Server and modpack friendly.** Run it on any server, including monetized ones, and include it in any modpack with credit. See [License](#license).
 
 ## Features
 
 - **The whole vein in one break.** Every connected ore of the same type is mined, including ores that only touch at an edge or a corner. Stone and deepslate variants count as the same vein.
+- **A chain reaction you can watch.** The vein breaks block by block, spreading out from the ore you hit. It starts slow and speeds up: each block squashes, holds, and pops, with a crack that climbs in pitch ring by ring. Every popped block throws its own loot, which arcs out and lands in front of the vein or flies to you. The blocks stay normal blocks until their turn. Turn it off and the whole vein breaks at once.
 - **Enchantments apply.** Fortune multiplies drops and Silk Touch gives you the ore blocks, on every block of the vein.
 - **Tool tier matters.** Each ore needs the same pickaxe it needs in vanilla. Ancient debris still requires diamond or netherite.
 - **Durability is used fairly.** Each extra block costs 1 durability, reduced by Unbreaking as usual. Unbreakable tools aren't affected.
-- **Drops are gathered.** Items and XP appear at the block you mined, or at your feet if you prefer. Nothing gets stuck in the walls.
+- **Drops are gathered.** Items and XP land in front of the block you mined, or at your feet if you prefer. Nothing gets stuck in the walls.
 - **Vanilla XP.** You get the same XP per ore as vanilla, and none with Silk Touch.
 - **Players choose for themselves.** Anyone can turn Veinminer off or on with `/trigger veinminer`. No operator is needed.
 - **A clickable settings menu.** Operators can change every setting from chat. Settings survive `/reload` and restarts.
@@ -77,6 +78,7 @@ Open the menu with `/function veinminer:settings` and click to change a setting.
 | Max blocks per vein | 64 | Menu: 16, 32, 64, 128, 256. Any value from 1 to 512 by command. |
 | Require sneaking | ON | OFF means you veinmine whenever you break an ore with a pickaxe |
 | Drops | At mined block | At mined block / At player |
+| Chain animation | ON | OFF means the whole vein breaks at once and the drops appear right away, like 1.1.0 |
 | Use tool durability | ON | OFF means extra blocks are free |
 | Diagonal connections | ON | OFF means only face-touching ores count as one vein |
 | Action bar message | ON | Shows how many blocks were mined |
@@ -86,7 +88,7 @@ Open the menu with `/function veinminer:settings` and click to change a setting.
 Every setting can also be changed by command, for example:
 `/scoreboard players set #max_blocks veinminer.config 128`
 
-Setting names: `#max_blocks`, `#require_sneak`, `#drops`, `#durability`, `#diagonal`, `#feedback`, `#welcome`, `#ore.coal`, `#ore.copper`, `#ore.iron`, `#ore.gold`, `#ore.redstone`, `#ore.lapis`, `#ore.diamond`, `#ore.emerald`, `#ore.nether_gold`, `#ore.quartz`, `#ore.ancient_debris`. For on/off settings, 1 is on and 0 is off.
+Setting names: `#max_blocks`, `#require_sneak`, `#drops`, `#animation`, `#durability`, `#diagonal`, `#feedback`, `#welcome`, `#ore.coal`, `#ore.copper`, `#ore.iron`, `#ore.gold`, `#ore.redstone`, `#ore.lapis`, `#ore.diamond`, `#ore.emerald`, `#ore.nether_gold`, `#ore.quartz`, `#ore.ancient_debris`. For on/off settings, 1 is on and 0 is off.
 
 ## Add-ons
 
@@ -124,12 +126,14 @@ Don't unzip the file.
 
 - Blocks broken by Veinminer don't count toward the "Mined" statistic and don't use hunger.
 - Veinminer doesn't know about land-claim or protection plugins. On servers that use them, a vein that crosses into a claim will be mined too.
-- The maximum vein size affects performance. A 64-block vein takes about 6 ms, which is unnoticeable. A 512-block vein, the highest limit, takes about 80–90 ms, a short hitch. Keep the limit modest on busy servers. (Measured on a Ryzen 9 5900X.)
+- The maximum vein size affects performance. A 64-block vein takes about 4 ms in the tick you break it (4–5 ms with the animation off), and its animation then costs about 3 ms per tick for a second or two, which is unnoticeable. A 512-block vein, the highest limit, takes about 40 ms, and its animation up to about 17 ms per tick. Keep the limit modest on busy servers. (Measured on a Ryzen 9 5900X.)
+- While a chain plays, the waiting blocks are still normal blocks. If you mine one yourself before its turn, it drops as usual and the chain skips it. Loot from the chain is rolled with the pickaxe you started it with.
+- The animation uses display entities (one per block while it pops, one per flying item) and removes them as soon as they're done. A typical vein is finished about 1.5 seconds after the break.
 
 ## Uninstall
 
 1. Run `/function veinminer:uninstall`.
-2. Remove the `.zip` from the `datapacks` folder, or run `/datapack disable "file/Veinminer-1.1.0.zip"`.
+2. Remove the `.zip` from the `datapacks` folder, or run `/datapack disable "file/Veinminer-1.2.0.zip"`.
 3. Run `/reload`.
 
 ## Support

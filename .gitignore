@@ -8,3 +8,12 @@ dev/icon/contact.png
 # textures extracted from the Minecraft jar (Mojang's), and the v1 icon built from them
 dev/icon/textures/
 dev/icon/v1/
+# client capture output (dev/capture/run.sh)
+dev/capture/.work/
+dev/capture/frames*/
+dev/capture/pick*.png
+dev/capture/seq.png
+dev/capture/flight.png
+dev/capture/arc.png
+dev/capture/sheet.png
+dev/capture/preview/
