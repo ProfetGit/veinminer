@@ -1,3 +1,5 @@
+![Veinminer](https://raw.githubusercontent.com/ProfetGit/veinminer/main/docs/banner.gif)
+
 **Sneak, mine one ore, and the whole vein comes out.**
 
 Veinminer is a lightweight, fully vanilla data pack for **Minecraft Java 26.2 and 26.3**. It installs as a single zip and runs only on the server, so players join with an unmodified game. It works in singleplayer, over LAN, and on dedicated servers.
