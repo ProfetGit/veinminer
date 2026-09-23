@@ -1,0 +1,7 @@
+{
+  "pack": {
+    "description": "Veinminer test fixture: a fake add-on using the veinminer:api hooks",
+    "min_format": [107, 1],
+    "max_format": 121
+  }
+}

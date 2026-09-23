@@ -120,6 +120,7 @@ public class VeinminerTest {
             if (line.startsWith("!tick ")) { ticks(Integer.parseInt(line.substring(6).trim())); continue; }
             if (line.equals("!player")) { spawnPlayer(); continue; }
             if (line.startsWith("!sneak ")) { sneak(Boolean.parseBoolean(line.substring(7).trim())); continue; }
+            if (line.equals("!chat")) { for (String m : chat()) System.out.println("[EXPLORE] chat| " + m); continue; }
             if (line.startsWith("!destroy ")) {
                 String[] p = line.substring(9).trim().split(" ");
                 BlockPos pos = new BlockPos(Integer.parseInt(p[0]), Integer.parseInt(p[1]), Integer.parseInt(p[2]));
@@ -277,6 +278,17 @@ class Scenarios {
 
     static int count(Map<String, Integer> items, String id) { return items.getOrDefault(id, 0); }
 
+    static int score(String holder, String objective) {
+        String out = VeinminerTest.cmd("scoreboard players get " + holder + " " + objective).toString();
+        java.util.regex.Matcher m = java.util.regex.Pattern.compile(" has (-?\\d+) ").matcher(out);
+        return m.find() ? Integer.parseInt(m.group(1)) : Integer.MIN_VALUE;
+    }
+
+    static int requiresCount() {
+        String out = VeinminerTest.cmd("data get storage veinminer:meta requires").toString();
+        return out.contains("Found no elements") ? -1 : out.split("Test requirement", -1).length - 1;
+    }
+
     static Map<String, Integer> itemsInCell(BlockPos cell) {
         return VeinminerTest.on(() -> {
             Map<String, Integer> m = new java.util.TreeMap<>();
@@ -309,6 +321,14 @@ class Scenarios {
         cmd("forceload add 96 96 143 143");
         cmd("gamemode survival VeinTester");
         VeinminerTest.ticks(80);
+        // the hook fixture (dev/test/hookpack) is off for everything except section 25
+        VeinminerTest.cmd("datapack disable \"file/hookpack\"");
+        VeinminerTest.ticks(5);
+        List<String> packs = VeinminerTest.cmd("datapack list enabled");
+        VeinminerTest.check("base pack runs alone", !packs.toString().contains("hookpack") && packs.toString().contains("Veinminer-"), packs.toString());
+        VeinminerTest.check("version_id stored for add-ons", VeinminerTest.cmd("data get storage veinminer:meta version_id").toString().contains("10100"),
+            VeinminerTest.cmd("data get storage veinminer:meta version_id").toString());
+        VeinminerTest.check("no add-on requirement text without add-ons", requiresCount() == -1, "requires=" + requiresCount());
         List<String> ver = VeinminerTest.cmd("data get storage veinminer:meta version");
         VeinminerTest.info("pack version: " + ver);
         VeinminerTest.check("pack loaded (config defaults present)",
@@ -602,8 +622,78 @@ class Scenarios {
         List<String> tog = VeinminerTest.cmd("execute as VeinTester run function veinminer:player/welcome");
         List<String> hello = VeinminerTest.chat();
         VeinminerTest.info("welcome: " + hello);
-        VeinminerTest.check("welcome text shown", hello.stream().anyMatch(m -> m.contains("sneak while mining")), hello.toString());
+        VeinminerTest.check("welcome text shown, same as 1.0.0", hello.contains("⛏ Veinminer: sneak while mining an ore with a pickaxe to break the whole vein. [Toggle] {clicks=1}"), hello.toString());
         VeinminerTest.check("welcome hint runs", tog.stream().noneMatch(m -> m.contains("<--")), tog.toString());
+
+        // 25. add-on hooks, via the fixture pack dev/test/hookpack
+        cmd("scoreboard players reset * vmtest");
+        VeinminerTest.cmd("datapack enable \"file/hookpack\"");
+        VeinminerTest.ticks(5);
+        VeinminerTest.check("api/loaded runs after version_id is set", score("#loaded", "vmtest") == 1 && score("#version_id", "vmtest") == 10100,
+            "loaded=" + score("#loaded", "vmtest") + " version_id=" + score("#version_id", "vmtest"));
+        say("reload");
+        VeinminerTest.ticks(5);
+        VeinminerTest.check("requires text rebuilt on /reload, not duplicated", requiresCount() == 1 && score("#loaded", "vmtest") == 2, "requires=" + requiresCount());
+
+        arena();
+        place("minecraft:iron_ore", IRON);
+        tool("minecraft:iron_pickaxe");
+        cmd("scoreboard players set #calls_a vmtest 0");
+        cmd("scoreboard players set #calls_b vmtest 0");
+        mine();
+        VeinminerTest.check("hooks that don't return allow the vein", remaining("minecraft:iron_ore", IRON) == 0
+            && score("#calls_a", "vmtest") == 1 && score("#calls_b", "vmtest") == 1,
+            "left=" + remaining("minecraft:iron_ore", IRON) + " a=" + score("#calls_a", "vmtest") + " b=" + score("#calls_b", "vmtest"));
+
+        arena();
+        cmd("tag VeinTester add vmtest.veto_a");
+        place("minecraft:iron_ore", IRON);
+        tool("minecraft:iron_pickaxe");
+        cmd("scoreboard players set #calls_b vmtest 0");
+        VeinminerTest.chat();
+        mine();
+        it = VeinminerTest.itemsNear(O, 3);
+        VeinminerTest.check("return 1 cancels the vein, single block still breaks", remaining("minecraft:iron_ore", IRON) == 5
+            && VeinminerTest.blockId(O).equals("minecraft:air") && count(it, "minecraft:raw_iron") == 1 && damage() == 1,
+            "left=" + remaining("minecraft:iron_ore", IRON) + " items " + it + " " + held());
+        VeinminerTest.check("first returning hook ends the chain", score("#calls_b", "vmtest") == 0, "b=" + score("#calls_b", "vmtest"));
+        bar = VeinminerTest.chat();
+        VeinminerTest.check("cancelled vein shows no action bar", bar.stream().noneMatch(m -> m.startsWith("[actionbar]")), bar.toString());
+
+        arena();
+        cmd("tag VeinTester remove vmtest.veto_a");
+        cmd("tag VeinTester add vmtest.veto_b");
+        place("minecraft:iron_ore", IRON);
+        tool("minecraft:iron_pickaxe");
+        mine();
+        VeinminerTest.check("a later hook can cancel after an earlier one falls through", remaining("minecraft:iron_ore", IRON) == 5,
+            "left=" + remaining("minecraft:iron_ore", IRON));
+
+        arena();
+        place("minecraft:iron_ore", IRON);
+        tool("minecraft:iron_pickaxe");
+        VeinminerTest.sneak(false);
+        cmd("scoreboard players set #calls_a vmtest 0");
+        mine();
+        VeinminerTest.check("hooks run only after Veinminer's own checks pass", score("#calls_a", "vmtest") == 0, "a=" + score("#calls_a", "vmtest"));
+
+        VeinminerTest.chat();
+        VeinminerTest.cmd("execute as VeinTester run function veinminer:player/welcome");
+        hello = VeinminerTest.chat();
+        VeinminerTest.check("join hint shows add-on requirement", hello.stream().anyMatch(m -> m.contains("whole vein. Test requirement. [Toggle]")), hello.toString());
+        VeinminerTest.cmd("execute as VeinTester run function veinminer:settings");
+        shown = VeinminerTest.chat();
+        VeinminerTest.check("menu shows add-on requirement", shown.size() == 11 && shown.get(1).contains("Test requirement"), shown.size() + " lines: " + shown);
+
+        VeinminerTest.cmd("datapack disable \"file/hookpack\"");
+        VeinminerTest.ticks(5);
+        arena();
+        place("minecraft:iron_ore", IRON);
+        tool("minecraft:iron_pickaxe");
+        mine();
+        VeinminerTest.check("removing the add-on clears its requirement and hooks", requiresCount() == -1 && remaining("minecraft:iron_ore", IRON) == 0,
+            "requires=" + requiresCount() + " left=" + remaining("minecraft:iron_ore", IRON));
+        cmd("tag VeinTester remove vmtest.veto_b");
 
         // 24. warm benchmark: default 64-block cap, repeated
         List<Long> runs = new ArrayList<>();
@@ -628,5 +718,6 @@ class Scenarios {
         List<String> un = VeinminerTest.cmd("execute as VeinTester run function veinminer:uninstall");
         List<String> objs = VeinminerTest.cmd("scoreboard objectives list");
         VeinminerTest.check("uninstall removes all objectives", objs.stream().noneMatch(o -> o.contains("veinminer")), objs + " " + un);
+        VeinminerTest.check("uninstall removes version_id", VeinminerTest.cmd("data get storage veinminer:meta version_id").toString().contains("Found no elements"), "");
     }
 }

@@ -1,4 +1,6 @@
-data modify storage veinminer:meta version set value "1.0.0"
+data modify storage veinminer:meta version set value "1.1.0"
+data modify storage veinminer:meta version_id set value 10100
+data remove storage veinminer:meta requires
 scoreboard objectives add veinminer trigger {text:"Veinminer"}
 scoreboard objectives add veinminer.off dummy
 scoreboard objectives add veinminer.config dummy
@@ -34,3 +36,4 @@ data modify storage veinminer:groups diamond set value {id:"diamond",a:"minecraf
 data modify storage veinminer:groups emerald set value {id:"emerald",a:"minecraft:emerald_ore",b:"minecraft:deepslate_emerald_ore",xp:"3..7",hasxp:1b}
 data modify storage veinminer:groups quartz set value {id:"quartz",a:"minecraft:nether_quartz_ore",b:"minecraft:nether_quartz_ore",xp:"2..5",hasxp:1b}
 data modify storage veinminer:groups ancient_debris set value {id:"ancient_debris",a:"minecraft:ancient_debris",b:"minecraft:ancient_debris",xp:"0..1",hasxp:0b}
+function #veinminer:api/loaded

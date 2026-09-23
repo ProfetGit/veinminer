@@ -101,6 +101,10 @@ def main() -> None:
         print("\n".join(errors))
         sys.exit(f"{len(errors)} problem(s)")
     ver = version()
+    major, minor, patch = (int(p) for p in ver.split("."))
+    vid = major * 10000 + minor * 100 + patch
+    if f"storage veinminer:meta version_id set value {vid}\n" not in (PACK / "data/veinminer/function/load.mcfunction").read_text():
+        sys.exit(f"load.mcfunction: expected version_id {vid} for {ver}")
     for rel, needle in (("pack/pack.mcmeta", f"v{ver}"), ("pack/data/veinminer/function/settings.mcfunction", f"v{ver}"),
                         ("pack/data/veinminer/function/uninstall.mcfunction", f"Veinminer-{ver}.zip"),
                         ("CHANGELOG.md", f"## {ver}")):

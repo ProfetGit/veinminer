@@ -39,4 +39,6 @@ data remove storage veinminer:groups quartz
 data remove storage veinminer:groups ancient_debris
 data remove storage veinminer:menu row
 data remove storage veinminer:meta version
-tellraw @s ["",{text:"⛏ Veinminer data removed. ",color:"gold"},{text:"Now delete or disable the datapack (e.g. /datapack disable \"file/Veinminer-1.0.0.zip\") so it does not reinstall on the next /reload.",color:"gray"}]
+data remove storage veinminer:meta version_id
+data remove storage veinminer:meta requires
+tellraw @s ["",{text:"⛏ Veinminer data removed. ",color:"gold"},{text:"Now delete or disable the datapack (e.g. /datapack disable \"file/Veinminer-1.1.0.zip\") so it does not reinstall on the next /reload.",color:"gray"}]

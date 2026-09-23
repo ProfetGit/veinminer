@@ -1,4 +1,5 @@
-tellraw @s ["",{text:"\n⛏ Veinminer settings ",color:"gold",bold:true},{text:"v1.0.0",color:"dark_gray"}]
+tellraw @s ["",{text:"\n⛏ Veinminer settings ",color:"gold",bold:true},{text:"v1.1.0",color:"dark_gray"}]
+execute if data storage veinminer:meta requires[0] run tellraw @s ["",{text:" "},{storage:"veinminer:meta",nbt:"requires[]",interpret:true,separator:""}]
 data modify storage veinminer:menu row set value []
 function veinminer:settings/max_button {v:16}
 function veinminer:settings/max_button {v:32}

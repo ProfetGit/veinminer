@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.1.0 — 2026-09-23
+- Add-on support. Other data packs can now stop a vein from being mined, or add a line to the join hint and the settings menu. The first add-on is Enchanted Veinminer, which makes veinmining need a Veinminer enchantment on the pickaxe.
+- Without add-ons, Veinminer works exactly as in 1.0.0.
+- For pack authors: the function tags `#veinminer:api/cancel` and `#veinminer:api/loaded`, the `veinminer:meta requires` text list, and the `veinminer:meta version_id` number (10100 for 1.1.0). See the README.
+
 ## 1.0.0 — 2026-09-23
 - First release for Minecraft Java 26.2 and 26.3.
 - Sneak and mine an ore to break the whole connected vein, diagonals included. Stone and deepslate variants count as one vein.

@@ -16,7 +16,7 @@ Veinminer is a lightweight, fully vanilla data pack for **Minecraft Java 26.2 an
 
 **Built to stay out of the way.** When nobody is mining, it only checks a few scoreboards each tick. The actual work happens in the single tick an ore breaks: a 64-block vein takes about 6 ms, measured on a real server.
 
-**Tested, not hoped.** Every release is checked by 58 automated tests on real 26.2 and 26.3 servers. A simulated player mines actual veins and checks drops, durability, tool tiers, enchantments and every setting.
+**Tested, not hoped.** Every release is checked by 73 automated tests on real 26.2 and 26.3 servers. A simulated player mines actual veins and checks drops, durability, tool tiers, enchantments and every setting.
 
 **Server and modpack friendly.** Run it on any server, including monetized ones, and include it in any modpack with credit. See [License](#license).
 
@@ -31,6 +31,7 @@ Veinminer is a lightweight, fully vanilla data pack for **Minecraft Java 26.2 an
 - **Players choose for themselves.** Anyone can turn Veinminer off or on with `/trigger veinminer`. No operator is needed.
 - **A clickable settings menu.** Operators can change every setting from chat. Settings survive `/reload` and restarts.
 - **Clean uninstall.** One command removes every scoreboard and all stored data.
+- **Add-on support.** Other data packs can add their own rules on top. See [Add-ons](#add-ons).
 
 ## How to use
 
@@ -87,6 +88,22 @@ Every setting can also be changed by command, for example:
 
 Setting names: `#max_blocks`, `#require_sneak`, `#drops`, `#durability`, `#diagonal`, `#feedback`, `#welcome`, `#ore.coal`, `#ore.copper`, `#ore.iron`, `#ore.gold`, `#ore.redstone`, `#ore.lapis`, `#ore.diamond`, `#ore.emerald`, `#ore.nether_gold`, `#ore.quartz`, `#ore.ancient_debris`. For on/off settings, 1 is on and 0 is off.
 
+## Add-ons
+
+**[Enchanted Veinminer](https://modrinth.com/datapack/enchanted-veinminer)** makes veinmining depend on a new **Veinminer** enchantment. You find it like any other pickaxe enchantment: at the enchanting table, from librarians, or in loot. Pickaxes without it mine one block at a time. It needs Veinminer 1.1.0 or newer.
+
+<details>
+<summary>For data pack authors</summary>
+
+Veinminer 1.1.0 and newer offer these hooks. They are safe to use when Veinminer isn't installed, because a tag your pack adds to is simply never called.
+
+- `#veinminer:api/cancel` (function tag): runs as and at the player just before a vein is mined, after Veinminer's own checks (sneaking, pickaxe, ore type, game mode). Do `return 1` to cancel the vein. The block the player broke still breaks normally. To allow the vein, **don't return at all**: the first function in the tag that returns decides, so a `return 0` or `return fail` would skip the add-ons after yours.
+- `#veinminer:api/loaded` (function tag): runs at the end of Veinminer's load function, every load and `/reload`. Use it to check that Veinminer is present.
+- `storage veinminer:meta requires` (list of text components): cleared on every load, just before `#veinminer:api/loaded` runs. Append a sentence there, such as `{text:"Your pickaxe needs X. ",color:"gray"}`, and Veinminer shows it in the join hint and the settings menu.
+- `storage veinminer:meta version_id` (int): `major × 10000 + minor × 100 + patch`, for example `10100` for 1.1.0.
+
+</details>
+
 ## Installation
 
 **Singleplayer**
@@ -100,7 +117,7 @@ Don't unzip the file.
 ## Compatibility
 
 - One zip supports Minecraft Java **26.2 and 26.3**. 26.3 changed the data pack format, so the zip includes a small 26.3 overlay that the game selects automatically.
-- Everything lives in the `veinminer` namespace. The only vanilla files it touches are the `#minecraft:load` and `#minecraft:tick` function tags, which it adds to, so other data packs are unaffected.
+- Everything lives in the `veinminer` namespace. The only vanilla files it touches are the `#minecraft:load` and `#minecraft:tick` function tags, which it adds to, so other data packs are unaffected. Add-ons hook in through the tags in [Add-ons](#add-ons).
 - Only vanilla ores are supported, because a data pack can't detect modded blocks being mined.
 
 ## Good to know
@@ -112,7 +129,7 @@ Don't unzip the file.
 ## Uninstall
 
 1. Run `/function veinminer:uninstall`.
-2. Remove the `.zip` from the `datapacks` folder, or run `/datapack disable "file/Veinminer-1.0.0.zip"`.
+2. Remove the `.zip` from the `datapacks` folder, or run `/datapack disable "file/Veinminer-1.1.0.zip"`.
 3. Run `/reload`.
 
 ## Support

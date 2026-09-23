@@ -3,7 +3,7 @@
     "description": [
       {"text": "Veinminer", "color": "gold", "bold": true},
       {"text": " – sneak-mine whole ore veins\n", "color": "gray"},
-      {"text": "v1.0.0 by Profet", "color": "dark_gray"}
+      {"text": "v1.1.0 by Profet", "color": "dark_gray"}
     ],
     "min_format": [107, 1],
     "max_format": 121
