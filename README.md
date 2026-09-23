@@ -115,6 +115,12 @@ Don't unzip the file.
 2. Remove the `.zip` from the `datapacks` folder, or run `/datapack disable "file/Veinminer-1.0.0.zip"`.
 3. Run `/reload`.
 
+## Support
+
+Veinminer is free. If it saves you some time, a coffee helps fund the next update.
+
+[![Support me on Ko-fi](https://raw.githubusercontent.com/ProfetGit/assets/main/kofi-banner.gif)](https://ko-fi.com/profetgit)
+
 ## License
 
 © 2026 Profet. All rights reserved.
