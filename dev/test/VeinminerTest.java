@@ -36,8 +36,7 @@ public class VeinminerTest {
     static final List<String> failures = new ArrayList<>();
 
     public static void main(String[] args) throws Exception {
-        net.minecraft.server.Main.main(new String[] {"--nogui"});
-        server = findServer();
+        server = boot();
         long deadline = System.currentTimeMillis() + 180_000;
         while (!server.isReady()) {
             if (System.currentTimeMillis() > deadline) throw new IllegalStateException("server never became ready");
@@ -61,6 +60,24 @@ public class VeinminerTest {
             Thread.sleep(3000);
             System.exit(failed == 0 ? 0 : 1);
         }
+    }
+
+    /** Vanilla by default; -Dharness.main=<class> boots a plugin platform in-process instead (PLATFORM= in run.sh). */
+    static MinecraftServer boot() throws Exception {
+        String main = System.getProperty("harness.main");
+        if (main == null) {
+            net.minecraft.server.Main.main(new String[] {"--nogui"});
+            return findServer();
+        }
+        Class.forName(main).getMethod("main", String[].class).invoke(null, (Object) new String[] {"--nogui"});
+        java.lang.reflect.Method get = MinecraftServer.class.getMethod("getServer");
+        long deadline = System.currentTimeMillis() + 180_000;
+        Object s;
+        while ((s = get.invoke(null)) == null) {
+            if (System.currentTimeMillis() > deadline) throw new IllegalStateException("server never started");
+            Thread.sleep(50);
+        }
+        return (MinecraftServer) s;
     }
 
     @SuppressWarnings("unchecked")
@@ -103,12 +120,14 @@ public class VeinminerTest {
     static List<String> cmd(String command) {
         return on(() -> {
             List<String> out = new ArrayList<>();
-            CommandSource capture = new CommandSource() {
-                public void sendSystemMessage(Component c) { out.add(c.getString()); }
-                public boolean acceptsSuccess() { return true; }
-                public boolean acceptsFailure() { return true; }
-                public boolean shouldInformAdmins() { return false; }
-            };
+            // a proxy, not an anonymous class: plugin platforms add methods (getBukkitSender), answered by the server
+            CommandSource capture = (CommandSource) java.lang.reflect.Proxy.newProxyInstance(CommandSource.class.getClassLoader(),
+                new Class<?>[] {CommandSource.class}, (proxy, m, a) -> switch (m.getName()) {
+                    case "sendSystemMessage" -> { out.add(((Component) a[0]).getString()); yield null; }
+                    case "acceptsSuccess", "acceptsFailure" -> true;
+                    case "shouldInformAdmins" -> false;
+                    default -> m.invoke(server, a);
+                });
             server.getCommands().performPrefixedCommand(server.createCommandSourceStack().withSource(capture), command);
             return out;
         });
@@ -410,7 +429,7 @@ class Scenarios {
         VeinminerTest.cmd("datapack disable \"file/hookpack\"");
         VeinminerTest.ticks(5);
         List<String> packs = VeinminerTest.cmd("datapack list enabled");
-        VeinminerTest.check("base pack runs alone", !packs.toString().contains("hookpack") && packs.toString().contains("Veinminer-"), packs.toString());
+        VeinminerTest.check("base pack runs alone", !packs.toString().contains("hookpack") && packs.toString().contains(System.getProperty("harness.packs", "Veinminer-")), packs.toString());
         VeinminerTest.check("version_id stored for add-ons", VeinminerTest.cmd("data get storage veinminer:meta version_id").toString().contains("10200"),
             VeinminerTest.cmd("data get storage veinminer:meta version_id").toString());
         VeinminerTest.check("no add-on requirement text without add-ons", requiresCount() == -1, "requires=" + requiresCount());
