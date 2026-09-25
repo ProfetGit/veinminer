@@ -9,6 +9,10 @@
 
 A lightweight vanilla data pack for **Minecraft Java 26.2 and 26.3**. It runs on the server only, so players join with an unmodified game. It also comes as a mod (Fabric, Quilt, NeoForge, Forge) and a server plugin (Paper, Purpur, Spigot, Bukkit).
 
+<p align="center">
+<img src="https://raw.githubusercontent.com/ProfetGit/veinminer/main/docs/showcase/veinminer.gif" alt="Sneak, mine one ore, and the whole vein pops block by block" width="65%">
+</p>
+
 ![Features](https://raw.githubusercontent.com/ProfetGit/veinminer/main/docs/desc/title-features.png)
 
 - **The whole vein in one break,** including ores that only touch at an edge or a corner. Stone and deepslate variants count as one vein.
