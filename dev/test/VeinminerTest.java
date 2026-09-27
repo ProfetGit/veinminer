@@ -475,7 +475,7 @@ class Scenarios {
         VeinminerTest.ticks(5);
         List<String> packs = VeinminerTest.cmd("datapack list enabled");
         VeinminerTest.check("base pack runs alone", !packs.toString().contains("hookpack") && packs.toString().contains(System.getProperty("harness.packs", "Veinminer-")), packs.toString());
-        VeinminerTest.check("version_id stored for add-ons", VeinminerTest.cmd("data get storage veinminer:meta version_id").toString().contains("10300"),
+        VeinminerTest.check("version_id stored for add-ons", VeinminerTest.cmd("data get storage veinminer:meta version_id").toString().contains("10301"),
             VeinminerTest.cmd("data get storage veinminer:meta version_id").toString());
         VeinminerTest.check("no add-on requirement text without add-ons", requiresCount() == -1, "requires=" + requiresCount());
         List<String> ver = VeinminerTest.cmd("data get storage veinminer:meta version");
@@ -794,9 +794,15 @@ class Scenarios {
         place("minecraft:iron_ore", IRON);
         tool("minecraft:iron_pickaxe");
         VeinminerTest.destroy(O);
-        VeinminerTest.ticks(2);
+        VeinminerTest.ticks(1);
         List<String> sb = VeinminerTest.standins();
-        VeinminerTest.check("chain: a stand-in takes the light of the cell in front of its block", sb.contains("111,6,110 at_xn [1.0,0.0,0.0]"), sb.toString());
+        // a new display is drawn only after its first client tick: it must exist a tick before its block turns to air
+        VeinminerTest.check("chain: a stand-in appears a tick before its block turns to air, slightly oversized so they don't z-fight",
+            sb.contains("111,6,110 at_xn [0.997,-0.003,-0.003]") && VeinminerTest.blockId(at(1, 0, 0)).equals("minecraft:iron_ore"), sb + " block " + VeinminerTest.blockId(at(1, 0, 0)));
+        VeinminerTest.ticks(1);
+        sb = VeinminerTest.standins();
+        VeinminerTest.check("chain: a stand-in takes the light of the cell in front of its block", sb.contains("111,6,110 at_xn [0.997,-0.003,-0.003]")
+            && VeinminerTest.blockId(at(1, 0, 0)).equals("minecraft:air"), sb + " block " + VeinminerTest.blockId(at(1, 0, 0)));
         List<String> gh = VeinminerTest.ghosts();
         VeinminerTest.check("chain: flying loot is parked at its landing spot, resting on the floor",
             !gh.isEmpty() && gh.stream().allMatch(s -> s.split(" ")[1].equals("5.1875")), gh.toString());
@@ -933,7 +939,7 @@ class Scenarios {
         cmd("scoreboard players reset * vmtest");
         VeinminerTest.cmd("datapack enable \"file/hookpack\"");
         VeinminerTest.ticks(5);
-        VeinminerTest.check("api/loaded runs after version_id is set", score("#loaded", "vmtest") == 1 && score("#version_id", "vmtest") == 10300,
+        VeinminerTest.check("api/loaded runs after version_id is set", score("#loaded", "vmtest") == 1 && score("#version_id", "vmtest") == 10301,
             "loaded=" + score("#loaded", "vmtest") + " version_id=" + score("#version_id", "vmtest"));
         say("reload");
         VeinminerTest.ticks(5);

@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.3.1 — 2026-09-27
+- Fixed a black flicker as each block of a chain starts to squash. The block disappeared a moment before the animated block took its place, so you could see into the dark hole for a split second (most visible at high frame rates). The animated block now appears first and the real one is removed a tick later.
+- For pack authors: `veinminer:meta version_id` is now 10301.
+
 ## 1.3.0 — 2026-09-27
 - Smoother, weightier loot. Each popped block now throws its loot in one clean arc: it bursts out of the block, flies, lands on the floor with a little thud and bounces into a normal item. Before, it flew in a stiff zig-zag, vanished just above the floor and reappeared on the ground.
 - Big veins keep their sound to the end. On large veins the crack and the plop used to go silent about halfway through, and the crumbs and puffs stopped with them. Now every block pops with all of it, and the pitch keeps climbing until the last block.

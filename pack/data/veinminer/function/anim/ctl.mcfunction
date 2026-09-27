@@ -1,6 +1,6 @@
 scoreboard players add @s veinminer.t 1
 data modify storage veinminer:anim r set from entity @s data.m
-execute unless data storage veinminer:anim r.nd run data modify storage veinminer:anim r merge value {nd:"none",nx:0,ny:0,nz:0,mx:0,my:0,mz:0}
+execute unless data storage veinminer:anim r.nd run data modify storage veinminer:anim r merge value {nd:"0",nx:0,ny:0,nz:0}
 execute store result score #cop veinminer.data run data get storage veinminer:anim r.op
 scoreboard players set #vis veinminer.data 0
 scoreboard players operation #shown veinminer.data = @s veinminer.xp

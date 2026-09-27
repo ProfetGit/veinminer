@@ -122,3 +122,17 @@ relative teleport per tick instead of three keys and a teleport lerp). Same cost
   (`merge-radius.item` 2.5 there, 0.5 in vanilla/Paper/CraftBukkit) pulls the pile into the struck block's own drop
   1.8 blocks away. The 1.3.0 chain ends two ticks later than 1.2.0's, so the check now read the cell after that merge;
   1.2.0 passed by two ticks. The check now samples the most loot at the player cell while the chain lands.
+
+## 1.3.1 — the black flicker at the swap (user report after the 1.3.0 release)
+- Report: at high fps each block goes black for a moment when it turns into its animated stand-in.
+- Cause (probe): a block's air update applies the frame its packet is handled, but a new display is drawn only after
+  its first client tick. 1.3.0 (and 1.2.0) summoned the stand-in and set the block to air in the same tick, so the empty
+  cell showed for 1–3 frames at 60 fps (up to 50 ms, many frames at high fps); where both were drawn it z-fought
+  (hatching in the full-size v8 frames). The 60 fps lab showed it only as odd frames; nobody had looked frame by frame.
+- Fix: the stand-in is summoned one tick before its block turns to air (`anim/prep`, `anim/prep_first` for the first
+  ring), 0.6 % oversized while the real block is still there, in the first hollow neighbour cell (its own cell is solid
+  that tick). First squash key back to 1.2.0's 3 ticks (the add packet is now a tick earlier).
+- Measured (v10): every ring's air update arrives after its stand-in was drawn (big vein: stand-ins first drawn at frames
+  65/71/74/77/80/86/89, air updates at 66/72/75/78/81/87/91); full-size frames show no dark cell and no hatching;
+  curves, stretch, hand-off and pitches as in 1.3.0. 99 tests (the new one: the stand-in exists while its block is still
+  ore).

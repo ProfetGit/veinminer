@@ -7,6 +7,7 @@ apart in time, later ones bunch up (pop... pop.. pop-pop-pop). Bigger veins use 
 KMAX ticks. The tiers also count the rings (#rings), which spreads the pop pitch over the whole chain.
 keys.mcfunction + key/k<n>: the stand-ins' squash, stretch and vanish keys, one line per light-cell offset.
 throw.mcfunction, fly.mcfunction + fly/: the loot's arc (keys and per-tick steps) and the contact squash.
+prep.mcfunction + stand/<cell>, ring.mcfunction: the stand-in summoned a tick early in a lit cell, the pop effects.
 Rerun after changing any table.
 """
 import math
@@ -48,8 +49,17 @@ def tier(K: float) -> str:
 # Stand-in keys (tick of the display's own countdown, interpolation ticks, xz scale, y scale); scaled about the block
 # centre. The display stands in the lit cell in front of its block (offset n, tag veinminer.at_<k>) and is translated
 # back, so it takes the light the block's visible face had.
-KEYS = [(-2, 2, 1.06, 0.9), (-4, 2, 1.2, 0.72), (-8, 1, 0.8, 1.4), (-10, 2, 0.0, 0.0)]
+KEYS = [(-1, 3, 1.06, 0.9), (-4, 2, 1.2, 0.72), (-8, 1, 0.8, 1.4), (-10, 2, 0.0, 0.0)]
 CELLS = {"0": (0, 0, 0), "xp": (1, 0, 0), "xn": (-1, 0, 0), "yp": (0, 1, 0), "yn": (0, -1, 0), "zp": (0, 0, 1), "zn": (0, 0, -1)}
+
+
+# The stand-in is summoned one tick before its block turns to air (anim/prep, marker countdown 1): a new display is
+# drawn only after its first client tick, so summoning it in the same tick as the setblock showed the empty cell (dark)
+# for up to a tick. While the real block is still there it is 0.3 % larger, so the two don't z-fight. It stands in the
+# first hollow neighbour cell (toward the miner first, then PREP_ORDER) and is translated back: its own cell is still
+# solid (light 0) during that tick. With no hollow neighbour the block is enclosed and can't be seen.
+PREP_ORDER = ["yp", "xp", "xn", "zp", "zn", "yn"]
+PAD = 0.003
 
 
 def f(v: float) -> str:
@@ -101,6 +111,44 @@ def bump(amp: float, k: int) -> float:
     return 4 * amp * u * (1 - u)
 
 
+def stand() -> dict:
+    out = {}
+    for k, n in CELLS.items():
+        pos = " ".join(f"~{c}" if c else "~" for c in n)
+        tr = ",".join(f(-c - PAD) for c in n)
+        tf = f"transformation:{{left_rotation:[0f,0f,0f,1f],right_rotation:[0f,0f,0f,1f],translation:[{tr}],scale:[{f(1 + 2 * PAD)},{f(1 + 2 * PAD)},{f(1 + 2 * PAD)}]}}"
+        out[f"stand/{k}"] = [
+            f'$execute if block ~ ~ ~ $(b) run summon block_display {pos} {{block_state:{{Name:"$(b)",id:"$(b)"}},Tags:["veinminer.fx","veinminer.fnew","veinminer.b","veinminer.at_{k}"],{tf}}}',
+            f'$execute unless block ~ ~ ~ $(b) run summon block_display {pos} {{block_state:{{Name:"$(a)",id:"$(a)"}},Tags:["veinminer.fx","veinminer.fnew","veinminer.at_{k}"],{tf}}}',
+            "execute as @e[type=block_display,tag=veinminer.fnew] run function veinminer:anim/fx_init",
+            "tag @s add veinminer.prepped"]
+    # a block replaced during its prep tick: remove its stand-in (at_<k> at X belongs to the block at X - n)
+    out["skip"] = [f"$execute positioned {' '.join(f'~{c}' if c else '~' for c in n)} run kill @e[type=block_display,tag=veinminer.at_{k},"
+                   f"scores={{veinminer.op=$(op),veinminer.t=0}},distance=..0.01]" for k, n in CELLS.items()] + ["kill @s"]
+    lines = ["$execute unless block ~ ~ ~ #veinminer:veins/$(id) run return 0"]
+    for k in PREP_ORDER:  # the cell toward the miner (anim/face) first
+        cell = " ".join(f"~{c}" if c else "~" for c in CELLS[k])
+        lines.append(f'execute if data storage veinminer:anim r{{nd:"{k}"}} if block {cell} #veinminer:hollow run return run function veinminer:anim/stand/{k} with storage veinminer:anim r')
+    for k in PREP_ORDER:
+        cell = " ".join(f"~{c}" if c else "~" for c in CELLS[k])
+        lines.append(f"execute if block {cell} #veinminer:hollow run return run function veinminer:anim/stand/{k} with storage veinminer:anim r")
+    lines.append("function veinminer:anim/stand/0 with storage veinminer:anim r")
+    out["prep"] = lines
+    # the pop's crumbs and puff at each stand-in's own block (the display stands in its light cell)
+    ring = []
+    for k, n in CELLS.items():
+        back = "" if k == "0" else " positioned " + " ".join(f"~{-c}" if c else "~" for c in n)
+        sel = f"@e[type=block_display,tag=veinminer.at_{k}{{}},scores={{{{veinminer.op=$(op),veinminer.t=-10}}}}]"
+        ring += [f'$execute at {sel.format(",tag=!veinminer.b")}{back} run particle minecraft:block{{block_state:"$(a)"}} ~0.5 ~0.5 ~0.5 0.25 0.25 0.25 0 12',
+                 f'$execute at {sel.format(",tag=veinminer.b")}{back} run particle minecraft:block{{block_state:"$(b)"}} ~0.5 ~0.5 ~0.5 0.25 0.25 0.25 0 12',
+                 f'$execute at {sel.format("")}{back} run particle minecraft:small_gust ~0.5 ~0.5 ~0.5 0.15 0.15 0.15 0 1']
+    ring += ['$execute at @e[type=block_display,scores={veinminer.op=$(op),veinminer.t=-10},limit=1] run playsound minecraft:entity.chicken.egg block @a ~0.5 ~0.5 ~0.5 0.45 $(q)',
+             '$execute at @e[type=block_display,tag=veinminer.b,scores={veinminer.op=$(op),veinminer.t=-10},limit=1] run return run playsound $(sb) block @a ~0.5 ~0.5 ~0.5 0.8 $(p)',
+             '$execute at @e[type=block_display,scores={veinminer.op=$(op),veinminer.t=-10},limit=1] run playsound $(sa) block @a ~0.5 ~0.5 ~0.5 0.8 $(p)']
+    out["ring"] = ring
+    return out
+
+
 def fly() -> dict:
     """The launch tick (countdown 0, anim/throw) sends the first key and the first step; countdown -k sends step k+1,
     so the bump and the keys are drawn complete one tick after they are sent, together."""
@@ -133,7 +181,8 @@ def fly() -> dict:
 def main() -> None:
     (FUNC / "key").mkdir(exist_ok=True)
     (FUNC / "fly").mkdir(exist_ok=True)
-    for name, lines in {**keys(), **fly()}.items():
+    (FUNC / "stand").mkdir(exist_ok=True)
+    for name, lines in {**keys(), **fly(), **stand()}.items():
         (FUNC / f"{name}.mcfunction").write_text("\n".join(lines) + "\n")
     for suffix, K in TIERS:
         (FUNC / f"rings_{suffix}.mcfunction").write_text(tier(K))
@@ -143,7 +192,7 @@ def main() -> None:
         pick.append(f"execute if entity {SEL.format(f',distance={far(TIERS[i - 1][1])}..,limit=1')} run return run function veinminer:anim/rings_{TIERS[i][0]}")
     pick.append(f"function veinminer:anim/rings_{TIERS[0][0]}")
     (FUNC / "rings.mcfunction").write_text("\n".join(pick) + "\n")
-    print(f"wrote keys.mcfunction, key/, fly.mcfunction, fly/, rings.mcfunction + {len(TIERS)} tiers to {FUNC}")
+    print(f"wrote keys, key/, throw, fly, fly/, prep, stand/, ring, rings + {len(TIERS)} tiers to {FUNC}")
 
 
 if __name__ == "__main__":
