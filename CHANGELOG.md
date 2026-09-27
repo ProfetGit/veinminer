@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.3.0 — 2026-09-27
+- Smoother, weightier loot. Each popped block now throws its loot in one clean arc: it bursts out of the block, flies, lands on the floor with a little thud and bounces into a normal item. Before, it flew in a stiff zig-zag, vanished just above the floor and reappeared on the ground.
+- Big veins keep their sound to the end. On large veins the crack and the plop used to go silent about halfway through, and the crumbs and puffs stopped with them. Now every block pops with all of it, and the pitch keeps climbing until the last block.
+- More of the loot flies. A normal vein now throws almost all of its loot; on big veins, the loot that doesn't fly lands on the piles just as they hit the floor instead of appearing out of nowhere.
+- Blocks keep their colour better. A block waiting for its turn now takes the light of the face you're looking at, so in torch-lit caves it no longer turns noticeably darker while it squashes.
+- The snap before each pop always shows in full (it was sometimes cut short), and blocks no longer shrink a little the instant they start.
+- Flying loot is lit like the spot it lands on, so it doesn't change brightness when it becomes a real item.
+- For pack authors: `veinminer:meta version_id` is now 10300. The add-on hooks are unchanged.
+
 ## 1.2.0 — 2026-09-23
 - Chain animation. A veinmined vein now breaks block by block, spreading out from the ore you hit. The chain starts slow and speeds up. Each block squashes down, holds for a beat, then pops in a crack of block particles and a little puff, with the crack climbing in pitch ring by ring. Each popped block throws its own loot, which arcs out of the wall and lands in a row in front of it (or flies to you, with drops set to your feet). XP arrives with the loot. A typical vein takes about 1.5 seconds; the biggest take about 3.
 - The blocks stay real, normal blocks until it's their turn, so nothing changes colour or looks out of place while you wait.

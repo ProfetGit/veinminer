@@ -8,6 +8,9 @@ scoreboard objectives remove veinminer.op
 scoreboard objectives remove veinminer.end
 scoreboard objectives remove veinminer.ring
 scoreboard objectives remove veinminer.xp
+scoreboard objectives remove veinminer.dx
+scoreboard objectives remove veinminer.dy
+scoreboard objectives remove veinminer.dz
 scoreboard objectives remove veinminer.mined.coal_ore
 scoreboard objectives remove veinminer.mined.deepslate_coal_ore
 scoreboard objectives remove veinminer.mined.copper_ore
@@ -52,4 +55,4 @@ data remove storage veinminer:menu row
 data remove storage veinminer:meta version
 data remove storage veinminer:meta version_id
 data remove storage veinminer:meta requires
-tellraw @s ["",{text:"⛏ Veinminer data removed. ",color:"gold"},{text:"Now delete or disable the datapack (e.g. /datapack disable \"file/Veinminer-1.2.0.zip\") so it does not reinstall on the next /reload.",color:"gray"}]
+tellraw @s ["",{text:"⛏ Veinminer data removed. ",color:"gold"},{text:"Now delete or disable the datapack (e.g. /datapack disable \"file/Veinminer-1.3.0.zip\") so it does not reinstall on the next /reload.",color:"gray"}]

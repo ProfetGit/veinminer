@@ -1,5 +1,5 @@
-data modify storage veinminer:meta version set value "1.2.0"
-data modify storage veinminer:meta version_id set value 10200
+data modify storage veinminer:meta version set value "1.3.0"
+data modify storage veinminer:meta version_id set value 10300
 data remove storage veinminer:meta requires
 scoreboard objectives add veinminer trigger {text:"Veinminer"}
 scoreboard objectives add veinminer.off dummy
@@ -10,7 +10,10 @@ scoreboard objectives add veinminer.op dummy
 scoreboard objectives add veinminer.end dummy
 scoreboard objectives add veinminer.ring dummy
 scoreboard objectives add veinminer.xp dummy
-scoreboard players set #7 veinminer.data 7
+scoreboard objectives add veinminer.dx dummy
+scoreboard objectives add veinminer.dy dummy
+scoreboard objectives add veinminer.dz dummy
+scoreboard players set #1000 veinminer.data 1000
 scoreboard objectives add veinminer.mined.coal_ore minecraft.mined:minecraft.coal_ore
 scoreboard objectives add veinminer.mined.deepslate_coal_ore minecraft.mined:minecraft.deepslate_coal_ore
 scoreboard objectives add veinminer.mined.copper_ore minecraft.mined:minecraft.copper_ore

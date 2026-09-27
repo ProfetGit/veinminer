@@ -18,3 +18,7 @@ dev/capture/arc.png
 dev/capture/sheet.png
 dev/capture/preview/
 dev/capture/gallery/
+dev/lab/out/
+dev/lab/.work/
+dev/lab/scenes/
+dev/lab/baseline/

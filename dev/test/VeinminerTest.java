@@ -149,6 +149,22 @@ public class VeinminerTest {
                 System.out.println(sb);
                 continue;
             }
+            if (line.startsWith("!time ")) {
+                String c = line.substring(6).trim();
+                long t0 = System.nanoTime();
+                List<String> out = cmd(c);
+                System.out.println("[EXPLORE] " + String.format(java.util.Locale.ROOT, "%7.2f ms", (System.nanoTime() - t0) / 1e6) + "  " + c + (out.isEmpty() ? "" : "  -> " + out));
+                continue;
+            }
+            if (line.startsWith("!timed ")) {
+                long[] before = on(() -> server.getTickTimesNanos().clone());
+                ticks(Integer.parseInt(line.substring(7).trim()));
+                long[] after = on(() -> server.getTickTimesNanos().clone());
+                long w = 0;
+                for (int i = 0; i < after.length; i++) if (after[i] != before[i]) w = Math.max(w, after[i]);
+                System.out.println("[EXPLORE] worst tick " + w / 100_000 / 10.0 + " ms");
+                continue;
+            }
             if (line.startsWith("!destroy ")) {
                 String[] p = line.substring(9).trim().split(" ");
                 BlockPos pos = new BlockPos(Integer.parseInt(p[0]), Integer.parseInt(p[1]), Integer.parseInt(p[2]));
@@ -205,6 +221,35 @@ public class VeinminerTest {
                 }
             }
             return out;
+        });
+    }
+
+    /** Stand-ins: "x,y,z <light cell tag> [translation]" (entity block position, veinminer.at_* tag, transformation). */
+    static List<String> standins() {
+        List<net.minecraft.world.entity.Entity> es = on(() -> {
+            List<net.minecraft.world.entity.Entity> l = new ArrayList<>();
+            for (net.minecraft.world.entity.Entity e : level.getAllEntities()) if (e.entityTags().contains("veinminer.fx")) l.add(e);
+            return l;
+        });
+        List<String> out = new ArrayList<>();
+        for (net.minecraft.world.entity.Entity e : es) {
+            String cell = e.entityTags().stream().filter(s -> s.startsWith("veinminer.at_")).findFirst().orElse("veinminer.?").substring(10);
+            String tr = String.join(" ", cmd("data get entity " + e.getStringUUID() + " transformation.translation"));
+            tr = tr.substring(tr.indexOf("data: ") + 6).replace("f", "").replace(" ", "");
+            BlockPos p = e.blockPosition();
+            out.add(p.getX() + "," + p.getY() + "," + p.getZ() + " " + cell + " " + tr);
+        }
+        return out;
+    }
+
+    /** Visible flying loot: "x y z" of each veinminer.ghost without veinminer.hide. */
+    static List<String> ghosts() {
+        return on(() -> {
+            List<String> l = new ArrayList<>();
+            for (net.minecraft.world.entity.Entity e : level.getAllEntities())
+                if (e.entityTags().contains("veinminer.ghost") && !e.entityTags().contains("veinminer.hide"))
+                    l.add(e.getX() + " " + e.getY() + " " + e.getZ());
+            return l;
         });
     }
 
@@ -430,7 +475,7 @@ class Scenarios {
         VeinminerTest.ticks(5);
         List<String> packs = VeinminerTest.cmd("datapack list enabled");
         VeinminerTest.check("base pack runs alone", !packs.toString().contains("hookpack") && packs.toString().contains(System.getProperty("harness.packs", "Veinminer-")), packs.toString());
-        VeinminerTest.check("version_id stored for add-ons", VeinminerTest.cmd("data get storage veinminer:meta version_id").toString().contains("10200"),
+        VeinminerTest.check("version_id stored for add-ons", VeinminerTest.cmd("data get storage veinminer:meta version_id").toString().contains("10300"),
             VeinminerTest.cmd("data get storage veinminer:meta version_id").toString());
         VeinminerTest.check("no add-on requirement text without add-ons", requiresCount() == -1, "requires=" + requiresCount());
         List<String> ver = VeinminerTest.cmd("data get storage veinminer:meta version");
@@ -672,11 +717,19 @@ class Scenarios {
         cmd("scoreboard players set #drops veinminer.config 1");
         place("minecraft:iron_ore", IRON);
         tool("minecraft:iron_pickaxe");
-        mine();
-        Map<String, Integer> atPlayer = itemsInCell(new BlockPos(110, 5, 110));
+        VeinminerTest.destroy(O);
+        VeinminerTest.ticks(3);
+        // Spigot merges items within 2.5 blocks (merge-radius), which can pull the pile into the struck block's own
+        // drop 40 ticks after the break, so the loot's arrival is sampled while the chain lands
+        int atPlayerMax = 0;
+        for (int i = 0; i < 80 && animating(); i++) {
+            VeinminerTest.ticks(1);
+            atPlayerMax = Math.max(atPlayerMax, count(itemsInCell(new BlockPos(110, 5, 110)), "minecraft:raw_iron"));
+        }
+        settle();
         // the struck block's own vanilla drop rolls around freely while the chain plays, so only the total near the origin is fixed
-        VeinminerTest.check("drops=1 puts drops at player", count(atPlayer, "minecraft:raw_iron") >= 5
-            && count(VeinminerTest.itemsNear(O, 3), "minecraft:raw_iron") == 6, "player cell " + atPlayer + ", origin " + itemsInCell(O) + ", near " + VeinminerTest.itemsNear(O, 3));
+        VeinminerTest.check("drops=1 puts drops at player", atPlayerMax >= 5 && count(VeinminerTest.itemsNear(O, 3), "minecraft:raw_iron") == 6,
+            "most at the player cell " + atPlayerMax + ", origin " + itemsInCell(O) + ", near " + VeinminerTest.itemsNear(O, 3));
 
         // 20. lapis / redstone / quartz / emerald / copper / nether gold sanity
         String[][] kinds = {{"minecraft:lapis_ore","minecraft:lapis_lazuli","minecraft:stone_pickaxe"},{"minecraft:deepslate_redstone_ore","minecraft:redstone","minecraft:iron_pickaxe"},
@@ -734,6 +787,41 @@ class Scenarios {
             n(fx, "sound minecraft:block.stone.break") == 4 && n(fx, "sound minecraft:block.deepslate.break") == 1, fx.toString());
         VeinminerTest.check("chain: ring pitch climbs a step per ring", pitches.equals(List.of(0.85f, 0.92f, 0.99f, 1.06f, 1.13f)), pitches.toString());
         VeinminerTest.check("chain: every popped block crumbles", n(fx, "particle minecraft:block") == 5, fx.toString());
+
+        // 1.3.0: a stand-in stands in the lit cell in front of its block and is drawn back in place; flying loot is
+        // parked on its landing spot at a resting item's height from the start
+        arena();
+        place("minecraft:iron_ore", IRON);
+        tool("minecraft:iron_pickaxe");
+        VeinminerTest.destroy(O);
+        VeinminerTest.ticks(2);
+        List<String> sb = VeinminerTest.standins();
+        VeinminerTest.check("chain: a stand-in takes the light of the cell in front of its block", sb.contains("111,6,110 at_xn [1.0,0.0,0.0]"), sb.toString());
+        List<String> gh = VeinminerTest.ghosts();
+        VeinminerTest.check("chain: flying loot is parked at its landing spot, resting on the floor",
+            !gh.isEmpty() && gh.stream().allMatch(s -> s.split(" ")[1].equals("5.1875")), gh.toString());
+        settle();
+
+        // 1.3.0: a 64-block chain keeps its pop sound, plop and crumbs on every ring, the pitch rising all the way
+        arena();
+        cmd("fill " + OX + " " + OY + " " + OZ + " " + (OX + 4) + " " + (OY + 3) + " " + (OZ + 4) + " minecraft:coal_ore");
+        tool("minecraft:diamond_pickaxe");
+        VeinminerTest.fx();
+        VeinminerTest.destroy(O);
+        VeinminerTest.ticks(1);
+        settle();
+        fx = VeinminerTest.fx();
+        List<Float> ring = fx.stream().filter(s -> s.startsWith("sound minecraft:block.stone.break "))
+            .map(s -> Float.parseFloat(s.substring(s.lastIndexOf(' ') + 1))).toList();
+        List<Float> plop = fx.stream().filter(s -> s.startsWith("sound minecraft:entity.chicken.egg "))
+            .map(s -> Float.parseFloat(s.substring(s.lastIndexOf(' ') + 1))).toList();
+        boolean rising = true;
+        for (int i = 1; i < ring.size(); i++) rising &= ring.get(i) > ring.get(i - 1);
+        VeinminerTest.check("chain: a 64-block chain has a pop sound and plop on every ring, pitch rising to the last",
+            ring.size() >= 12 && plop.size() == ring.size() && rising && ring.get(ring.size() - 1) <= 1.5f && ring.get(ring.size() - 1) >= 1.45f
+            && plop.stream().allMatch(v -> v <= 2.0f), "rings " + ring + " plops " + plop);
+        VeinminerTest.check("chain: every block of a 64-block chain crumbles", n(fx, "particle minecraft:block") == 63 && n(fx, "particle minecraft:small_gust") == 63,
+            "block " + n(fx, "particle minecraft:block") + " gust " + n(fx, "particle minecraft:small_gust"));
 
         arena();
         place("minecraft:diamond_ore", three);
@@ -845,7 +933,7 @@ class Scenarios {
         cmd("scoreboard players reset * vmtest");
         VeinminerTest.cmd("datapack enable \"file/hookpack\"");
         VeinminerTest.ticks(5);
-        VeinminerTest.check("api/loaded runs after version_id is set", score("#loaded", "vmtest") == 1 && score("#version_id", "vmtest") == 10200,
+        VeinminerTest.check("api/loaded runs after version_id is set", score("#loaded", "vmtest") == 1 && score("#version_id", "vmtest") == 10300,
             "loaded=" + score("#loaded", "vmtest") + " version_id=" + score("#version_id", "vmtest"));
         say("reload");
         VeinminerTest.ticks(5);

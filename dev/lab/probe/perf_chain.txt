@@ -1,0 +1,35 @@
+// Veinminer chain server cost: a 100-ore coal blob (64-block cap), mined in the harness arena. perf.py reads the
+// !timed windows. Warm-up chain first (JIT, function caches), then the measured one.
+forceload add 96 96 143 143
+!player
+gamemode survival VeinTester
+!tick 80
+fill 100 0 100 131 15 131 minecraft:stone
+fill 110 5 110 110 6 110 minecraft:air
+fill 111 6 110 115 9 114 minecraft:coal_ore
+fill 110 5 120 110 6 120 minecraft:air
+fill 111 6 120 115 9 124 minecraft:coal_ore
+kill @e[type=item]
+item replace entity VeinTester weapon.mainhand with minecraft:diamond_pickaxe
+tp VeinTester 110.5 5 120.5 -90 -10
+!sneak true
+!tick 5
+!destroy 111 6 120
+// warm-up chain
+!timed 100
+kill @e[type=item]
+kill @e[type=experience_orb]
+item replace entity VeinTester weapon.mainhand with minecraft:diamond_pickaxe
+tp VeinTester 110.5 5 110.5 -90 -10
+!tick 5
+!destroy 111 6 110
+// the mining tick
+!timed 2
+// the chain, 10-tick windows
+!timed 10
+!timed 10
+!timed 10
+!timed 10
+!timed 10
+!timed 10
+!timed 10
