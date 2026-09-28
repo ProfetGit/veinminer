@@ -10,6 +10,11 @@
 A lightweight vanilla data pack for **Minecraft Java 26.2 and 26.3**. It runs on the server only, so players join with an unmodified game. It also comes as a mod (Fabric, Quilt, NeoForge, Forge) and a server plugin (Paper, Purpur, Spigot, Bukkit).
 
 <p align="center">
+<a href="https://youtu.be/RdPigQOQUng"><img src="https://img.youtube.com/vi/RdPigQOQUng/maxresdefault.jpg" alt="Watch the Veinminer trailer on YouTube" width="100%"></a>
+<br><a href="https://youtu.be/RdPigQOQUng"><b>Watch the trailer on YouTube</b></a>
+</p>
+
+<p align="center">
 <img src="https://raw.githubusercontent.com/ProfetGit/veinminer/main/docs/showcase/veinminer_copper.gif" alt="One swing breaks a whole copper blob" width="49%">
 <img src="https://raw.githubusercontent.com/ProfetGit/veinminer/main/docs/showcase/veinminer_diamond.gif" alt="A deepslate diamond vein with Fortune III" width="49%">
 </p>
