@@ -52,6 +52,17 @@ Operators open a clickable menu with `/function veinminer:settings`. It sets the
 
 Use only one of the three. To remove Veinminer cleanly, run `/function veinminer:uninstall` first.
 
+![More from Profet](https://raw.githubusercontent.com/ProfetGit/veinminer/main/docs/desc/title-more-from-profet.png)
+
+<!-- promo:start -->
+<p align="center">
+<a href="https://modrinth.com/datapack/vanilla-timber"><img src="https://raw.githubusercontent.com/ProfetGit/assets/main/promo/timber.gif" alt="Timber: One chop. Whole tree. Server side." width="49%"></a>
+<a href="https://www.curseforge.com/minecraft/mc-mods/tidy-pockets"><img src="https://raw.githubusercontent.com/ProfetGit/assets/main/promo/tidy-pockets.gif" alt="Tidy Pockets: One click. All sorted. Client side." width="49%"></a>
+<a href="https://www.curseforge.com/minecraft/mc-mods/having-a-blast"><img src="https://raw.githubusercontent.com/ProfetGit/assets/main/promo/having-a-blast.gif" alt="Having a Blast: One boom. Bouncy blocks. Client or server." width="49%"></a>
+<a href="https://www.curseforge.com/minecraft/mc-mods/far-out-zoom"><img src="https://raw.githubusercontent.com/ProfetGit/assets/main/promo/far-out-zoom.gif" alt="Far Out Zoom: The horizon, up close. Client side." width="49%"></a>
+</p>
+<!-- promo:end -->
+
 ![Support](https://raw.githubusercontent.com/ProfetGit/veinminer/main/docs/desc/title-support.png)
 
 Veinminer is free. If it saves you some time, a coffee helps fund the next update.
