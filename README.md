@@ -42,7 +42,7 @@ Operators open a clickable menu with `/function veinminer:settings`. It sets the
 
 ![Add-ons](https://raw.githubusercontent.com/ProfetGit/veinminer/main/docs/desc/title-add-ons.png)
 
-**[Enchanted Veinminer](https://modrinth.com/datapack/enchanted-veinminer)** turns veinmining into a pickaxe enchantment you have to find first. Making your own add-on? See the [add-on API](https://github.com/ProfetGit/veinminer/blob/main/docs/api.md).
+**[Enchanted Veinminer](https://www.curseforge.com/minecraft/mc-mods/enchanted-veinminer)** turns veinmining into a pickaxe enchantment you have to find first. Making your own add-on? See the [add-on API](https://github.com/ProfetGit/veinminer/blob/main/docs/api.md).
 
 ![Installation](https://raw.githubusercontent.com/ProfetGit/veinminer/main/docs/desc/title-installation.png)
 
@@ -56,7 +56,7 @@ Use only one of the three. To remove Veinminer cleanly, run `/function veinminer
 
 <!-- promo:start -->
 <p align="center">
-<a href="https://modrinth.com/datapack/vanilla-timber"><img src="https://raw.githubusercontent.com/ProfetGit/assets/main/promo/timber.gif" alt="Timber: One chop. Whole tree. Server side." width="49%"></a>
+<a href="https://www.curseforge.com/minecraft/mc-mods/profets-timber"><img src="https://raw.githubusercontent.com/ProfetGit/assets/main/promo/timber.gif" alt="Timber: One chop. Whole tree. Server side." width="49%"></a>
 <a href="https://www.curseforge.com/minecraft/mc-mods/tidy-pockets"><img src="https://raw.githubusercontent.com/ProfetGit/assets/main/promo/tidy-pockets.gif" alt="Tidy Pockets: One click. All sorted. Client side." width="49%"></a>
 <a href="https://www.curseforge.com/minecraft/mc-mods/having-a-blast"><img src="https://raw.githubusercontent.com/ProfetGit/assets/main/promo/having-a-blast.gif" alt="Having a Blast: One boom. Bouncy blocks. Client or server." width="49%"></a>
 <a href="https://www.curseforge.com/minecraft/mc-mods/far-out-zoom"><img src="https://raw.githubusercontent.com/ProfetGit/assets/main/promo/far-out-zoom.gif" alt="Far Out Zoom: The horizon, up close. Client side." width="49%"></a>

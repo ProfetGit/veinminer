@@ -1,6 +1,6 @@
 # Veinminer add-on API
 
-Hooks for data packs that build on Veinminer, for example [Enchanted Veinminer](https://modrinth.com/datapack/enchanted-veinminer).
+Hooks for data packs that build on Veinminer, for example [Enchanted Veinminer](https://www.curseforge.com/minecraft/mc-mods/enchanted-veinminer).
 
 Veinminer 1.1.0 and newer offer these hooks. They are safe to use when Veinminer isn't installed, because a tag your pack adds to is simply never called.
 
