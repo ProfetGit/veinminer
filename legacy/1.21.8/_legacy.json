@@ -1,0 +1,19 @@
+{
+  "replace": [
+    {
+      "files": "data/veinminer/function/vein/start.mcfunction",
+      "old": "gamerule block_drops",
+      "new": "gamerule doTileDrops"
+    }
+  ],
+  "drop_lines": [
+    {
+      "files": "data/veinminer/function/tool/identify.mcfunction",
+      "containing": "minecraft:copper_pickaxe"
+    },
+    {
+      "files": "data/veinminer/function/vein/visit.mcfunction",
+      "containing": "incorrect_for_copper_tool"
+    }
+  ]
+}

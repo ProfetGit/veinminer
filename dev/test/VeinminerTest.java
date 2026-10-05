@@ -213,7 +213,7 @@ public class VeinminerTest {
             Object o;
             while ((o = channel.readOutbound()) != null) {
                 if (o instanceof net.minecraft.network.protocol.game.ClientboundSoundPacket p)
-                    out.add("sound " + p.getSound().value().location() + " " + String.format(java.util.Locale.ROOT, "%.2f", p.getPitch()));
+                    out.add("sound " + soundId(p.getSound().value()) + " " + String.format(java.util.Locale.ROOT, "%.2f", p.getPitch()));
                 else if (o instanceof net.minecraft.network.protocol.game.ClientboundLevelParticlesPacket p) {
                     java.lang.reflect.Method m;
                     try { m = p.getClass().getMethod("getParticle"); } catch (NoSuchMethodException e) { m = p.getClass().getMethod("particle"); }
@@ -228,12 +228,12 @@ public class VeinminerTest {
     static List<String> standins() {
         List<net.minecraft.world.entity.Entity> es = on(() -> {
             List<net.minecraft.world.entity.Entity> l = new ArrayList<>();
-            for (net.minecraft.world.entity.Entity e : level.getAllEntities()) if (e.entityTags().contains("veinminer.fx")) l.add(e);
+            for (net.minecraft.world.entity.Entity e : level.getAllEntities()) if (tagsOf(e).contains("veinminer.fx")) l.add(e);
             return l;
         });
         List<String> out = new ArrayList<>();
         for (net.minecraft.world.entity.Entity e : es) {
-            String cell = e.entityTags().stream().filter(s -> s.startsWith("veinminer.at_")).findFirst().orElse("veinminer.?").substring(10);
+            String cell = tagsOf(e).stream().filter(s -> s.startsWith("veinminer.at_")).findFirst().orElse("veinminer.?").substring(10);
             String tr = String.join(" ", cmd("data get entity " + e.getStringUUID() + " transformation.translation"));
             tr = tr.substring(tr.indexOf("data: ") + 6).replace("f", "").replace(" ", "");
             BlockPos p = e.blockPosition();
@@ -247,16 +247,51 @@ public class VeinminerTest {
         return on(() -> {
             List<String> l = new ArrayList<>();
             for (net.minecraft.world.entity.Entity e : level.getAllEntities())
-                if (e.entityTags().contains("veinminer.ghost") && !e.entityTags().contains("veinminer.hide"))
+                if (tagsOf(e).contains("veinminer.ghost") && !tagsOf(e).contains("veinminer.hide"))
                     l.add(e.getX() + " " + e.getY() + " " + e.getZ());
             return l;
         });
     }
 
+    /** Game rule names: snake_case from 1.21.11, camelCase before. */
+    static String rule(String snake) {
+        boolean legacy = String.join(" ", cmd("gamerule doTileDrops")).contains("currently set");
+        return !legacy ? snake : switch (snake) {
+            case "block_drops" -> "doTileDrops";
+            default -> snake;
+        };
+    }
+
+    /** A sound's id: location() in 26.x, getLocation() before. */
+    static Object soundId(net.minecraft.sounds.SoundEvent s) {
+        try {
+            return s.getClass().getMethod("location").invoke(s);
+        } catch (ReflectiveOperationException e) {
+            try {
+                return s.getClass().getMethod("getLocation").invoke(s);
+            } catch (ReflectiveOperationException e2) {
+                throw new RuntimeException(e2);
+            }
+        }
+    }
+
+    /** Entity tags: entityTags() in 26.x, getTags() before. */
+    static java.util.Set<String> tagsOf(net.minecraft.world.entity.Entity e) {
+        try {
+            return (java.util.Set<String>) e.getClass().getMethod("entityTags").invoke(e);
+        } catch (ReflectiveOperationException ex) {
+            try {
+                return (java.util.Set<String>) e.getClass().getMethod("getTags").invoke(e);
+            } catch (ReflectiveOperationException ex2) {
+                throw new RuntimeException(ex2);
+            }
+        }
+    }
+
     static int tagged(String tag) {
         return on(() -> {
             int n = 0;
-            for (net.minecraft.world.entity.Entity e : level.getAllEntities()) if (e.entityTags().contains(tag)) n++;
+            for (net.minecraft.world.entity.Entity e : level.getAllEntities()) if (tagsOf(e).contains(tag)) n++;
             return n;
         });
     }
@@ -272,7 +307,7 @@ public class VeinminerTest {
         return on(() -> {
             Map<String, String> m = new java.util.TreeMap<>();
             for (net.minecraft.world.entity.Entity e : level.getAllEntities()) {
-                if (!e.entityTags().contains("veinminer.pend")) continue;
+                if (!tagsOf(e).contains("veinminer.pend")) continue;
                 BlockPos p = e.blockPosition();
                 String block = BuiltInRegistries.BLOCK.getKey(level.getBlockState(p).getBlock()).toString();
                 m.put(p.getX() + "," + p.getY() + "," + p.getZ(), block + " t=" + scoreOf(e, "veinminer.t") + " op=" + scoreOf(e, "veinminer.op"));
@@ -366,7 +401,7 @@ class Scenarios {
         cmd("kill @e[type=experience_orb]");
         cmd("gamemode survival VeinTester");
         cmd("tp VeinTester 110.5 5 110.5 -90 -10");
-        cmd("gamerule block_drops true");
+        cmd("gamerule " + VeinminerTest.rule("block_drops") + " true");
         cmd("scoreboard players reset * veinminer.config");
         cmd("function veinminer:config/defaults");
         cmd("scoreboard players set VeinTester veinminer.off 0");
@@ -475,7 +510,7 @@ class Scenarios {
         VeinminerTest.ticks(5);
         List<String> packs = VeinminerTest.cmd("datapack list enabled");
         VeinminerTest.check("base pack runs alone", !packs.toString().contains("hookpack") && packs.toString().contains(System.getProperty("harness.packs", "Veinminer-")), packs.toString());
-        VeinminerTest.check("version_id stored for add-ons", VeinminerTest.cmd("data get storage veinminer:meta version_id").toString().contains("10301"),
+        VeinminerTest.check("version_id stored for add-ons", VeinminerTest.cmd("data get storage veinminer:meta version_id").toString().contains("10302"),
             VeinminerTest.cmd("data get storage veinminer:meta version_id").toString());
         VeinminerTest.check("no add-on requirement text without add-ons", requiresCount() == -1, "requires=" + requiresCount());
         List<String> ver = VeinminerTest.cmd("data get storage veinminer:meta version");
@@ -545,11 +580,13 @@ class Scenarios {
         mine();
         it = VeinminerTest.itemsNear(O, 1.5);
         VeinminerTest.check("debris + diamond pickaxe -> vein", remaining("minecraft:ancient_debris", three) == 0 && count(it, "minecraft:ancient_debris") == 3, "items " + it);
-        arena();
-        place("minecraft:iron_ore", three);
-        tool("minecraft:copper_pickaxe");
-        mine();
-        VeinminerTest.check("iron + copper pickaxe -> vein", remaining("minecraft:iron_ore", three) == 0, "left=" + remaining("minecraft:iron_ore", three));
+        if (BuiltInRegistries.ITEM.stream().anyMatch(i -> String.valueOf(i).contains("copper_pickaxe"))) {
+            arena();
+            place("minecraft:iron_ore", three);
+            tool("minecraft:copper_pickaxe");
+            mine();
+            VeinminerTest.check("iron + copper pickaxe -> vein", remaining("minecraft:iron_ore", three) == 0, "left=" + remaining("minecraft:iron_ore", three));
+        }
         arena();
         place("minecraft:coal_ore", three);
         tool("minecraft:wooden_pickaxe");
@@ -704,7 +741,7 @@ class Scenarios {
 
         // 18. block_drops off -> ray fallback, no drops
         arena();
-        cmd("gamerule block_drops false");
+        cmd("gamerule " + VeinminerTest.rule("block_drops") + " false");
         place("minecraft:iron_ore", IRON);
         tool("minecraft:iron_pickaxe");
         mine();
@@ -939,7 +976,7 @@ class Scenarios {
         cmd("scoreboard players reset * vmtest");
         VeinminerTest.cmd("datapack enable \"file/hookpack\"");
         VeinminerTest.ticks(5);
-        VeinminerTest.check("api/loaded runs after version_id is set", score("#loaded", "vmtest") == 1 && score("#version_id", "vmtest") == 10301,
+        VeinminerTest.check("api/loaded runs after version_id is set", score("#loaded", "vmtest") == 1 && score("#version_id", "vmtest") == 10302,
             "loaded=" + score("#loaded", "vmtest") + " version_id=" + score("#version_id", "vmtest"));
         say("reload");
         VeinminerTest.ticks(5);

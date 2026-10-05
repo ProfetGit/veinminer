@@ -5,7 +5,7 @@
 // Screen space: the `screen` group is tilted to face the orthographic camera, so inside it x = right, y = up, z = toward camera.
 var VM = (function () {
   const fs = require('fs');
-  const DIR = '/home/emppu/Projects/Minecraft Datapacks/Veinminer/dev/icon/';
+  const DIR = '/home/emppu/Projects/Minecraft Datapacks/packs/Veinminer/dev/icon/';
   const TEX = DIR + 'sprites/';
   const FPS = 25, DT = 1 / FPS, LEN = 2.4;
   const CAM_POS = [0, 60, 104], CAM_TARGET = [0, 16, 0], CAM_PAN = [2.7, 8.1, 0], CAM_ZOOM = 0.45;

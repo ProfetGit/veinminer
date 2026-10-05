@@ -1,0 +1,20 @@
+{
+  "replace": [
+    {
+      "files": "data/veinminer/function/anim/*.mcfunction",
+      "old": " strict",
+      "new": " replace"
+    },
+    {
+      "files": "data/veinminer/function/tool/*.mcfunction",
+      "old": "components.\"minecraft:enchantments\".\"",
+      "new": "components.\"minecraft:enchantments\".levels.\""
+    }
+  ],
+  "text_json": {
+    "storage": [
+      "veinminer:menu row",
+      "veinminer:meta requires"
+    ]
+  }
+}
