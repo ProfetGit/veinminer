@@ -1,8 +1,8 @@
-![Veinminer](https://raw.githubusercontent.com/ProfetGit/veinminer/main/docs/banner.gif)
+![Veinminer](https://raw.githubusercontent.com/ProfetGit/veinminer/main/docs/banner.webp)
 
 <p align="center">
-<a href="https://github.com/ProfetGit"><img src="https://raw.githubusercontent.com/ProfetGit/assets/main/buttons/github.gif" alt="GitHub" width="23.96%"></a>
-<a href="https://ko-fi.com/profetgit"><img src="https://raw.githubusercontent.com/ProfetGit/assets/main/buttons/kofi.gif" alt="Ko-fi" width="23.96%"></a>
+<a href="https://github.com/ProfetGit"><img src="https://raw.githubusercontent.com/ProfetGit/assets/main/buttons/github.webp" alt="GitHub" width="23.96%"></a>
+<a href="https://ko-fi.com/profetgit"><img src="https://raw.githubusercontent.com/ProfetGit/assets/main/buttons/kofi.webp" alt="Ko-fi" width="23.96%"></a>
 </p>
 
 **Sneak, mine one ore, and the whole vein comes out.**
@@ -15,11 +15,11 @@ A lightweight vanilla data pack for **Minecraft Java 26.2 and 26.3**. It runs on
 </p>
 
 <p align="center">
-<img src="https://raw.githubusercontent.com/ProfetGit/veinminer/main/docs/showcase/veinminer_copper.gif" alt="One swing breaks a whole copper blob" width="49%">
-<img src="https://raw.githubusercontent.com/ProfetGit/veinminer/main/docs/showcase/veinminer_diamond.gif" alt="A deepslate diamond vein with Fortune III" width="49%">
+<img src="https://raw.githubusercontent.com/ProfetGit/veinminer/main/docs/showcase/veinminer_copper.webp" alt="One swing breaks a whole copper blob" width="49%">
+<img src="https://raw.githubusercontent.com/ProfetGit/veinminer/main/docs/showcase/veinminer_diamond.webp" alt="A deepslate diamond vein with Fortune III" width="49%">
 </p>
 
-![Features](https://raw.githubusercontent.com/ProfetGit/veinminer/main/docs/desc/title-features.png)
+![Features](https://raw.githubusercontent.com/ProfetGit/veinminer/main/docs/desc/title-features.webp)
 
 - **The whole vein in one break,** including ores that only touch at an edge or a corner. Stone and deepslate variants count as one vein.
 - **A chain reaction you can watch.** The vein pops block by block, spreading out from the ore you hit, and every block throws its loot out in front of you.
@@ -28,7 +28,7 @@ A lightweight vanilla data pack for **Minecraft Java 26.2 and 26.3**. It runs on
 - **Only ores.** It never chain-breaks stone, logs or your builds.
 - **Everyone chooses.** Any player can turn it off or on for themselves with `/trigger veinminer`.
 
-![How to use](https://raw.githubusercontent.com/ProfetGit/veinminer/main/docs/desc/title-how-to-use.png)
+![How to use](https://raw.githubusercontent.com/ProfetGit/veinminer/main/docs/desc/title-how-to-use.webp)
 
 1. Hold a pickaxe.
 2. **Sneak.**
@@ -36,15 +36,15 @@ A lightweight vanilla data pack for **Minecraft Java 26.2 and 26.3**. It runs on
 
 Works on every vanilla ore: coal, copper, iron, lapis, gold, redstone, diamond, emerald, nether gold, quartz and ancient debris.
 
-![Settings](https://raw.githubusercontent.com/ProfetGit/veinminer/main/docs/desc/title-settings.png)
+![Settings](https://raw.githubusercontent.com/ProfetGit/veinminer/main/docs/desc/title-settings.webp)
 
 Operators open a clickable menu with `/function veinminer:settings`. It sets the maximum vein size (64 by default), whether sneaking is needed, where drops land, the animation, durability use, diagonal connections and which ores count.
 
-![Add-ons](https://raw.githubusercontent.com/ProfetGit/veinminer/main/docs/desc/title-add-ons.png)
+![Add-ons](https://raw.githubusercontent.com/ProfetGit/veinminer/main/docs/desc/title-add-ons.webp)
 
 **[Enchanted Veinminer](https://www.curseforge.com/minecraft/mc-mods/enchanted-veinminer)** turns veinmining into a pickaxe enchantment you have to find first. Making your own add-on? See the [add-on API](https://github.com/ProfetGit/veinminer/blob/main/docs/api.md).
 
-![Installation](https://raw.githubusercontent.com/ProfetGit/veinminer/main/docs/desc/title-installation.png)
+![Installation](https://raw.githubusercontent.com/ProfetGit/veinminer/main/docs/desc/title-installation.webp)
 
 - **Data pack:** put the `.zip` in your world's `datapacks` folder and run `/reload`. Don't unzip it.
 - **Mod:** put the `-fabric.jar` (Fabric or Quilt, needs Fabric API) or the `-forge.jar` (Forge or NeoForge) in `mods`.
@@ -52,28 +52,28 @@ Operators open a clickable menu with `/function veinminer:settings`. It sets the
 
 Use only one of the three. To remove Veinminer cleanly, run `/function veinminer:uninstall` first.
 
-![More from Profet](https://raw.githubusercontent.com/ProfetGit/veinminer/main/docs/desc/title-more-from-profet.png)
+![More from Profet](https://raw.githubusercontent.com/ProfetGit/veinminer/main/docs/desc/title-more-from-profet.webp)
 
 <!-- promo:start -->
 <p align="center">
-<a href="https://www.curseforge.com/minecraft/mc-mods/profets-timber"><img src="https://raw.githubusercontent.com/ProfetGit/assets/main/promo/timber.gif" alt="Timber: One chop. Whole tree. Server side." width="49%"></a>
-<a href="https://www.curseforge.com/minecraft/mc-mods/tidy-pockets"><img src="https://raw.githubusercontent.com/ProfetGit/assets/main/promo/tidy-pockets.gif" alt="Tidy Pockets: One click. All sorted. Client side." width="49%"></a>
-<a href="https://www.curseforge.com/minecraft/mc-mods/having-a-blast"><img src="https://raw.githubusercontent.com/ProfetGit/assets/main/promo/having-a-blast.gif" alt="Having a Blast: One boom. Bouncy blocks. Client or server." width="49%"></a>
-<a href="https://www.curseforge.com/minecraft/mc-mods/far-out-zoom"><img src="https://raw.githubusercontent.com/ProfetGit/assets/main/promo/far-out-zoom.gif" alt="Far Out Zoom: The horizon, up close. Client side." width="49%"></a>
+<a href="https://www.curseforge.com/minecraft/mc-mods/profets-timber"><img src="https://raw.githubusercontent.com/ProfetGit/assets/main/promo/timber.webp" alt="Timber: One chop. Whole tree. Server side." width="49%"></a>
+<a href="https://www.curseforge.com/minecraft/mc-mods/tidy-pockets"><img src="https://raw.githubusercontent.com/ProfetGit/assets/main/promo/tidy-pockets.webp" alt="Tidy Pockets: One click. All sorted. Client side." width="49%"></a>
+<a href="https://www.curseforge.com/minecraft/mc-mods/having-a-blast"><img src="https://raw.githubusercontent.com/ProfetGit/assets/main/promo/having-a-blast.webp" alt="Having a Blast: One boom. Bouncy blocks. Client or server." width="49%"></a>
+<a href="https://www.curseforge.com/minecraft/mc-mods/far-out-zoom"><img src="https://raw.githubusercontent.com/ProfetGit/assets/main/promo/far-out-zoom.webp" alt="Far Out Zoom: The horizon, up close. Client side." width="49%"></a>
 </p>
 <!-- promo:end -->
 
-![Support](https://raw.githubusercontent.com/ProfetGit/veinminer/main/docs/desc/title-support.png)
+![Support](https://raw.githubusercontent.com/ProfetGit/veinminer/main/docs/desc/title-support.webp)
 
 Veinminer is free. If it saves you some time, a coffee helps fund the next update.
 
-[![Support me on Ko-fi](https://raw.githubusercontent.com/ProfetGit/assets/main/kofi-banner.gif)](https://ko-fi.com/profetgit)
+[![Support me on Ko-fi](https://raw.githubusercontent.com/ProfetGit/assets/main/kofi-banner.webp)](https://ko-fi.com/profetgit)
 
 Want your own server to play on with friends? My BisectHosting affiliate link gives you 25% off the first month, and I get a small commission.
 
-[![Get 25% off your first month at BisectHosting](https://raw.githubusercontent.com/ProfetGit/assets/main/bisecthosting-banner.gif)](https://url-shortener.curseforge.com/Pp2BN)
+[![Get 25% off your first month at BisectHosting](https://raw.githubusercontent.com/ProfetGit/assets/main/bisecthosting-banner.webp)](https://url-shortener.curseforge.com/Pp2BN)
 
-![License](https://raw.githubusercontent.com/ProfetGit/veinminer/main/docs/desc/title-license.png)
+![License](https://raw.githubusercontent.com/ProfetGit/veinminer/main/docs/desc/title-license.webp)
 
 © 2026 Profet. All rights reserved.
 
@@ -82,4 +82,4 @@ Want your own server to play on with friends? My BisectHosting affiliate link gi
 
 Full terms: [LICENSE](https://github.com/ProfetGit/veinminer/blob/main/LICENSE).
 
-![](https://raw.githubusercontent.com/ProfetGit/veinminer/main/docs/desc/divider.png)
+![](https://raw.githubusercontent.com/ProfetGit/veinminer/main/docs/desc/divider.webp)
