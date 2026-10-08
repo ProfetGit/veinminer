@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.3.3 — 2026-10-08
+- The join hint is now off by default, so new worlds no longer print the controls reminder when you open them. Operators can turn it back on in `/function veinminer:settings` (Join hint).
+- For pack authors: `veinminer:meta version_id` is now 10303.
+
 ## 1.3.2 — 2026-09-30
 - Now also runs on Minecraft Java 1.21.1, 1.21.4, 1.21.8 and 1.21.11, as a data pack zip and a Fabric/Quilt mod jar for each of them. Nothing changes on 26.2 and 26.3.
 - For pack authors: `veinminer:meta version_id` is now 10302.

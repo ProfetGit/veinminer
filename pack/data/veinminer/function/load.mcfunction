@@ -1,5 +1,5 @@
-data modify storage veinminer:meta version set value "1.3.2"
-data modify storage veinminer:meta version_id set value 10302
+data modify storage veinminer:meta version set value "1.3.3"
+data modify storage veinminer:meta version_id set value 10303
 data remove storage veinminer:meta requires
 scoreboard objectives add veinminer trigger {text:"Veinminer"}
 scoreboard objectives add veinminer.off dummy

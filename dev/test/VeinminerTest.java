@@ -510,7 +510,7 @@ class Scenarios {
         VeinminerTest.ticks(5);
         List<String> packs = VeinminerTest.cmd("datapack list enabled");
         VeinminerTest.check("base pack runs alone", !packs.toString().contains("hookpack") && packs.toString().contains(System.getProperty("harness.packs", "Veinminer-")), packs.toString());
-        VeinminerTest.check("version_id stored for add-ons", VeinminerTest.cmd("data get storage veinminer:meta version_id").toString().contains("10302"),
+        VeinminerTest.check("version_id stored for add-ons", VeinminerTest.cmd("data get storage veinminer:meta version_id").toString().contains("10303"),
             VeinminerTest.cmd("data get storage veinminer:meta version_id").toString());
         VeinminerTest.check("no add-on requirement text without add-ons", requiresCount() == -1, "requires=" + requiresCount());
         List<String> ver = VeinminerTest.cmd("data get storage veinminer:meta version");
@@ -966,6 +966,10 @@ class Scenarios {
         List<String> reset = VeinminerTest.cmd("execute as VeinTester run function veinminer:settings/reset");
         VeinminerTest.check("reset restores defaults", VeinminerTest.cmd("scoreboard players get #max_blocks veinminer.config").toString().contains("64"), reset.toString());
         VeinminerTest.chat();
+        VeinminerTest.cmd("execute as VeinTester run function veinminer:player/welcome");
+        List<String> quiet = VeinminerTest.chat();
+        VeinminerTest.check("join hint is off by default", quiet.isEmpty(), quiet.toString());
+        VeinminerTest.cmd("scoreboard players set #welcome veinminer.config 1");
         List<String> tog = VeinminerTest.cmd("execute as VeinTester run function veinminer:player/welcome");
         List<String> hello = VeinminerTest.chat();
         VeinminerTest.info("welcome: " + hello);
@@ -976,7 +980,7 @@ class Scenarios {
         cmd("scoreboard players reset * vmtest");
         VeinminerTest.cmd("datapack enable \"file/hookpack\"");
         VeinminerTest.ticks(5);
-        VeinminerTest.check("api/loaded runs after version_id is set", score("#loaded", "vmtest") == 1 && score("#version_id", "vmtest") == 10302,
+        VeinminerTest.check("api/loaded runs after version_id is set", score("#loaded", "vmtest") == 1 && score("#version_id", "vmtest") == 10303,
             "loaded=" + score("#loaded", "vmtest") + " version_id=" + score("#version_id", "vmtest"));
         say("reload");
         VeinminerTest.ticks(5);
@@ -1025,6 +1029,7 @@ class Scenarios {
         VeinminerTest.check("hooks run only after Veinminer's own checks pass", score("#calls_a", "vmtest") == 0, "a=" + score("#calls_a", "vmtest"));
 
         VeinminerTest.chat();
+        VeinminerTest.cmd("scoreboard players set #welcome veinminer.config 1");
         VeinminerTest.cmd("execute as VeinTester run function veinminer:player/welcome");
         hello = VeinminerTest.chat();
         VeinminerTest.check("join hint shows add-on requirement", hello.stream().anyMatch(m -> m.contains("whole vein. Test requirement. [Toggle]")), hello.toString());
