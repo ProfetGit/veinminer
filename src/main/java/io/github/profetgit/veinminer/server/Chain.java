@@ -514,11 +514,17 @@ public final class Chain {
         xpPool = 0;
     }
 
+    /**
+     * Sounds and particles leave at once, but the displays and the block change go out with the entity tracker of the next
+     * tick (the pack's tick function ran before the tracker, in the same tick): the effects wait a tick to stay in step.
+     */
+    private static final int SOUND_LAG = 1;
+
     /** Crumbs and a gust per block, one break sound and one egg plop per ring, the pitch climbing ring by ring. */
     private void ring() {
         Node first = null;
         for (Node n : standing) {
-            if (age - n.turned != StandKeys.VANISH) continue;
+            if (age - n.turned != StandKeys.VANISH + SOUND_LAG) continue;
             Vec3 c = Vec3.atCenterOf(n.pos);
             level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, n.state), c.x, c.y, c.z, 12, 0.25, 0.25, 0.25, 0);
             level.sendParticles(ParticleTypes.SMALL_GUST, c.x, c.y, c.z, 1, 0.15, 0.15, 0.15, 0);
