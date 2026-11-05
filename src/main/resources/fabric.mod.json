@@ -14,7 +14,7 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "io.github.profetgit.veinminer.Veinminer"
+      "io.github.profetgit.veinminer.platform.fabric.FabricEntry"
     ],
     "client": [
       "io.github.profetgit.veinminer.client.VeinminerClient"

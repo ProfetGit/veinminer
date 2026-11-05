@@ -1,0 +1,12 @@
+{
+  "values": [
+    {
+      "id": "veinminer:test_ore_tin",
+      "required": false
+    },
+    {
+      "id": "veinminer:test_ore_be",
+      "required": false
+    }
+  ]
+}

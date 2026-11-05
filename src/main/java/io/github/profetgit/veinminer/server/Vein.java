@@ -1,0 +1,138 @@
+package io.github.profetgit.veinminer.server;
+
+import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
+
+/** PRD 5.2 and 5.4: the scan of a vein and the break of its blocks through the real player break path. */
+public final class Vein {
+    public enum Result {
+        BROKEN,
+        /** Not a block of the group any more, wrong tool for it, or another mod refused the break. */
+        SKIPPED,
+        /** The next block would use the pickaxe's last durability point: the chain ends. */
+        WORN,
+        /** The held item is no longer the one the vein started with: the chain ends. */
+        TOOL_CHANGED
+    }
+
+    private static final int[][] FACES = {{1, 0, 0}, {-1, 0, 0}, {0, 1, 0}, {0, -1, 0}, {0, 0, 1}, {0, 0, -1}};
+    private static final int[][] ALL = neighbours();
+
+    private static boolean running;
+
+    private Vein() {}
+
+    private static int[][] neighbours() {
+        int[][] o = new int[26][];
+        int n = 0;
+        for (int x = -1; x <= 1; x++) {
+            for (int y = -1; y <= 1; y++) {
+                for (int z = -1; z <= 1; z++) if (x != 0 || y != 0 || z != 0) o[n++] = new int[]{x, y, z};
+            }
+        }
+        return o;
+    }
+
+    /** True while a vein is breaking blocks: those breaks never start another vein. */
+    public static boolean running() {
+        return running;
+    }
+
+    /**
+     * The cells to mine after the struck cell {@code origin}: breadth-first over the faces (and the 20 diagonals), only
+     * loaded cells of {@code group} without a block entity. Order is distance from {@code origin}, ties nearer to
+     * {@code near}. At most {@code limit} cells, looking at no more than {@code visitCap} cells.
+     */
+    public static List<BlockPos> scan(ServerLevel level, Vec3 near, BlockPos origin, String group, int limit, int visitCap, boolean diagonal) {
+        int[][] offsets = diagonal ? ALL : FACES;
+        List<BlockPos> out = new ArrayList<>();
+        LongOpenHashSet visited = new LongOpenHashSet();
+        visited.add(origin.asLong());
+        int seen = 1;
+        List<BlockPos> frontier = List.of(origin);
+        while (!frontier.isEmpty() && out.size() < limit && seen < visitCap) {
+            List<BlockPos> found = new ArrayList<>();
+            scan:
+            for (BlockPos p : frontier) {
+                for (int[] o : offsets) {
+                    if (seen >= visitCap) break scan;
+                    BlockPos q = p.offset(o[0], o[1], o[2]);
+                    if (!visited.add(q.asLong())) continue;
+                    seen++;
+                    if (level.isOutsideBuildHeight(q) || !level.hasChunkAt(q)) continue;
+                    BlockState s = level.getBlockState(q);
+                    if (s.hasBlockEntity() || !group.equals(Groups.of(s.getBlock()))) continue;
+                    found.add(q);
+                }
+            }
+            found.sort(Comparator.comparingDouble(q -> q.distToCenterSqr(near)));
+            for (BlockPos q : found) {
+                if (out.size() >= limit) break;
+                out.add(q);
+            }
+            frontier = found;
+        }
+        return out;
+    }
+
+    /** Scans from the struck cell and breaks the whole vein now; returns the blocks broken, the struck one not counted. */
+    public static int run(ServerLevel level, ServerPlayer player, BlockPos origin, String group, ItemStack tool) {
+        Config.Values cfg = Config.get();
+        int mined = 0;
+        Result stop = null;
+        running = true;
+        try {
+            for (BlockPos pos : scan(level, player.position(), origin, group, cfg.maxBlocks() - 1, cfg.visitCap(), cfg.diagonal())) {
+                Result r = breakOne(player, tool, pos, group);
+                if (r == Result.BROKEN) mined++;
+                else if (r != Result.SKIPPED) {
+                    stop = r;
+                    break;
+                }
+            }
+        } finally {
+            running = false;
+        }
+        if (cfg.feedback() && mined > 0) {
+            player.sendOverlayMessage(Component.translatableWithFallback("veinminer.msg.veined", "Veined " + (mined + 1) + " " + group, mined + 1, group));
+        }
+        if (cfg.feedback() && stop == Result.WORN) {
+            player.sendOverlayMessage(Component.translatableWithFallback("veinminer.msg.worn", "Pickaxe is too worn"));
+        }
+        return mined;
+    }
+
+    /**
+     * One block of a vein through {@code ServerPlayerGameMode.destroyBlock}: drops, XP, stats, exhaustion, tool wear and
+     * the loader's break events (claims) all run as for a block mined by hand. That path already charges the tool, so
+     * with {@code durability} off the damage is put back instead of charging again.
+     */
+    public static Result breakOne(ServerPlayer player, ItemStack tool, BlockPos pos, String group) {
+        if (player.getMainHandItem() != tool) return Result.TOOL_CHANGED;
+        if (tool.isDamageableItem() && tool.getMaxDamage() - tool.getDamageValue() <= 1) return Result.WORN;
+        ServerLevel level = player.level();
+        if (level.isOutsideBuildHeight(pos) || !level.hasChunkAt(pos)) return Result.SKIPPED;
+        BlockState state = level.getBlockState(pos);
+        if (state.hasBlockEntity() || !group.equals(Groups.of(state.getBlock())) || !player.hasCorrectToolForDrops(state)) return Result.SKIPPED;
+        int damage = tool.getDamageValue();
+        boolean was = running;
+        running = true;
+        boolean broke;
+        try {
+            broke = player.gameMode.destroyBlock(pos);
+        } finally {
+            running = was;
+        }
+        if (!Config.get().durability() && !tool.isEmpty()) tool.setDamageValue(damage);
+        return broke ? Result.BROKEN : Result.SKIPPED;
+    }
+}
