@@ -27,7 +27,7 @@ import org.jspecify.annotations.Nullable;
 public final class Hooks {
     public static final TagKey<Item> TOOLS = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("veinminer", "tools"));
 
-    private record Start(ServerLevel level, ServerPlayer player, BlockPos pos, BlockState state, String group, ItemStack tool) {}
+    private record Start(ServerLevel level, ServerPlayer player, BlockPos pos, BlockState state, String group, ItemStack tool, int mark) {}
 
     private static final List<Start> PENDING = new ArrayList<>();
     private static int sweep;
@@ -109,7 +109,7 @@ public final class Hooks {
         ItemStack tool = player.getMainHandItem();
         if (!tool.is(TOOLS)) return;
         if (be != null || !player.hasCorrectToolForDrops(state)) return;
-        PENDING.add(new Start(level, player, pos.immutable(), state, group, tool));
+        PENDING.add(new Start(level, player, pos.immutable(), state, group, tool, level.getNextEntityId()));
     }
 
     /** Runs the queued veins; the end of every server tick, and the self-test after its own break. */
@@ -121,7 +121,7 @@ public final class Hooks {
             if (s.player.isRemoved() || !s.player.isAlive() || s.player.level() != s.level || s.player.getMainHandItem() != s.tool || s.tool.isEmpty()) continue;
             try {
                 if (Api.cancelled(s.level, s.player, s.pos, s.state, s.group)) continue;
-                if (Config.get().animation()) Chain.start(s.level, s.player, s.pos, s.group, s.tool);
+                if (Config.get().animation()) Chain.start(s.level, s.player, s.pos, s.group, s.tool, s.mark);
                 else Vein.run(s.level, s.player, s.pos, s.group, s.tool);
             } catch (RuntimeException e) {
                 Veinminer.LOG.error("Veinminer: a vein failed, the rest stays ore", e);

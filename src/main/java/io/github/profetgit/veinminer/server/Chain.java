@@ -98,6 +98,7 @@ public final class Chain {
     private final String face;
     private final boolean own;
     private Vec3 landing;
+    private int xpPool;
     private int age, ring, dir, shown, visTurn, maxVisTurn, mined;
     private Vein.Result stop;
     private boolean stopped, finished;
@@ -155,8 +156,16 @@ public final class Chain {
         return List.copyOf(ACTIVE);
     }
 
-    /** Scans from the struck cell and starts the chain; null when the vein has no other block. */
+    /** As {@link #start(ServerLevel, ServerPlayer, BlockPos, String, ItemStack, int)} for a struck block whose loot is left alone. */
     public static Chain start(ServerLevel level, ServerPlayer player, BlockPos origin, String group, ItemStack tool) {
+        return start(level, player, origin, group, tool, Integer.MAX_VALUE);
+    }
+
+    /**
+     * Scans from the struck cell and starts the chain; null when the vein has no other block. What the struck block dropped
+     * (entities with an id above {@code mark}) joins the chain's loot and flies the same arc.
+     */
+    public static Chain start(ServerLevel level, ServerPlayer player, BlockPos origin, String group, ItemStack tool, int mark) {
         Config.Values cfg = Config.get();
         if (countFor(player) >= MAX_PER_PLAYER) return null;
         List<BlockPos> cells = Vein.scan(level, player.position(), origin, group, Lag.maxBlocks(GroupData.cap(group, cfg.maxBlocks())) - 1, cfg.visitCap(), cfg.diagonal());
@@ -164,6 +173,7 @@ public final class Chain {
         Chain c = new Chain(level, player, tool, group, origin, cells, cfg.drops() == 1);
         ACTIVE.add(c);
         count = ACTIVE.size();
+        c.loot(origin, mark);
         c.prepDue();
         return c;
     }
@@ -353,7 +363,7 @@ public final class Chain {
             mined++;
             n.turned = age;
             if (n.stand != null) standing.add(n);
-            loot(n, mark);
+            loot(n.pos, mark);
         } else {
             dropStand(n);
             if (r != Vein.Result.SKIPPED) halt(r);
@@ -369,8 +379,8 @@ public final class Chain {
     }
 
     /** Entity ids only grow, so what the break dropped is whatever near the block has an id above the mark taken before it. */
-    private void loot(Node n, int mark) {
-        AABB box = new AABB(n.pos).inflate(1.0);
+    private void loot(BlockPos pos, int mark) {
+        AABB box = new AABB(pos).inflate(1.0);
         List<ItemEntity> items = new ArrayList<>(level.getEntitiesOfClass(ItemEntity.class, box, e -> e.getId() > mark && !e.isRemoved()));
         items.sort(Comparator.comparingInt(ItemEntity::getId));
         List<ExperienceOrb> orbs = level.getEntitiesOfClass(ExperienceOrb.class, box, e -> e.getId() > mark && !e.isRemoved());
@@ -384,7 +394,7 @@ public final class Chain {
             xp = 0;
             e.discard();
         }
-        if (xp > 0) ghost(ItemStack.EMPTY, Vec3.atCenterOf(n.pos), xp);
+        if (xp > 0) ghost(ItemStack.EMPTY, Vec3.atCenterOf(pos), xp);
     }
 
     private void ghost(ItemStack stack, Vec3 start, int xp) {
@@ -477,17 +487,22 @@ public final class Chain {
             g.display = null;
         }
         Vec3 at = g.lo ? player.position() : g.spot.subtract(0, Arc.rest(g.cube), 0);
-        Vec3 orb = g.lo ? player.position() : g.spot;
-        if (!level.hasChunkAt(BlockPos.containing(at))) {
-            at = player.position();
-            orb = at;
-        }
+        if (!level.hasChunkAt(BlockPos.containing(at))) at = player.position();
         if (!g.stack.isEmpty()) {
             ItemEntity item = new ItemEntity(level, at.x, at.y, at.z, g.stack, 0, g.lo ? 0 : Arc.HOP, 0);
             item.setPickUpDelay(g.lo ? 0 : Arc.PICKUP_DELAY);
             level.addFreshEntity(item);
         }
-        if (g.xp > 0) ExperienceOrb.award(level, orb, g.xp);
+        xpPool += g.xp;
+    }
+
+    /** The chain's XP is paid as one lot at the landing spot, so a vein makes a few orbs, not one per block. */
+    private void payXp() {
+        if (xpPool <= 0) return;
+        Vec3 at = own ? player.position() : landing;
+        if (!level.hasChunkAt(BlockPos.containing(at))) at = player.position();
+        ExperienceOrb.award(level, at, xpPool);
+        xpPool = 0;
     }
 
     /** Crumbs and a gust per block, one break sound and one egg plop per ring, the pitch climbing ring by ring. */
@@ -515,6 +530,7 @@ public final class Chain {
         remaining.clear();
         for (Ghost g : ghosts) land(g);
         ghosts.clear();
+        payXp();
         for (Node n : nodes) dropStand(n);
         standing.clear();
         Config.Values cfg = Config.get();

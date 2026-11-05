@@ -161,7 +161,7 @@ final class ChainScene {
         Rig.eq("timeline 64: blocks mined", 63, c.mined());
         Rig.eq("timeline 64: visible ghosts capped at 12", 12, c.shown());
         Rig.check("timeline 64: at most 3 visible ghosts per turn tick", c.maxVisiblePerTurn() <= 3 && c.maxVisiblePerTurn() >= 1, "max " + c.maxVisiblePerTurn());
-        Rig.eq("timeline 64: loot is 63 coal_ore", 63, Rig.grab().count(Items.COAL_ORE));
+        Rig.eq("timeline 64: loot is 64 coal_ore (the struck block's included)", 64, Rig.grab().count(Items.COAL_ORE));
         noLeak("timeline 64");
     }
 
@@ -253,6 +253,7 @@ final class ChainScene {
         Rig.check("landing: 1.3 blocks from the struck block toward the eyes, on the floor",
             Math.abs(spot.x - p.x) < 1e-6 && Math.abs(spot.z - p.z) < 1e-6 && Math.abs(spot.y - (Rig.base.getY() + 1)) < 1e-6, spot + " vs " + p);
         Rig.Loot struck = Rig.grab();
+        Rig.eq("landing: the struck block's own drop and orb joined the chain (nothing left in its hole)", 0, struck.total() + struck.xp());
         Rig.settle();
         Rig.eq("landing: all 64 broke", 64, Rig.air(cells));
         int items = 0, far = 0, delayed = 0, orbs = 0, orbsFar = 0;
@@ -267,10 +268,11 @@ final class ChainScene {
             orbs++;
             if (Math.hypot(o.getX() - spot.x, o.getZ() - spot.z) > 1.1) orbsFar++;
         }
-        Rig.check("landing: loot of 63 blocks came out as real items", items >= 63, "items " + items + " struck " + struck.total());
+        Rig.check("landing: loot of all 64 blocks came out as real items", items >= 64, "items " + items);
         Rig.eq("landing: items away from the landing spot", 0, far);
         Rig.eq("landing: items without a pickup delay", 0, delayed);
         Rig.check("landing: xp orbs at the landing spot", orbs > 0 && xp > 0 && orbsFar == 0, "orbs " + orbs + " xp " + xp + " far " + orbsFar);
+        Rig.check("landing: the chain's xp is a few orbs, not one per block", orbs <= 6, "orbs " + orbs + " xp " + xp);
         Rig.grab();
         noLeak("landing");
     }
@@ -292,7 +294,7 @@ final class ChainScene {
             if (e.position().distanceTo(feet) > 0.5) far++;
             if (e.hasPickUpDelay()) delayed++;
         }
-        Rig.eq("drops 1: 63 items", 63, items);
+        Rig.eq("drops 1: 64 items", 64, items);
         Rig.eq("drops 1: items away from the miner's feet", 0, far);
         Rig.eq("drops 1: items with a pickup delay", 0, delayed);
         Rig.grab();
@@ -341,7 +343,7 @@ final class ChainScene {
         Rig.settle();
         Rig.eq("tool swap: no block turned after the swap", before, Rig.air(cells));
         Rig.check("tool swap: the rest stays ore", Rig.air(cells) < 64 && Rig.level.getBlockState(Rig.at(4, 2, 2)).is(Blocks.COAL_ORE), "air " + Rig.air(cells));
-        Rig.eq("tool swap: loot of the turned blocks landed", before - 1, Rig.grab().count(Items.COAL_ORE));
+        Rig.eq("tool swap: loot of the turned blocks landed", before, Rig.grab().count(Items.COAL_ORE));
         Rig.check("tool swap: claims released", !Chain.claimed(Rig.level, Rig.at(4, 2, 2)), "claimed");
         noLeak("tool swap");
     }
@@ -370,7 +372,7 @@ final class ChainScene {
         int ticks = Rig.settle();
         Rig.eq("blob 80: 64 mined, the rest stays ore", 64, Rig.air(cells));
         Rig.check("blob 80: ends within the tail", c != null && ticks == c.plan().end(), "ticks " + ticks);
-        Rig.eq("blob 80: 63 chain items", 63, Rig.grab().count(Items.COAL_ORE));
+        Rig.eq("blob 80: 64 chain items", 64, Rig.grab().count(Items.COAL_ORE));
         noLeak("blob 80");
     }
 
@@ -414,7 +416,7 @@ final class ChainScene {
         Rig.eq("flush: no chain left", 0, Chain.count());
         Rig.eq("flush: no block turned by the flush", air, Rig.air(cells));
         Rig.check("flush: part of the vein stays ore", air < 64, "air " + air);
-        Rig.eq("flush: every turned block's loot landed", air - 1, Rig.grab().count(Items.COAL_ORE));
+        Rig.eq("flush: every turned block's loot landed", air, Rig.grab().count(Items.COAL_ORE));
         noLeak("flush");
     }
 
