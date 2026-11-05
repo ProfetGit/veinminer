@@ -1,6 +1,6 @@
 # Changelog
 
-## 2.0.0 — unreleased
+## 2.0.0 — 2026-11-05
 
 Veinminer is now a mod. It replaces the data pack and keeps the same chain: the vein pops block by block from the ore you mined, faster and faster, and the loot flies in an arc to land at your feet. It runs on Minecraft **26.3, 26.2, 1.21.1 and 1.20.1**, with **Fabric** (needs Fabric API), **Quilt**, **NeoForge** and **Forge**. On 1.20.1 one jar serves Forge and NeoForge.
 
