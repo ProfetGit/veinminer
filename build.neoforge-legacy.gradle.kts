@@ -79,3 +79,8 @@ tasks.test {
 
 extra["mcVersion"] = mc
 apply(from = rootProject.file("../../tools/Backport/renames.gradle.kts"))
+
+// moddev's legacy setup keeps Minecraft off the test classpath, and these unit tests use TagKey and DataResult: they run on
+// the Fabric targets of the same sources (:1.21.1-fabric:test), which is the same code
+tasks.named("compileTestJava") { enabled = false }
+tasks.test { enabled = false }
