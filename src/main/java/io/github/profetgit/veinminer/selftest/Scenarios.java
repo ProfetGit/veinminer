@@ -29,6 +29,7 @@ final class Scenarios {
                 .server(ChainScene::realCheck);
         }
         if (only.contains("real")) s.server(RealMods::run).waitTicks(20);
+        if (only.contains("demo")) s.server(Demo::build).waitTicks(100);
         if (only.contains("perf")) {
             s.server(Perf::warm).waitTicks(20);
             for (int i = 0; i < 3; i++) {
