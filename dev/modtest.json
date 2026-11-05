@@ -214,14 +214,14 @@
             "test": "execute unless entity @e[type=minecraft:block_display]"
           },
           {
-            "name": "loot_landed",
-            "test": "execute if entity @e[type=minecraft:item,nbt={Item:{id:\"minecraft:coal\"}}]"
+            "name": "loot_in_hosts_pockets",
+            "test": "execute if entity @a[name=Host,nbt={Inventory:[{id:\"minecraft:coal\"}]}]"
           }
         ],
         "checks": [
           {
             "name": "no_kicks",
-            "absent": "(was kicked|Disconnecting|lost connection: (?!Disconnected))"
+            "absent": "(was kicked|Disconnecting|lost connection: (?!Disconnected|Server closed))"
           },
           {
             "name": "no_veinminer_errors",

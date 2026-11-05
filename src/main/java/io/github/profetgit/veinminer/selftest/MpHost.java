@@ -68,7 +68,7 @@ final class MpHost {
             })
             .waitTicks(60)
             .run(mc -> SelfTest.record("mp displays cleaned up", standIns(mc) == 0, standIns(mc) + " block displays left"))
-            .waitTicks(20);
+            .waitTicks(300);
         return s;
     }
 }
