@@ -30,6 +30,7 @@ public final class SelfTest {
     private static int index;
     private static String captureName;
     private static int captureLeft, captureFrame;
+    private static final StringBuilder CAPTURE_TICKS = new StringBuilder();
 
     private SelfTest() {}
 
@@ -67,6 +68,8 @@ public final class SelfTest {
         if (captureLeft <= 0) return;
         Path out = Path.of(OUT, "frames", captureName, String.format("f%03d.png", captureFrame++));
         captureLeft--;
+        CAPTURE_TICKS.append(captureFrame - 1).append(' ').append(ticks).append('\n');
+        if (captureLeft == 0) writeTicks();
         TestCompat.screenshot(mc.gameRenderer.mainRenderTarget(), (NativeImage img) -> WRITER.execute(() -> {
             try (img) {
                 Files.createDirectories(out.getParent());
@@ -85,6 +88,28 @@ public final class SelfTest {
         captureName = name;
         captureLeft = frames;
         captureFrame = 0;
+        CAPTURE_TICKS.setLength(0);
+    }
+
+    static void stopCapture() {
+        if (captureLeft > 0) {
+            captureLeft = 0;
+            writeTicks();
+        }
+    }
+
+    /** {@code ticks.txt} beside the frames: "frame client-tick" per line, to read the real frame rate off the sheet. */
+    private static void writeTicks() {
+        Path file = Path.of(OUT, "frames", captureName, "ticks.txt");
+        String text = CAPTURE_TICKS.toString();
+        WRITER.execute(() -> {
+            try {
+                Files.createDirectories(file.getParent());
+                Files.writeString(file, text);
+            } catch (IOException e) {
+                VeinminerClient.LOG.warn("[selftest] ticks write failed: {}", e.toString());
+            }
+        });
     }
 
     public static void record(String name, boolean pass, String detail) {

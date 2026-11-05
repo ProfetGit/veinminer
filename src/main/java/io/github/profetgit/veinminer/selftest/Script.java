@@ -82,4 +82,12 @@ final class Script {
         });
         return this;
     }
+
+    Script stopCapture() {
+        steps.add(mc -> {
+            SelfTest.stopCapture();
+            return true;
+        });
+        return this;
+    }
 }

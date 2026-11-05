@@ -35,7 +35,7 @@ public final class TestBlocks {
     public static boolean wanted() {
         if (System.getProperty("veinminer.selftest") == null) return false;
         String scene = System.getProperty("veinminer.selftest.scene", "all");
-        return scene.equals("all") || scene.contains("modded");
+        return scene.equals("all") || scene.contains("modded") || scene.contains("chainview");
     }
 
     public static void register() {
