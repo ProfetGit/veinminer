@@ -46,6 +46,7 @@ tasks.test {
 }
 
 tasks.processResources {
+    exclude("META-INF/neoforge.mods.toml", "META-INF/mods.toml")
     val props = mapOf(
         "version" to project.version.toString(),
         "mc" to mc,
@@ -54,6 +55,8 @@ tasks.processResources {
         "author" to project.property("mod.author"),
         "homepage" to project.property("mod.homepage"),
         "fabric_loader" to project.property("deps.fabric_loader"),
+        "mc_range" to ((findProperty("deps.mc_range") as String?) ?: "~$mc"),
+        "java" to "25",
     )
     inputs.properties(props)
     filesMatching("fabric.mod.json") { expand(props) }

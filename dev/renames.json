@@ -1,0 +1,137 @@
+[
+  {
+    "regex": "org\\.jspecify\\.annotations\\.Nullable",
+    "to": "org.jetbrains.annotations.Nullable",
+    "when": "<1.21.11"
+  },
+  {
+    "regex": "net\\.minecraft\\.world\\.level\\.gamerules\\.GameRules",
+    "to": "net.minecraft.world.level.GameRules",
+    "when": "<1.21.11"
+  },
+  {
+    "regex": "\\b(ServerLevel level|level) = player\\.level\\(\\);",
+    "to": "$1 = player.serverLevel();",
+    "when": "<26.1",
+    "files": "^(Vein|Rig)\\.java$",
+    "groups": "1"
+  },
+  {
+    "regex": "player\\.gameMode\\(\\) != GameType\\.SURVIVAL",
+    "to": "player.gameMode.getGameModeForPlayer() != GameType.SURVIVAL",
+    "when": "<26.1",
+    "files": "^Hooks\\.java$"
+  },
+  {
+    "regex": "Commands\\.hasPermission\\(Commands\\.LEVEL_GAMEMASTERS\\)",
+    "to": "(src -> src.hasPermission(2))",
+    "when": "<1.21.11",
+    "files": "^VeinminerCommand\\.java$"
+  },
+  {
+    "regex": "BuiltInRegistries\\.BLOCK\\.getTags\\(\\)::iterator",
+    "to": "BuiltInRegistries.BLOCK.getTags().map(com.mojang.datafixers.util.Pair::getSecond)::iterator",
+    "when": "<1.21.2",
+    "files": "^Groups\\.java$"
+  },
+  {
+    "regex": "BuiltInRegistries\\.BLOCK\\.get\\((vanillaTag\\(|TagKey\\.create\\()",
+    "to": "BuiltInRegistries.BLOCK.getTag($1",
+    "when": "<1.21.2",
+    "files": "^Groups\\.java$",
+    "groups": "1"
+  },
+  {
+    "regex": "Rig\\.server\\.getRandomSequences\\(\\)\\.reset\\(COAL_SEQUENCE, seed\\)",
+    "to": "Rig.level.getRandomSequences().reset(COAL_SEQUENCE, (int) seed, true, true)",
+    "when": ">=1.21 <26.1",
+    "files": "^Fair\\.java$"
+  },
+  {
+    "regex": "Rig\\.level\\.getGameRules\\(\\)\\.set\\(GameRules\\.BLOCK_DROPS, (true|false), Rig\\.server\\)",
+    "to": "Rig.level.getGameRules().getRule(GameRules.RULE_DOBLOCKDROPS).set($1, Rig.server)",
+    "when": "<1.21.11",
+    "files": "^Fair\\.java$",
+    "groups": "1"
+  },
+  {
+    "regex": "\\.requiresCorrectToolForDrops\\(\\)\\.setId\\(key\\)",
+    "to": ".requiresCorrectToolForDrops()",
+    "when": "<1.21.2",
+    "files": "^TestBlocks\\.java$"
+  },
+  {
+    "regex": "new Item\\.Properties\\(\\)\\.setId\\(itemKey\\)\\.useBlockDescriptionPrefix\\(\\)",
+    "to": "new Item.Properties()",
+    "when": "<1.21.2",
+    "files": "^TestBlocks\\.java$"
+  },
+  {
+    "regex": "new BlockEntityType<>\\(TestBe::new, Set\\.of\\(be\\)\\)",
+    "to": "BlockEntityType.Builder.of(TestBe::new, be).build(null)",
+    "when": "<1.21.2",
+    "files": "^TestBlocks\\.java$"
+  },
+  {
+    "regex": "Rig\\.server\\.getRandomSequences\\(\\)\\.reset\\(COAL_SEQUENCE, seed\\)",
+    "to": "Rig.level.getRandomSequences().get(COAL_SEQUENCE).setSeed(seed)",
+    "when": "<1.21",
+    "files": "^Fair\\.java$"
+  },
+  {
+    "regex": "ResourceLocation\\.(fromNamespaceAndPath|parse|withDefaultNamespace)\\(",
+    "to": "new ResourceLocation(",
+    "when": "<1.21"
+  },
+  {
+    "regex": "\\bMath\\.clamp\\(",
+    "to": "net.minecraft.util.Mth.clamp(",
+    "when": "<1.20.5"
+  },
+  {
+    "regex": "(\\w+)\\.isGameLoadFinished\\(\\)",
+    "to": "($1.getOverlay() == null)",
+    "when": "<1.20.5",
+    "groups": "1"
+  },
+  {
+    "regex": "protected List<ItemStack> getDrops\\(",
+    "to": "public List<ItemStack> getDrops(",
+    "when": "<1.21",
+    "files": "^TestBlocks\\.java$"
+  },
+  {
+    "regex": "s\\.enchant\\(enchant\\(Enchantments\\.SILK_TOUCH\\), silk\\)",
+    "to": "s.enchant(Enchantments.SILK_TOUCH, silk)",
+    "when": "<1.21",
+    "files": "^Rig\\.java$"
+  },
+  {
+    "regex": "s\\.enchant\\(enchant\\(Enchantments\\.FORTUNE\\), fortune\\)",
+    "to": "s.enchant(Enchantments.BLOCK_FORTUNE, fortune)",
+    "when": "<1.21",
+    "files": "^Rig\\.java$"
+  },
+  {
+    "regex": "return level\\.registryAccess\\(\\)\\.lookupOrThrow\\(Registries\\.ENCHANTMENT\\)\\.getOrThrow\\(key\\);",
+    "to": "throw new UnsupportedOperationException();",
+    "when": "<1.21",
+    "files": "^Rig\\.java$"
+  },
+  {
+    "regex": "\\.value\\(\\)\\.createWorldDimensions\\(\\), mc\\.screen\\);",
+    "to": ".value().createWorldDimensions());",
+    "when": "<1.21",
+    "files": "^TestCompat\\.java$"
+  },
+  {
+    "regex": "net\\.neoforged\\.neoforge\\.event\\.level\\.block\\.BreakBlockEvent",
+    "to": "net.neoforged.neoforge.event.level.BlockEvent.BreakEvent",
+    "when": "<1.21.2"
+  },
+  {
+    "from": "BreakBlockEvent",
+    "to": "BreakEvent",
+    "when": "<1.21.2"
+  }
+]

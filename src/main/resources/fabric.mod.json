@@ -17,7 +17,7 @@
       "io.github.profetgit.veinminer.platform.fabric.FabricEntry"
     ],
     "client": [
-      "io.github.profetgit.veinminer.client.VeinminerClient"
+      "io.github.profetgit.veinminer.platform.fabric.FabricClientEntry"
     ]
   },
   "mixins": [
@@ -26,7 +26,7 @@
   "depends": {
     "fabricloader": ">=${fabric_loader}",
     "fabric-api": "*",
-    "minecraft": "~${mc}",
-    "java": ">=25"
+    "minecraft": "${mc_range}",
+    "java": ">=${java}"
   }
 }

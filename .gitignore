@@ -10,3 +10,6 @@ dist/
 *.iml
 **/.work/
 __pycache__/
+forge-*/build/
+forge-*/run/
+forge-*/.gradle/
