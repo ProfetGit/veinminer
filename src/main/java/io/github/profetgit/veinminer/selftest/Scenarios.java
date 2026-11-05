@@ -13,6 +13,8 @@ final class Scenarios {
             .check("world loaded", mc -> mc.player.isAlive() ? null : "player not alive");
         String only = System.getProperty("veinminer.selftest.scene", "all");
         if (only.equals("all") || only.contains("smoke")) smoke(s);
+        if (only.equals("all") || only.contains("modded")) s.server(Modded::run);
+        if (only.equals("all") || only.contains("fair")) s.server(Fair::run);
         return s;
     }
 
