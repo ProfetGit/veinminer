@@ -3,6 +3,7 @@ package io.github.profetgit.veinminer.platform.fabric;
 //? fabric {
 import io.github.profetgit.veinminer.Veinminer;
 import io.github.profetgit.veinminer.platform.Platform;
+import io.github.profetgit.veinminer.selftest.BreakGuard;
 import io.github.profetgit.veinminer.selftest.TestBlocks;
 import io.github.profetgit.veinminer.server.GroupData;
 import io.github.profetgit.veinminer.server.Hooks;
@@ -31,13 +32,17 @@ public final class FabricEntry implements ModInitializer, Platform {
         if (TestBlocks.wanted()) TestBlocks.register();
         ResourceLoader.get(PackType.SERVER_DATA).registerReloadListener(GroupData.ID, GroupData.listener());
         ServerLifecycleEvents.SERVER_STARTED.register(Hooks::serverStarted);
+        ServerLifecycleEvents.SERVER_STOPPING.register(Hooks::serverStopping);
         ServerLifecycleEvents.SERVER_STOPPED.register(Hooks::serverStopped);
+        ServerLifecycleEvents.END_DATA_PACK_RELOAD.register((server, resources, success) -> Hooks.dataReloaded(server, success));
+        ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> Hooks.join(server, handler.getPlayer()));
         ServerTickEvents.END_SERVER_TICK.register(Hooks::serverTickEnd);
         ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> Hooks.leave(handler.getPlayer()));
         CommonLifecycleEvents.TAGS_LOADED.register((registries, client) -> Hooks.tagsReloaded());
         PlayerBlockBreakEvents.AFTER.register((level, player, pos, state, be) -> {
             if (level instanceof ServerLevel sl && player instanceof ServerPlayer sp) Hooks.blockBroken(sl, sp, pos, state, be);
         });
+        if (BreakGuard.wanted()) PlayerBlockBreakEvents.BEFORE.register((level, player, pos, state, be) -> BreakGuard.allows(level, pos));
         CommandRegistrationCallback.EVENT.register((dispatcher, context, selection) -> Hooks.commands(dispatcher));
     }
 
@@ -64,6 +69,11 @@ public final class FabricEntry implements ModInitializer, Platform {
     @Override
     public boolean isFakePlayer(ServerPlayer player) {
         return player instanceof FakePlayer;
+    }
+
+    @Override
+    public ServerPlayer testFakePlayer(ServerLevel level) {
+        return FakePlayer.get(level);
     }
 
     @Override

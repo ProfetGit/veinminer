@@ -40,7 +40,8 @@
         }
       ],
       "mp": [
-        "join"
+        "join",
+        "veinminer"
       ]
     },
     "release": {
@@ -54,7 +55,8 @@
         }
       ],
       "mp": [
-        "join"
+        "join",
+        "veinminer"
       ]
     }
   },
@@ -97,6 +99,77 @@
           {
             "wait": "Guest joined the game",
             "timeout": 240
+          }
+        ]
+      },
+      "veinminer": {
+        "clients": [
+          {
+            "user": "Host",
+            "role": "host",
+            "vars": {
+              "mode": "mp-host"
+            },
+            "seconds": 150
+          },
+          {
+            "user": "Guest",
+            "role": "guest",
+            "seconds": 60,
+            "after": "Host joined the game"
+          }
+        ],
+        "steps": [
+          {
+            "wait": "Host joined the game",
+            "timeout": 300,
+            "send": [
+              "op Host",
+              "gamemode survival Host",
+              "gamerule spawn_mobs false",
+              "effect give Host haste infinite 127 true",
+              "give Host minecraft:iron_pickaxe",
+              "fill 3 -60 2 6 -57 5 minecraft:coal_ore",
+              "tp Host 4.5 -60 0.5 0 0",
+              "veinminer set require_sneak false",
+              "veinminer set animation true",
+              "veinminer set max_blocks 64"
+            ]
+          },
+          {
+            "wait": "Guest joined the game",
+            "timeout": 300,
+            "send": [
+              "gamemode survival Guest",
+              "tp Guest 4.5 -60 -3.5 0 0"
+            ]
+          },
+          {
+            "name": "host_vein_done",
+            "wait": "vein done",
+            "timeout": 400
+          },
+          {
+            "name": "blob_gone",
+            "test": "execute unless block 4 -58 4 minecraft:coal_ore"
+          },
+          {
+            "name": "no_displays",
+            "test": "execute unless entity @e[type=minecraft:block_display]"
+          },
+          {
+            "name": "loot_landed",
+            "test": "execute if entity @e[type=minecraft:item,nbt={Item:{id:\"minecraft:coal\"}}]"
+          }
+        ],
+        "checks": [
+          {
+            "name": "no_kicks",
+            "absent": "(was kicked|Disconnecting|lost connection: (?!Disconnected))"
+          },
+          {
+            "name": "no_veinminer_errors",
+            "absent": "Veinminer: (chain|a vein) failed"
           }
         ]
       }

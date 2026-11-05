@@ -41,6 +41,34 @@ final class Scenarios {
                 .server(GroupsScene::afterReload);
         }
         if (only.equals("all") || only.contains("blockentity")) s.server(BlockEntityScene::run);
+        if (M4.want(only, "conflict")) s.server(Gates::conflict);
+        if (M4.want(only, "fake")) s.server(Gates::fake);
+        if (M4.want(only, "claims")) s.server(Gates::claims);
+        if (M4.want(only, "lag")) s.server(Gates::lag);
+        if (M4.want(only, "players")) s.server(Persist::players);
+        if (M4.want(only, "config_reload")) {
+            s.server(Persist::configEdit).waitTicks(60)
+                .server(Persist::configCheckEdit).waitTicks(60)
+                .server(Persist::configCheckBroken).waitTicks(60)
+                .server(Persist::configCheckFixed);
+        }
+        if (M4.want(only, "hooks")) {
+            s.server(Gates::hooksInstall)
+                .until("the add-on's loaded function", 800, mc -> Gates.hooksLoaded()).waitTicks(10)
+                .server(Gates::hooksCheck).waitTicks(80)
+                .server(Gates::hooksGone);
+        }
+        if (M4.want(only, "migrate")) {
+            s.server(Persist::migrateInstall).waitTicks(100)
+                .server(Persist::migrateRun).waitTicks(100)
+                .server(Persist::migrateAfter);
+        }
+        if (M4.want(only, "crash")) {
+            s.server(Crash::crash)
+                .server(Crash::unloadStart)
+                .until("the far chain to end", 800, mc -> Crash.unloadDone()).waitTicks(40)
+                .server(Crash::unloadCheck);
+        }
         return s;
     }
 

@@ -1,6 +1,7 @@
 package io.github.profetgit.veinminer.server;
 
 import io.github.profetgit.veinminer.Veinminer;
+import io.github.profetgit.veinminer.api.VeinminerEvents;
 import io.github.profetgit.veinminer.core.Arc;
 import io.github.profetgit.veinminer.core.Delays;
 import io.github.profetgit.veinminer.core.StandKeys;
@@ -39,6 +40,8 @@ import org.joml.Quaternionf;
  */
 public final class Chain {
     private static final TagKey<Block> HOLLOW = TagKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath("veinminer", "hollow"));
+    /** Most chains one player has running at once (PRD 7, a guess to tune). */
+    public static final int MAX_PER_PLAYER = 3;
     private static final List<Chain> ACTIVE = new ArrayList<>();
     private static volatile int count;
     private static boolean quiet;
@@ -142,6 +145,12 @@ public final class Chain {
         return count;
     }
 
+    public static int countFor(ServerPlayer player) {
+        int n = 0;
+        for (Chain c : ACTIVE) if (c.player == player) n++;
+        return n;
+    }
+
     public static List<Chain> active() {
         return List.copyOf(ACTIVE);
     }
@@ -149,7 +158,8 @@ public final class Chain {
     /** Scans from the struck cell and starts the chain; null when the vein has no other block. */
     public static Chain start(ServerLevel level, ServerPlayer player, BlockPos origin, String group, ItemStack tool) {
         Config.Values cfg = Config.get();
-        List<BlockPos> cells = Vein.scan(level, player.position(), origin, group, GroupData.cap(group, cfg.maxBlocks()) - 1, cfg.visitCap(), cfg.diagonal());
+        if (countFor(player) >= MAX_PER_PLAYER) return null;
+        List<BlockPos> cells = Vein.scan(level, player.position(), origin, group, Lag.maxBlocks(GroupData.cap(group, cfg.maxBlocks())) - 1, cfg.visitCap(), cfg.diagonal());
         if (cells.isEmpty()) return null;
         Chain c = new Chain(level, player, tool, group, origin, cells, cfg.drops() == 1);
         ACTIVE.add(c);
@@ -243,7 +253,7 @@ public final class Chain {
     private void tick() {
         age++;
         visTurn = 0;
-        if (player.isRemoved()) {
+        if (player.isRemoved() || !player.isAlive() || player.hasDisconnected() || player.level() != level) {
             end(false);
             return;
         }
@@ -290,7 +300,7 @@ public final class Chain {
     }
 
     private void prep(Node n) {
-        if (!level.hasChunkAt(n.pos)) return;
+        if (!Vein.loaded(level, n.pos)) return;
         BlockState st = level.getBlockState(n.pos);
         if (!group.equals(Groups.of(st.getBlock()))) return;
         n.state = st;
@@ -325,7 +335,7 @@ public final class Chain {
 
     private void turn(Node n) {
         remaining.remove(n.pos.asLong());
-        if (!level.hasChunkAt(n.pos) || !group.equals(Groups.of(level.getBlockState(n.pos).getBlock()))) {
+        if (!Vein.loaded(level, n.pos) || !group.equals(Groups.of(level.getBlockState(n.pos).getBlock()))) {
             dropStand(n);
             return;
         }
@@ -509,5 +519,6 @@ public final class Chain {
         standing.clear();
         Config.Values cfg = Config.get();
         if (message && cfg.feedback()) Vein.feedback(player, mined, group, stop);
+        for (VeinminerEvents.AfterVein a : VeinminerEvents.AFTER_VEIN.listeners()) a.after(level, player, origin, group, mined);
     }
 }

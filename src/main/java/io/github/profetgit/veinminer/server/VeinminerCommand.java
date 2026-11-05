@@ -2,13 +2,15 @@ package io.github.profetgit.veinminer.server;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.DoubleArgumentType;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
-/** {@code /veinminer} (toggle yourself), {@code status}, and {@code reload} and {@code tune} (level 2). */
+/** {@code /veinminer} (toggle yourself, saved), {@code status}, and {@code reload}, {@code set} and {@code tune} (level 2). */
 public final class VeinminerCommand {
     private VeinminerCommand() {}
 
@@ -21,7 +23,25 @@ public final class VeinminerCommand {
                 c.getSource().sendSuccess(() -> Component.literal(Config.broken() ? "Veinminer config unreadable, keeping the current values" : "Veinminer config reloaded"), true);
                 return 1;
             }))
+            .then(set())
             .then(tune()));
+    }
+
+    private static LiteralArgumentBuilder<CommandSourceStack> set() {
+        return Commands.literal("set").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
+            .then(Commands.argument("key", StringArgumentType.string())
+                .suggests((c, b) -> SharedSuggestionProvider.suggest(Config.KEYS, b))
+                .then(Commands.argument("value", StringArgumentType.greedyString()).executes(c -> {
+                    String key = StringArgumentType.getString(c, "key");
+                    String value = StringArgumentType.getString(c, "value");
+                    String err = Config.set(key, value);
+                    if (err != null) {
+                        c.getSource().sendFailure(Component.literal(err));
+                        return 0;
+                    }
+                    c.getSource().sendSuccess(() -> Component.literal("Veinminer: " + key + " = " + value.trim()), true);
+                    return 1;
+                })));
     }
 
     private static LiteralArgumentBuilder<CommandSourceStack> tune() {
