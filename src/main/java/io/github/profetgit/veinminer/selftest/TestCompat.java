@@ -5,6 +5,7 @@ import com.mojang.blaze3d.platform.NativeImage;
 import java.util.function.Consumer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Screenshot;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.LevelSettings;
@@ -49,6 +50,22 @@ final class TestCompat {
         return net.minecraft.SharedConstants.getCurrentVersion().name();
 //?} else {
 /*        return net.minecraft.SharedConstants.getCurrentVersion().getName();
+*///?}
+    }
+
+    static int intOr(CompoundTag tag, String key, int fallback) {
+//? if >=1.21.5 {
+        return tag.getIntOr(key, fallback);
+//?} else {
+/*        return tag.contains(key, 99) ? tag.getInt(key) : fallback;
+*///?}
+    }
+
+    static String stringOr(CompoundTag tag, String key, String fallback) {
+//? if >=1.21.5 {
+        return tag.getStringOr(key, fallback);
+//?} else {
+/*        return tag.contains(key, 8) ? tag.getString(key) : fallback;
 *///?}
     }
 }

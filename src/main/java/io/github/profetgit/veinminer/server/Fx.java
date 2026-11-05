@@ -77,6 +77,7 @@ public final class Fx {
         ((ItemDisplayAccess) d).veinminer$setItemStack(stack);
         ((ItemDisplayAccess) d).veinminer$setItemTransform(ItemDisplayContext.GROUND);
         DisplayAccess a = (DisplayAccess) d;
+//? if >=1.20.2
         a.veinminer$setTeleportDuration(1);
         a.veinminer$setTransformation(of(from.x, from.y, from.z, NONE, 0, 0, 0));
         level.addFreshEntity(d);

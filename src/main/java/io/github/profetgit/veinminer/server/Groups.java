@@ -24,6 +24,13 @@ public final class Groups {
     private static final List<String> VANILLA = List.of("coal", "iron", "copper", "gold", "redstone", "lapis", "diamond", "emerald");
     private static final String[] PREFIXES = {"deepslate_", "nether_", "end_", "blackstone_", "netherrack_"};
 
+//? if >=1.21 {
+    private static final List<TagKey<Block>> COMMON = List.of(commonTag("c", "ores"));
+//?} else {
+/*    // 1.20.1: Forge tags ore blocks forge:ores and forge:ores/<name>, Fabric c:ores and c:<name>_ores
+    private static final List<TagKey<Block>> COMMON = List.of(commonTag("c", "ores"), commonTag("forge", "ores"));
+*///?}
+
     private static Map<Block, String> table;
     private static Map<String, Integer> sizes = Map.of();
     private static int oresSize;
@@ -85,9 +92,17 @@ public final class Groups {
             Map<String, HolderSet.Named<Block>> subtags = new TreeMap<>();
             for (HolderSet.Named<Block> tag : (Iterable<HolderSet.Named<Block>>) BuiltInRegistries.BLOCK.getTags()::iterator) {
                 Identifier id = tag.key().location();
+//? if >=1.21 {
                 if (id.getNamespace().equals("c") && id.getPath().startsWith("ores/") && id.getPath().length() > 5) {
                     subtags.put(id.getPath().substring(5), tag);
                 }
+//?} else {
+/*                if ((id.getNamespace().equals("c") || id.getNamespace().equals("forge")) && id.getPath().startsWith("ores/") && id.getPath().length() > 5) {
+                    subtags.put(id.getPath().substring(5), tag);
+                } else if (id.getNamespace().equals("c") && id.getPath().endsWith("_ores") && id.getPath().length() > 5) {
+                    subtags.putIfAbsent(id.getPath().substring(0, id.getPath().length() - 5), tag);
+                }
+*///?}
             }
             for (Map.Entry<String, HolderSet.Named<Block>> e : subtags.entrySet()) {
                 for (var holder : e.getValue()) t.putIfAbsent(holder.value(), e.getKey());
@@ -101,14 +116,16 @@ public final class Groups {
         t.putIfAbsent(Blocks.NETHER_QUARTZ_ORE, "quartz");
         t.putIfAbsent(Blocks.ANCIENT_DEBRIS, "netherite_scrap");
         if (!ignoreCommon) {
-            var common = BuiltInRegistries.BLOCK.get(TagKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath("c", "ores")));
-            if (common.isPresent()) {
-                for (var holder : common.get()) {
-                    ores++;
-                    Block b = holder.value();
-                    if (!t.containsKey(b)) {
-                        Identifier id = BuiltInRegistries.BLOCK.getKey(b);
-                        t.put(b, derive(id.getNamespace(), id.getPath()));
+            for (TagKey<Block> commonTag : COMMON) {
+                var common = BuiltInRegistries.BLOCK.get(commonTag);
+                if (common.isPresent()) {
+                    for (var holder : common.get()) {
+                        ores++;
+                        Block b = holder.value();
+                        if (!t.containsKey(b)) {
+                            Identifier id = BuiltInRegistries.BLOCK.getKey(b);
+                            t.put(b, derive(id.getNamespace(), id.getPath()));
+                        }
                     }
                 }
             }
@@ -122,6 +139,10 @@ public final class Groups {
         sizes = counts;
         oresSize = ores;
         return t;
+    }
+
+    private static TagKey<Block> commonTag(String namespace, String path) {
+        return TagKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath(namespace, path));
     }
 
     private static TagKey<Block> vanillaTag(String path) {

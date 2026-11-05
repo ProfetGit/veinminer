@@ -21,6 +21,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.scores.Objective;
+//? if >=1.20.3
 import net.minecraft.world.scores.ScoreHolder;
 
 /** PRD 13 M4 scenes {@code hooks}, {@code fake}, {@code claims}, {@code conflict} and {@code lag}: who may start a vein and what may stop it. */
@@ -37,8 +38,12 @@ final class Gates {
     private static int score(MinecraftServer s, String holder) {
         Objective o = s.getScoreboard().getObjective("vmtest");
         if (o == null) return -1;
+//? if >=1.20.3 {
         var info = s.getScoreboard().getPlayerScoreInfo(ScoreHolder.forNameOnly(holder), o);
         return info == null ? 0 : info.value();
+//?} else {
+/*        return s.getScoreboard().hasPlayerScore(holder, o) ? s.getScoreboard().getOrCreatePlayerScore(holder, o).getScore() : 0;
+*///?}
     }
 
     // ---- hooks: the add-on API through a real fixture data pack ----
@@ -64,7 +69,7 @@ final class Gates {
         Rig.check("hooks: #veinminer:api/loaded ran after the reload", score(s, "#loaded") >= 1, "loaded " + score(s, "#loaded"));
         Rig.eq("hooks: meta version_id 20000 was set before loaded ran", 20000, score(s, "#version_id"));
         Rig.check("hooks: loaded appended to meta requires", s.getCommandStorage().get(Api.metaId()).get("requires") instanceof ListTag l && l.size() == 1, String.valueOf(s.getCommandStorage().get(Api.metaId())));
-        Rig.check("hooks: meta version is 2.0.0", "2.0.0".equals(s.getCommandStorage().get(Api.metaId()).getStringOr("version", "")), String.valueOf(s.getCommandStorage().get(Api.metaId())));
+        Rig.check("hooks: meta version is 2.0.0", "2.0.0".equals(TestCompat.stringOr(s.getCommandStorage().get(Api.metaId()), "version", "")), String.valueOf(s.getCommandStorage().get(Api.metaId())));
 
         Rig.hold(Rig.pick(1, 0));
         int a = score(s, "#calls_a"), cancelRuns = Api.cancelRuns();

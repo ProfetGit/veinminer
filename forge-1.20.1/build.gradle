@@ -69,6 +69,10 @@ processResources {
     inputs.properties(p)
     inputs.file(buildFile)
     filesMatching('META-INF/mods.toml') { expand(p) }
+    // before 1.21 data packs read tags and functions from the plural folders
+    filesMatching('data/*/tags/block/**') { it.path = it.path.replace('/tags/block/', '/tags/blocks/') }
+    filesMatching('data/*/tags/item/**') { it.path = it.path.replace('/tags/item/', '/tags/items/') }
+    filesMatching('data/*/tags/function/**') { it.path = it.path.replace('/tags/function/', '/tags/functions/') }
     filesMatching('*.mixins.json') { filter { it.replace('"ServerPlayerGameModeMixin"', '"ServerPlayerGameModeMixin",\n    "forge.ForgeChopMixin"').replace('JAVA_21', 'JAVA_17').replace('"required": true,', '"required": true,\n  "refmap": "veinminer.refmap.json",') } }
     filesMatching('pack.mcmeta') {
         filter { line -> line.contains('"min_format"') ? '    "pack_format": 15' : (line.contains('"max_format"') ? null : line) }

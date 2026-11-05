@@ -37,6 +37,31 @@
         {
           "mc": "26.3",
           "loader": "fabric"
+        },
+        {
+          "mc": "26.2",
+          "loader": "fabric"
+        },
+        {
+          "mc": [
+            "1.21.1",
+            "1.20.1"
+          ],
+          "loader": "fabric",
+          "scenes": "smoke"
+        },
+        {
+          "mc": [
+            "26.3",
+            "26.2",
+            "1.21.1",
+            "1.20.1"
+          ],
+          "loader": [
+            "neoforge",
+            "forge"
+          ],
+          "scenes": "smoke"
         }
       ],
       "mp": [
@@ -52,6 +77,31 @@
         {
           "mc": "26.3",
           "loader": "fabric"
+        },
+        {
+          "mc": "26.2",
+          "loader": "fabric"
+        },
+        {
+          "mc": [
+            "1.21.1",
+            "1.20.1"
+          ],
+          "loader": "fabric",
+          "scenes": "smoke"
+        },
+        {
+          "mc": [
+            "26.3",
+            "26.2",
+            "1.21.1",
+            "1.20.1"
+          ],
+          "loader": [
+            "neoforge",
+            "forge"
+          ],
+          "scenes": "smoke"
         }
       ],
       "mp": [

@@ -1,7 +1,11 @@
 package io.github.profetgit.veinminer.server;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.mojang.serialization.JsonOps;
 import io.github.profetgit.veinminer.Veinminer;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -83,6 +87,7 @@ public final class GroupData {
         Veinminer.LOG.info("Veinminer: data groups {}", ids);
     }
 
+//? if >=1.21.2 {
     private static final class Listener extends SimpleJsonResourceReloadListener<GroupDef> {
         Listener() {
             super(GroupDef.CODEC, FileToIdConverter.json("veinminer/group"));
@@ -93,4 +98,19 @@ public final class GroupData {
             GroupData.apply(defs);
         }
     }
+//?} else {
+/*    private static final class Listener extends SimpleJsonResourceReloadListener {
+        Listener() {
+            super(new Gson(), "veinminer/group");
+        }
+
+        @Override
+        protected void apply(Map<Identifier, JsonElement> json, ResourceManager manager, ProfilerFiller profiler) {
+            Map<Identifier, GroupDef> defs = new HashMap<>();
+            json.forEach((id, element) -> GroupDef.CODEC.parse(JsonOps.INSTANCE, element)
+                .resultOrPartial(error -> Veinminer.LOG.error("Veinminer: group {} ignored: {}", id, error)).ifPresent(d -> defs.put(id, d)));
+            GroupData.apply(defs);
+        }
+    }
+*///?}
 }

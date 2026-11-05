@@ -109,7 +109,7 @@ public final class Hooks {
         ItemStack tool = player.getMainHandItem();
         if (!tool.is(TOOLS)) return;
         if (be != null || !player.hasCorrectToolForDrops(state)) return;
-        PENDING.add(new Start(level, player, pos.immutable(), state, group, tool, level.getNextEntityId()));
+        PENDING.add(new Start(level, player, pos.immutable(), state, group, tool, Chain.mark(level)));
     }
 
     /** Runs the queued veins; the end of every server tick, and the self-test after its own break. */

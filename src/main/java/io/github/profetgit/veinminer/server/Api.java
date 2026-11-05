@@ -79,6 +79,7 @@ public final class Api {
         for (VeinminerEvents.BeforeVein v : VeinminerEvents.BEFORE_VEIN.listeners()) {
             if (v.veto(level, player, pos, state, group)) return true;
         }
+//? if >=1.20.3 {
         MinecraftServer server = level.getServer();
         if (server.getFunctions().getTag(CANCEL).isEmpty()) return false;
         cancelRuns++;
@@ -94,6 +95,10 @@ public final class Api {
                 if (ok) cancelled[0] = true;
             });
         server.getCommands().performPrefixedCommand(source, "execute if function #" + CANCEL + " run return 1");
+//?} else {
+/*        // 1.20.1 has neither /return nor /execute if function: a function of the cancel tag cannot veto here, only BEFORE_VEIN listeners
+        boolean[] cancelled = {false};
+*///?}
         return cancelled[0];
     }
 }

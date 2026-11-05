@@ -16,7 +16,18 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
+//? if >=1.21.11 {
 import net.fabricmc.fabric.api.resource.v1.ResourceLoader;
+//?} else {
+/*import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
+import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.PreparableReloadListener;
+import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.util.profiling.ProfilerFiller;
+*///?}
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -30,7 +41,36 @@ public final class FabricEntry implements ModInitializer, Platform {
     public void onInitialize() {
         Veinminer.init(this);
         if (TestBlocks.wanted()) TestBlocks.register();
+//? if >=1.21.11 {
         ResourceLoader.get(PackType.SERVER_DATA).registerReloadListener(GroupData.ID, GroupData.listener());
+//?} else if >=1.21.2 {
+/*        PreparableReloadListener groups = GroupData.listener();
+        ResourceManagerHelper.get(PackType.SERVER_DATA).registerReloadListener(new IdentifiableResourceReloadListener() {
+            @Override
+            public ResourceLocation getFabricId() {
+                return GroupData.ID;
+            }
+
+            @Override
+            public CompletableFuture<Void> reload(PreparationBarrier barrier, ResourceManager manager, Executor backgroundExecutor, Executor gameExecutor) {
+                return groups.reload(barrier, manager, backgroundExecutor, gameExecutor);
+            }
+        });
+*///?} else {
+/*        PreparableReloadListener groups = GroupData.listener();
+        ResourceManagerHelper.get(PackType.SERVER_DATA).registerReloadListener(new IdentifiableResourceReloadListener() {
+            @Override
+            public ResourceLocation getFabricId() {
+                return GroupData.ID;
+            }
+
+            @Override
+            public CompletableFuture<Void> reload(PreparationBarrier barrier, ResourceManager manager, ProfilerFiller prepare,
+                                                  ProfilerFiller apply, Executor backgroundExecutor, Executor gameExecutor) {
+                return groups.reload(barrier, manager, prepare, apply, backgroundExecutor, gameExecutor);
+            }
+        });
+*///?}
         ServerLifecycleEvents.SERVER_STARTED.register(Hooks::serverStarted);
         ServerLifecycleEvents.SERVER_STOPPING.register(Hooks::serverStopping);
         ServerLifecycleEvents.SERVER_STOPPED.register(Hooks::serverStopped);

@@ -35,7 +35,7 @@
     "files": "^Groups\\.java$"
   },
   {
-    "regex": "BuiltInRegistries\\.BLOCK\\.get\\((vanillaTag\\(|TagKey\\.create\\()",
+    "regex": "BuiltInRegistries\\.BLOCK\\.get\\((vanillaTag\\(|TagKey\\.create\\(|tag\\)|commonTag\\)|GroupData\\.NEVER\\))",
     "to": "BuiltInRegistries.BLOCK.getTag($1",
     "when": "<1.21.2",
     "files": "^Groups\\.java$",
@@ -45,7 +45,7 @@
     "regex": "Rig\\.server\\.getRandomSequences\\(\\)\\.reset\\(COAL_SEQUENCE, seed\\)",
     "to": "Rig.level.getRandomSequences().reset(COAL_SEQUENCE, (int) seed, true, true)",
     "when": ">=1.21 <26.1",
-    "files": "^Fair\\.java$"
+    "files": "^(Fair|ChainScene)\\.java$"
   },
   {
     "regex": "Rig\\.level\\.getGameRules\\(\\)\\.set\\(GameRules\\.BLOCK_DROPS, (true|false), Rig\\.server\\)",
@@ -76,12 +76,19 @@
     "regex": "Rig\\.server\\.getRandomSequences\\(\\)\\.reset\\(COAL_SEQUENCE, seed\\)",
     "to": "Rig.level.getRandomSequences().get(COAL_SEQUENCE).setSeed(seed)",
     "when": "<1.21",
-    "files": "^Fair\\.java$"
+    "files": "^(Fair|ChainScene)\\.java$"
   },
   {
     "regex": "ResourceLocation\\.(fromNamespaceAndPath|parse|withDefaultNamespace)\\(",
     "to": "new ResourceLocation(",
     "when": "<1.21"
+  },
+  {
+    "regex": "\\bMath\\.clamp\\(\\(long\\) (Math\\.floor\\(.*\\)), 1, MAX\\);",
+    "to": "(int) Math.max(1L, Math.min((long) MAX, (long) $1));",
+    "when": "<1.20.5",
+    "files": "^Delays\\.java$",
+    "groups": "1"
   },
   {
     "regex": "\\bMath\\.clamp\\(",
@@ -133,5 +140,147 @@
     "from": "BreakBlockEvent",
     "to": "BreakEvent",
     "when": "<1.21.2"
+  },
+  {
+    "from": "AddServerReloadListenersEvent",
+    "to": "AddReloadListenerEvent",
+    "when": "<1.21.2",
+    "files": "^NeoForgeEntry\\.java$"
+  },
+  {
+    "regex": "e\\.addListener\\(GroupData\\.ID, GroupData\\.listener\\(\\)\\)",
+    "to": "e.addListener(GroupData.listener())",
+    "when": "<1.21.2",
+    "files": "^NeoForgeEntry\\.java$"
+  },
+  {
+    "regex": "\\bEntityTypes\\b",
+    "to": "EntityType",
+    "when": "<26.2"
+  },
+  {
+    "regex": "\\.entityTags\\(\\)",
+    "to": ".getTags()",
+    "when": "<26.1"
+  },
+  {
+    "regex": "\\.snapTo\\(",
+    "to": ".moveTo(",
+    "when": "<1.21.5"
+  },
+  {
+    "from": "HASTE",
+    "to": "DIG_SPEED",
+    "when": "<1.21.5"
+  },
+  {
+    "regex": "\\.isSolidRender\\(\\)",
+    "to": ".isSolidRender(net.minecraft.world.level.EmptyBlockGetter.INSTANCE, net.minecraft.core.BlockPos.ZERO)",
+    "when": "<1.21.2"
+  },
+  {
+    "regex": "owner\\.teleportTo\\(Rig\\.level, (.*?), java\\.util\\.Set\\.of\\(\\), 0, 0, false\\);",
+    "to": "owner.teleportTo(Rig.level, $1, 0, 0);",
+    "when": "<1.21.2",
+    "files": "^Crash\\.java$",
+    "groups": "1"
+  },
+  {
+    "regex": "import net\\.minecraft\\.server\\.permissions\\.LevelBasedPermissionSet;\\n",
+    "to": "",
+    "when": "<1.21.11"
+  },
+  {
+    "regex": "\\.withPermission\\(LevelBasedPermissionSet\\.ALL\\)",
+    "to": ".withPermission(0)",
+    "when": "<1.21.11"
+  },
+  {
+    "regex": "\\.withPermission\\(LevelBasedPermissionSet\\.GAMEMASTER\\)",
+    "to": ".withPermission(2)",
+    "when": "<1.21.11"
+  },
+  {
+    "from": "setTransformationInterpolationDuration",
+    "to": "setInterpolationDuration",
+    "when": "<1.20.2"
+  },
+  {
+    "from": "setTransformationInterpolationDelay",
+    "to": "setInterpolationDelay",
+    "when": "<1.20.2"
+  },
+  {
+    "regex": "new DimensionDataStorage\\((.*?), s\\.getFixerUpper\\(\\), s\\.registryAccess\\(\\)\\)",
+    "to": "new DimensionDataStorage($1, s.getFixerUpper())",
+    "when": "<1.20.5",
+    "files": "^Persist\\.java$",
+    "groups": "1"
+  },
+  {
+    "regex": "SavedData\\.Factory",
+    "to": "SavedCodec.Factory",
+    "when": "<1.20.2"
+  },
+  {
+    "regex": "\\.computeIfAbsent\\(TYPE, (\"\\w+\")\\)",
+    "to": ".computeIfAbsent(TYPE.load(), TYPE.create(), $1)",
+    "groups": "1",
+    "when": "<1.20.2"
+  },
+  {
+    "regex": "public CompoundTag save\\(CompoundTag tag, HolderLookup\\.Provider lookup\\)",
+    "to": "public CompoundTag save(CompoundTag tag)",
+    "when": "<1.20.2"
+  },
+  {
+    "regex": "SavedCodec\\.save\\(CODEC, this, tag, lookup\\)",
+    "to": "SavedCodec.save(CODEC, this, tag, null)",
+    "when": "<1.20.2"
+  },
+  {
+    "regex": "DataFixTypes\\.SAVED_DATA_COMMAND_STORAGE",
+    "to": "null",
+    "when": "<1.20.2"
+  },
+  {
+    "regex": "ParticleTypes\\.(SMALL_GUST|DUST_PLUME)\\b",
+    "to": "ParticleTypes.POOF",
+    "when": "<1.20.5"
+  },
+  {
+    "regex": "\\.withCallback\\(\\((\\w+), (\\w+)\\) ->",
+    "to": ".withCallback((cmdCtx, $1, $2) ->",
+    "when": "<1.20.2",
+    "groups": "1,2"
+  },
+  {
+    "regex": "\\.isError\\(\\)",
+    "to": ".result().isEmpty()",
+    "when": "<1.20.5",
+    "files": "^GroupsScene\\.java$"
+  },
+  {
+    "regex": "\\.getOrThrow\\(\\)",
+    "to": ".result().get()",
+    "when": "<1.20.5",
+    "files": "^GroupsScene\\.java$"
+  },
+  {
+    "regex": "server\\.tickRateManager\\(\\)\\.runsNormally\\(\\)",
+    "to": "true",
+    "when": "<1.20.3"
+  },
+  {
+    "regex": "\\.get\\(TYPE, (\"\\w+\")\\)",
+    "to": ".get(TYPE.load(), $1)",
+    "groups": "1",
+    "when": "<1.20.2"
+  },
+  {
+    "regex": "if \\(e\\.getRegistryKey\\(\\)\\.equals\\(Registries\\.BLOCK\\) && TestBlocks\\.wanted\\(\\)\\) TestBlocks\\.register\\(\\);",
+    "to": "if (TestBlocks.wanted()) {\n                e.register(Registries.BLOCK, h -> TestBlocks.registerBlocks((key, block) -> h.register(key.location(), block)));\n                e.register(Registries.ITEM, h -> TestBlocks.registerItems((key, item) -> h.register(key.location(), item)));\n                e.register(Registries.BLOCK_ENTITY_TYPE, h -> TestBlocks.registerEntityTypes((key, type) -> h.register(key.location(), type)));\n            }",
+    "when": "<1.21.2",
+    "files": "^NeoForgeEntry\\.java$"
   }
 ]

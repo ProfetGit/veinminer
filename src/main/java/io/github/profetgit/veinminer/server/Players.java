@@ -58,7 +58,12 @@ public final class Players extends SavedData {
     }
 //?} else {
 /*    private static Players get(MinecraftServer server) {
-        return server.overworld().getDataStorage().computeIfAbsent(TYPE, "veinminer_players");
+        return open(server.overworld().getDataStorage());
+    }
+
+    // reads the opt-out through the given storage (tests open the file with a second one)
+    public static Players open(net.minecraft.world.level.storage.DimensionDataStorage storage) {
+        return storage.computeIfAbsent(TYPE, "veinminer_players");
     }
 *///?}
 

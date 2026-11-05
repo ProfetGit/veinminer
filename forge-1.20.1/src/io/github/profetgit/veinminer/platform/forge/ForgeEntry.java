@@ -2,7 +2,9 @@ package io.github.profetgit.veinminer.platform.forge;
 
 import io.github.profetgit.veinminer.Veinminer;
 import io.github.profetgit.veinminer.platform.Platform;
+import io.github.profetgit.veinminer.selftest.BreakGuard;
 import io.github.profetgit.veinminer.selftest.TestBlocks;
+import io.github.profetgit.veinminer.server.GroupData;
 import io.github.profetgit.veinminer.server.Hooks;
 import java.nio.file.Path;
 import net.minecraft.core.BlockPos;
@@ -11,6 +13,10 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.util.FakePlayer;
+import net.minecraftforge.common.util.FakePlayerFactory;
+import net.minecraftforge.event.AddReloadListenerEvent;
+import net.minecraftforge.event.OnDatapackSyncEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.TagsUpdatedEvent;
 import net.minecraftforge.event.TickEvent;
@@ -18,6 +24,7 @@ import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.event.server.ServerStartedEvent;
 import net.minecraftforge.event.server.ServerStoppedEvent;
+import net.minecraftforge.event.server.ServerStoppingEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
@@ -31,12 +38,30 @@ public final class ForgeEntry implements Platform {
     public ForgeEntry() {
         Veinminer.init(this);
         IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
+        // each registry takes its entries during its own event
         modBus.addListener((RegisterEvent e) -> {
-            if (e.getRegistryKey().equals(Registries.BLOCK) && TestBlocks.wanted()) TestBlocks.register();
+            if (!TestBlocks.wanted()) return;
+            e.register(Registries.BLOCK, h -> TestBlocks.registerBlocks((key, block) -> h.register(key.location(), block)));
+            e.register(Registries.ITEM, h -> TestBlocks.registerItems((key, item) -> h.register(key.location(), item)));
+            e.register(Registries.BLOCK_ENTITY_TYPE, h -> TestBlocks.registerEntityTypes((key, type) -> h.register(key.location(), type)));
         });
         IEventBus bus = MinecraftForge.EVENT_BUS;
+        bus.addListener((AddReloadListenerEvent e) -> e.addListener(GroupData.listener()));
         bus.addListener((ServerStartedEvent e) -> Hooks.serverStarted(e.getServer()));
+        bus.addListener((ServerStoppingEvent e) -> Hooks.serverStopping(e.getServer()));
         bus.addListener((ServerStoppedEvent e) -> Hooks.serverStopped(e.getServer()));
+        // a null player is the sync after /reload (a join syncs to that player only); it comes before the new functions
+        bus.addListener((OnDatapackSyncEvent e) -> {
+            if (e.getPlayer() == null) Hooks.dataReloadedSoon();
+        });
+        bus.addListener((PlayerEvent.PlayerLoggedInEvent e) -> {
+            if (e.getEntity() instanceof ServerPlayer p) Hooks.join(p.server, p);
+        });
+        if (BreakGuard.wanted()) {
+            bus.addListener((BlockEvent.BreakEvent e) -> {
+                if (e.getLevel() instanceof ServerLevel l && !BreakGuard.allows(l, e.getPos())) e.setCanceled(true);
+            });
+        }
         bus.addListener((TickEvent.ServerTickEvent e) -> {
             if (e.phase == TickEvent.Phase.END) Hooks.serverTickEnd(e.getServer());
         });
@@ -67,10 +92,14 @@ public final class ForgeEntry implements Platform {
         return ModList.get().getModContainerById(modId).map(m -> m.getModInfo().getVersion().toString()).orElse(null);
     }
 
-    // Forge has no FakePlayer class; the exact-class check in the caller covers vanilla's own fakes
     @Override
     public boolean isFakePlayer(ServerPlayer player) {
-        return false;
+        return player instanceof FakePlayer;
+    }
+
+    @Override
+    public ServerPlayer testFakePlayer(ServerLevel level) {
+        return FakePlayerFactory.getMinecraft(level);
     }
 
     // Forge's own hook checks cancellation; post returns true when a listener cancelled

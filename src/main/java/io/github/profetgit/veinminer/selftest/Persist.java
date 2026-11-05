@@ -20,7 +20,11 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.permissions.LevelBasedPermissionSet;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.storage.LevelResource;
+//? if >=26.1 {
 import net.minecraft.world.level.storage.SavedDataStorage;
+//?} else {
+/*import net.minecraft.world.level.storage.DimensionDataStorage;
+*///?}
 
 /** PRD 13 M4 scenes {@code players}, {@code config_reload} and {@code migrate}: what survives a restart, a reload and the 1.3.x pack. */
 final class Persist {
@@ -62,19 +66,33 @@ final class Persist {
 
     /** Saves, then reads the file with a second storage over the same folder, as a restart would. */
     private static void reopened(MinecraftServer s, String name, boolean expectOff) {
+//? if >=26.1 {
         s.overworld().getDataStorage().saveAndJoin();
+//?} else {
+/*        s.overworld().getDataStorage().save();
+*///?}
         Path file = null;
         try (var walk = Files.walk(s.getWorldPath(LevelResource.ROOT))) {
             for (Path p : (Iterable<Path>) walk::iterator) {
+//? if >=26.1 {
                 if (p.endsWith(Path.of("veinminer", "players.dat"))) file = p;
+//?} else {
+/*                if (p.endsWith("veinminer_players.dat")) file = p;
+*///?}
             }
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
         Rig.check("players (" + name + "): data/veinminer/players.dat exists", file != null, "no file");
         if (file == null) return;
+//? if >=26.1 {
         try (SavedDataStorage fresh = new SavedDataStorage(file.getParent().getParent(), s.getFixerUpper(), s.registryAccess())) {
             Players read = fresh.computeIfAbsent(Players.type());
+//?} else {
+/*        {
+            DimensionDataStorage fresh = new DimensionDataStorage(file.getParent().toFile(), s.getFixerUpper(), s.registryAccess());
+            Players read = Players.open(fresh);
+*///?}
             Rig.check("players (" + name + "): a fresh storage reads the opt-out " + (expectOff ? "in" : "out"), read.contains(Rig.player.getUUID()) == expectOff,
                 "contains " + read.contains(Rig.player.getUUID()));
         }
@@ -203,9 +221,9 @@ final class Persist {
         boolean storages = true;
         for (String id : new String[]{"groups", "menu", "op", "anim"}) storages &= s.getCommandStorage().get(Identifier.fromNamespaceAndPath("veinminer", id)).isEmpty();
         Rig.check("migrate: the pack's storages are empty", storages, "not empty");
-        Rig.check("migrate: the meta version was dropped for Api.load", s.getCommandStorage().get(Api.metaId()).getIntOr("version_id", -1) == -1, s.getCommandStorage().get(Api.metaId()).toString());
+        Rig.check("migrate: the meta version was dropped for Api.load", TestCompat.intOr(s.getCommandStorage().get(Api.metaId()), "version_id", -1) == -1, s.getCommandStorage().get(Api.metaId()).toString());
         Hooks.dataReloaded(s, true);
-        Rig.eq("migrate: Api.load then wrote version_id 20000", 20000, s.getCommandStorage().get(Api.metaId()).getIntOr("version_id", -1));
+        Rig.eq("migrate: Api.load then wrote version_id 20000", 20000, TestCompat.intOr(s.getCommandStorage().get(Api.metaId()), "version_id", -1));
         Rig.check("migrate: the op was told in chat", told.stream().anyMatch(t -> t.contains("replaced the Veinminer 1.3 data pack") && t.contains(PACK)), told.toString());
         Rig.check("migrate: the pack folder is still there", Files.isDirectory(worldPack(s)), "deleted");
         M4.park();

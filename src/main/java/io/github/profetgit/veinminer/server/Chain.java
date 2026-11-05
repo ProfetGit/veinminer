@@ -331,6 +331,15 @@ public final class Chain {
         n.stand = Fx.stand(this, level, st, n.pos, n.offset);
     }
 
+    /** An entity id that every entity created after this call is above (ids are per level from 1.21.2, one global counter before). */
+    public static int mark(ServerLevel level) {
+//? if >=1.21.2 {
+        return level.getNextEntityId();
+//?} else {
+/*        return new ItemEntity(net.minecraft.world.entity.EntityType.ITEM, level).getId();
+*///?}
+    }
+
     private boolean hollow(int x, int y, int z) {
         BlockPos p = new BlockPos(x, y, z);
         return !level.isOutsideBuildHeight(p) && level.hasChunkAt(p) && level.getBlockState(p).is(HOLLOW);
@@ -351,7 +360,7 @@ public final class Chain {
         }
         if (n.stand == null) prep(n);
         if (n.state == null) n.state = level.getBlockState(n.pos);
-        int mark = level.getNextEntityId();
+        int mark = mark(level);
         Vein.Result r;
         quiet = true;
         try {

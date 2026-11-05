@@ -43,6 +43,7 @@ java {
 tasks.withType<JavaCompile>().configureEach {
     options.release = javaVer
     options.encoding = "UTF-8"
+    options.compilerArgs.addAll(listOf("-Xmaxerrs", "2000"))
 }
 
 tasks.test {
@@ -60,11 +61,18 @@ tasks.processResources {
         "homepage" to project.property("mod.homepage"),
         "fabric_loader" to project.property("deps.fabric_loader"),
         "mc_range" to ((findProperty("deps.mc_range") as String?) ?: "~$mc"),
-        "java" to "21",
+        "java" to javaVer.toString(),
     )
     inputs.properties(props)
     filesMatching("fabric.mod.json") { expand(props) }
     if (javaVer < 21) filesMatching("*.mixins.json") { filter { it.replace("JAVA_21", "JAVA_$javaVer") } }
+    // before 1.21 data packs read tags and functions from the plural folders
+    inputs.property("pluralTags", mc.startsWith("1.20"))
+    if (mc.startsWith("1.20")) {
+        filesMatching("data/*/tags/block/**") { path = path.replace("/tags/block/", "/tags/blocks/") }
+        filesMatching("data/*/tags/item/**") { path = path.replace("/tags/item/", "/tags/items/") }
+        filesMatching("data/*/tags/function/**") { path = path.replace("/tags/function/", "/tags/functions/") }
+    }
 }
 
 tasks.named<Jar>("jar") {

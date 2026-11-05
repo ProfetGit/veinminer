@@ -18,8 +18,10 @@ public interface DisplayAccess {
     @Invoker("setTransformationInterpolationDelay")
     void veinminer$setInterpolationDelay(int ticks);
 
+//? if >=1.20.2 {
     @Invoker("setPosRotInterpolationDuration")
     void veinminer$setTeleportDuration(int duration);
+//?}
 
     @Invoker("createTransformation")
     static Transformation veinminer$createTransformation(net.minecraft.network.syncher.SynchedEntityData data) {

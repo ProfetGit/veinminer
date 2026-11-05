@@ -1,8 +1,11 @@
 package io.github.profetgit.veinminer.selftest;
 
 import io.github.profetgit.veinminer.Veinminer;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.function.BiConsumer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -47,26 +50,45 @@ public final class TestBlocks {
     }
 
     public static void register() {
-        tin = ore("test_ore_tin", false);
-        zinc = ore("test_ore_zinc", false);
-        odd = ore("test_ore_odd", false);
-        be = ore("test_ore_be", true);
-        ext = ore("test_ore_ext", false);
-        ga = ore("test_ore_ga", false);
-        win = ore("test_ore_win", false);
-        cap = ore("test_ore_cap", false);
-        never = ore("test_ore_never", false);
-        custom = ore("test_ore_custom", false);
-        beType = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Identifier.fromNamespaceAndPath(Veinminer.ID, "test_ore_be"),
-            new BlockEntityType<>(TestBe::new, Set.of(be)));
+        registerBlocks((key, block) -> Registry.register(BuiltInRegistries.BLOCK, key, block));
+        registerItems((key, item) -> Registry.register(BuiltInRegistries.ITEM, key, item));
+        registerEntityTypes((key, type) -> Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, key, type));
     }
 
-    private static Block ore(String name, boolean entity) {
+    /** The three registrations apart, so a loader that only accepts a registry's entries during its own RegisterEvent (Forge 47) can feed each one. */
+    public static void registerBlocks(BiConsumer<ResourceKey<Block>, Block> sink) {
+        tin = ore(sink, "test_ore_tin", false);
+        zinc = ore(sink, "test_ore_zinc", false);
+        odd = ore(sink, "test_ore_odd", false);
+        be = ore(sink, "test_ore_be", true);
+        ext = ore(sink, "test_ore_ext", false);
+        ga = ore(sink, "test_ore_ga", false);
+        win = ore(sink, "test_ore_win", false);
+        cap = ore(sink, "test_ore_cap", false);
+        never = ore(sink, "test_ore_never", false);
+        custom = ore(sink, "test_ore_custom", false);
+    }
+
+    public static void registerItems(BiConsumer<ResourceKey<Item>, Item> sink) {
+        for (Map.Entry<ResourceKey<Block>, Block> e : BLOCKS.entrySet()) {
+            ResourceKey<Item> itemKey = ResourceKey.create(Registries.ITEM, e.getKey().identifier());
+            sink.accept(itemKey, new BlockItem(e.getValue(), new Item.Properties().setId(itemKey).useBlockDescriptionPrefix()));
+        }
+    }
+
+    public static void registerEntityTypes(BiConsumer<ResourceKey<BlockEntityType<?>>, BlockEntityType<?>> sink) {
+        beType = new BlockEntityType<>(TestBe::new, Set.of(be));
+        sink.accept(ResourceKey.create(Registries.BLOCK_ENTITY_TYPE, Identifier.fromNamespaceAndPath(Veinminer.ID, "test_ore_be")), beType);
+    }
+
+    private static final Map<ResourceKey<Block>, Block> BLOCKS = new LinkedHashMap<>();
+
+    private static Block ore(BiConsumer<ResourceKey<Block>, Block> sink, String name, boolean entity) {
         ResourceKey<Block> key = ResourceKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath(Veinminer.ID, name));
         BlockBehaviour.Properties props = BlockBehaviour.Properties.of().strength(3f).requiresCorrectToolForDrops().setId(key);
-        Block block = Registry.register(BuiltInRegistries.BLOCK, key, entity ? new EntityOre(props) : name.equals("test_ore_custom") ? new CustomOre(props) : new Ore(props));
-        ResourceKey<Item> itemKey = ResourceKey.create(Registries.ITEM, key.identifier());
-        Registry.register(BuiltInRegistries.ITEM, itemKey, new BlockItem(block, new Item.Properties().setId(itemKey).useBlockDescriptionPrefix()));
+        Block block = entity ? new EntityOre(props) : name.equals("test_ore_custom") ? new CustomOre(props) : new Ore(props);
+        sink.accept(key, block);
+        BLOCKS.put(key, block);
         return block;
     }
 
