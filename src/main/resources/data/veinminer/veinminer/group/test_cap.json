@@ -1,0 +1,5 @@
+{
+  "blocks": "#veinminer:test/capped",
+  "max_blocks": 5,
+  "xp_toggle": null
+}

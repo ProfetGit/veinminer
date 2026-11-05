@@ -27,6 +27,14 @@ final class Scenarios {
                 .until("chain frames written", 600, mc -> !SelfTest.capturing())
                 .server(ChainScene::realCheck);
         }
+        if (only.equals("all") || only.contains("groups")) {
+            s.server(GroupsScene::run)
+                .server(GroupsScene::startReload)
+                .until("the data reload", 1200, mc -> GroupsScene.reloaded())
+                .waitTicks(5)
+                .server(GroupsScene::afterReload);
+        }
+        if (only.equals("all") || only.contains("blockentity")) s.server(BlockEntityScene::run);
         return s;
     }
 

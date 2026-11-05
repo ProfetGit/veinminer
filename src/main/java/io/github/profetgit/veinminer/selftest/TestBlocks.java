@@ -11,7 +11,12 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
@@ -22,12 +27,15 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.jspecify.annotations.Nullable;
 
 /**
- * PRD 12 {@code modded}: ore-like blocks that drop themselves (in code, not a loot table), registered only for a self-test run that names the scene
+ * PRD 12 {@code modded} and M3 {@code groups}/{@code blockentity}: ore-like blocks that drop themselves (in code, not a loot table), registered only for a self-test run that names the scene
  * (a normal game never sees them). Tagged by the mod's own data: tin and the block-entity ore in {@code c:ores/tin},
  * zinc in {@code c:ores/zinc}, odd only in {@code c:ores}.
  */
 public final class TestBlocks {
-    public static Block tin, zinc, odd, be;
+    public static Block tin, zinc, odd, be, ext, ga, win, cap, never, custom;
+    /** Times {@link CustomOre#playerDestroy} ran, and the bonus item it drops on top of the ore itself. */
+    public static int customBreaks;
+    public static final Item CUSTOM_BONUS = Items.AMETHYST_SHARD;
     static BlockEntityType<TestBe> beType;
 
     private TestBlocks() {}
@@ -35,7 +43,7 @@ public final class TestBlocks {
     public static boolean wanted() {
         if (System.getProperty("veinminer.selftest") == null) return false;
         String scene = System.getProperty("veinminer.selftest.scene", "all");
-        return scene.equals("all") || scene.contains("modded");
+        return scene.equals("all") || scene.contains("modded") || scene.contains("groups") || scene.contains("blockentity");
     }
 
     public static void register() {
@@ -43,6 +51,12 @@ public final class TestBlocks {
         zinc = ore("test_ore_zinc", false);
         odd = ore("test_ore_odd", false);
         be = ore("test_ore_be", true);
+        ext = ore("test_ore_ext", false);
+        ga = ore("test_ore_ga", false);
+        win = ore("test_ore_win", false);
+        cap = ore("test_ore_cap", false);
+        never = ore("test_ore_never", false);
+        custom = ore("test_ore_custom", false);
         beType = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Identifier.fromNamespaceAndPath(Veinminer.ID, "test_ore_be"),
             new BlockEntityType<>(TestBe::new, Set.of(be)));
     }
@@ -50,7 +64,7 @@ public final class TestBlocks {
     private static Block ore(String name, boolean entity) {
         ResourceKey<Block> key = ResourceKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath(Veinminer.ID, name));
         BlockBehaviour.Properties props = BlockBehaviour.Properties.of().strength(3f).requiresCorrectToolForDrops().setId(key);
-        Block block = Registry.register(BuiltInRegistries.BLOCK, key, entity ? new EntityOre(props) : new Ore(props));
+        Block block = Registry.register(BuiltInRegistries.BLOCK, key, entity ? new EntityOre(props) : name.equals("test_ore_custom") ? new CustomOre(props) : new Ore(props));
         ResourceKey<Item> itemKey = ResourceKey.create(Registries.ITEM, key.identifier());
         Registry.register(BuiltInRegistries.ITEM, itemKey, new BlockItem(block, new Item.Properties().setId(itemKey).useBlockDescriptionPrefix()));
         return block;
@@ -65,6 +79,24 @@ public final class TestBlocks {
         @Override
         protected List<ItemStack> getDrops(BlockState state, LootParams.Builder params) {
             return List.of(new ItemStack(this));
+        }
+    }
+
+    /** A block with its own break behaviour: {@code playerDestroy} counts itself and drops a bonus item besides the ore. */
+    private static final class CustomOre extends Ore {
+        CustomOre(BlockBehaviour.Properties props) {
+            super(props);
+        }
+
+        @Override
+//? if >=26.3 {
+        public void playerDestroy(ServerLevel level, ServerPlayer player, BlockPos pos, BlockState state, @Nullable BlockEntity blockEntity, ItemStack destroyedWith) {
+//?} else {
+/*        public void playerDestroy(Level level, Player player, BlockPos pos, BlockState state, @Nullable BlockEntity blockEntity, ItemStack destroyedWith) {
+*///?}
+            customBreaks++;
+            popResource(level, pos, new ItemStack(CUSTOM_BONUS));
+            super.playerDestroy(level, player, pos, state, blockEntity, destroyedWith);
         }
     }
 

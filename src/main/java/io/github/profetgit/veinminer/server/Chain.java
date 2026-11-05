@@ -149,7 +149,7 @@ public final class Chain {
     /** Scans from the struck cell and starts the chain; null when the vein has no other block. */
     public static Chain start(ServerLevel level, ServerPlayer player, BlockPos origin, String group, ItemStack tool) {
         Config.Values cfg = Config.get();
-        List<BlockPos> cells = Vein.scan(level, player.position(), origin, group, cfg.maxBlocks() - 1, cfg.visitCap(), cfg.diagonal());
+        List<BlockPos> cells = Vein.scan(level, player.position(), origin, group, GroupData.cap(group, cfg.maxBlocks()) - 1, cfg.visitCap(), cfg.diagonal());
         if (cells.isEmpty()) return null;
         Chain c = new Chain(level, player, tool, group, origin, cells, cfg.drops() == 1);
         ACTIVE.add(c);
