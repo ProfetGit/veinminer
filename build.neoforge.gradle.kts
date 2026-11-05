@@ -76,3 +76,8 @@ tasks.processResources {
 tasks.named<Jar>("jar") {
     from(rootProject.file("LICENSE"))
 }
+
+// moddev keeps Minecraft off the test classpath, and the unit tests use TagKey and DataResult: they run on the Fabric
+// target of the same sources (:26.3-fabric:test)
+tasks.named("compileTestJava") { enabled = false }
+tasks.test { enabled = false }
