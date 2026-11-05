@@ -1,0 +1,20 @@
+modLoader = "javafml"
+loaderVersion = "[0,)"
+license = "All Rights Reserved"
+
+[[mods]]
+modId = "veinminer"
+version = "${version}"
+displayName = "${name}"
+authors = "${author}"
+displayURL = "${homepage}"
+description = '''${description}'''
+# vanilla clients join a server with Veinminer, and a client with Veinminer joins any server
+displayTest = "IGNORE_ALL_VERSION"
+
+[[dependencies.veinminer]]
+modId = "minecraft"
+mandatory = true
+versionRange = "[${mc},${mc_next})"
+ordering = "NONE"
+side = "BOTH"
