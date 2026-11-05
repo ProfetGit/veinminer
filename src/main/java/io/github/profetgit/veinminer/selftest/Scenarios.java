@@ -28,6 +28,7 @@ final class Scenarios {
                 .until("chain frames written", 600, mc -> !SelfTest.capturing())
                 .server(ChainScene::realCheck);
         }
+        if (only.contains("real")) s.server(RealMods::run).waitTicks(20);
         if (only.contains("perf")) {
             s.server(Perf::warm).waitTicks(20);
             for (int i = 0; i < 3; i++) {
