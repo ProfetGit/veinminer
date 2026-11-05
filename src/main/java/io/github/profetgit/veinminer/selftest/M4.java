@@ -19,7 +19,20 @@ import net.minecraft.world.level.block.Blocks;
 final class M4 {
     private M4() {}
 
+    /**
+     * The scenes {@code hooks} and {@code migrate} load fixture packs written in the 26.x data format (folder names, pack
+     * metadata): before 26.1 they are not run, and the mod's function-tag and migration paths there are untested.
+     */
+    static boolean packFixtures() {
+//? if >=26.1 {
+        return true;
+//?} else {
+/*        return false;
+*///?}
+    }
+
     static boolean want(String scenes, String name) {
+        if ((name.equals("hooks") || name.equals("migrate")) && !packFixtures()) return false;
         if (scenes.equals("all")) return true;
         for (String s : scenes.split(",")) if (s.trim().equals(name)) return true;
         return false;

@@ -178,9 +178,19 @@ public final class Chain {
         return c;
     }
 
+    /** Nanoseconds {@link #tickAll} took in each of the last 256 ticks that ran a chain (scene {@code perf}); {@link #seq} counts them. */
+    public static final long[] NANOS = new long[256];
+    public static int seq;
+
     /** One server tick of every running chain; nothing at all when none runs. */
     public static void tickAll() {
         if (ACTIVE.isEmpty()) return;
+        long t0 = System.nanoTime();
+        tickChains();
+        NANOS[seq++ & 255] = System.nanoTime() - t0;
+    }
+
+    private static void tickChains() {
         for (int i = 0; i < ACTIVE.size();) {
             Chain c = ACTIVE.get(i);
             try {

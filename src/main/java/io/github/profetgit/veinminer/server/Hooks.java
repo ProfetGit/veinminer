@@ -96,6 +96,15 @@ public final class Hooks {
      * once that break is finished. Gates are in PRD 5.1 order, cheapest first.
      */
     public static void blockBroken(ServerLevel level, ServerPlayer player, BlockPos pos, BlockState state, @Nullable BlockEntity be) {
+        blockBroken(level, player, pos, state, be, -1);
+    }
+
+    /**
+     * {@code mark} is the entity-id mark taken before the struck block's loot exists: the loader entries whose event fires
+     * after the break (NeoForge and Forge, through a mixin at the return of {@code destroyBlock}) take it at the head and pass
+     * it here; -1 takes it now, for Fabric's event that fires inside the break before the loot.
+     */
+    public static void blockBroken(ServerLevel level, ServerPlayer player, BlockPos pos, BlockState state, @Nullable BlockEntity be, int mark) {
         if (Vein.running()) return;
         String group = Groups.of(state.getBlock());
         if (group == null) return;
@@ -109,7 +118,7 @@ public final class Hooks {
         ItemStack tool = player.getMainHandItem();
         if (!tool.is(TOOLS)) return;
         if (be != null || !player.hasCorrectToolForDrops(state)) return;
-        PENDING.add(new Start(level, player, pos.immutable(), state, group, tool, Chain.mark(level)));
+        PENDING.add(new Start(level, player, pos.immutable(), state, group, tool, mark >= 0 ? mark : Chain.mark(level)));
     }
 
     /** Runs the queued veins; the end of every server tick, and the self-test after its own break. */

@@ -71,17 +71,33 @@ final class Persist {
 //?} else {
 /*        s.overworld().getDataStorage().save();
 *///?}
+        try {
+            Thread.sleep(400);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
         Path file = null;
-        try (var walk = Files.walk(s.getWorldPath(LevelResource.ROOT))) {
-            for (Path p : (Iterable<Path>) walk::iterator) {
-//? if >=26.1 {
-                if (p.endsWith(Path.of("veinminer", "players.dat"))) file = p;
-//?} else {
-/*                if (p.endsWith("veinminer_players.dat")) file = p;
-*///?}
+        // NeoForge 21.1 writes the file a moment after save() returns: wait, and look again for up to two seconds
+        for (int tries = 0; tries < 20 && file == null; tries++) {
+            if (tries > 0) {
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    break;
+                }
             }
-        } catch (IOException e) {
-            throw new IllegalStateException(e);
+            try (var walk = Files.walk(s.getWorldPath(LevelResource.ROOT))) {
+                for (Path p : (Iterable<Path>) walk::iterator) {
+//? if >=26.1 {
+                    if (p.endsWith(Path.of("veinminer", "players.dat"))) file = p;
+//?} else {
+/*                    if (p.endsWith("veinminer_players.dat")) file = p;
+*///?}
+                }
+            } catch (IOException e) {
+                throw new IllegalStateException(e);
+            }
         }
         Rig.check("players (" + name + "): data/veinminer/players.dat exists", file != null, "no file");
         if (file == null) return;

@@ -1,5 +1,7 @@
 package io.github.profetgit.veinminer.mixin.forge;
 
+import io.github.profetgit.veinminer.server.Chain;
+import io.github.profetgit.veinminer.server.Groups;
 import io.github.profetgit.veinminer.server.Hooks;
 import java.util.ArrayDeque;
 import net.minecraft.core.BlockPos;
@@ -30,12 +32,13 @@ abstract class ForgeChopMixin {
 
     @Inject(method = "destroyBlock", at = @At("HEAD"))
     private void veinminer$before(BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
-        veinminer$broken.push(new Object[] {level.getBlockState(pos), level.getBlockEntity(pos)});
+        BlockState state = level.getBlockState(pos);
+        veinminer$broken.push(new Object[] {state, level.getBlockEntity(pos), Groups.of(state.getBlock()) != null ? Chain.mark(level) : -1});
     }
 
     @Inject(method = "destroyBlock", at = @At("RETURN"))
     private void veinminer$after(BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
         Object[] b = veinminer$broken.poll();
-        if (b != null && cir.getReturnValueZ() && level.getBlockState(pos) != b[0]) Hooks.blockBroken(level, player, pos, (BlockState) b[0], (BlockEntity) b[1]);
+        if (b != null && cir.getReturnValueZ() && level.getBlockState(pos) != b[0]) Hooks.blockBroken(level, player, pos, (BlockState) b[0], (BlockEntity) b[1], (Integer) b[2]);
     }
 }

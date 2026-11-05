@@ -35,8 +35,12 @@ import net.minecraftforge.registries.RegisterEvent;
 public final class ForgeEntry implements Platform {
     public ForgeEntry(FMLJavaModLoadingContext context) {
         Veinminer.init(this);
+        // Forge's registries are locked outside their own events and take entries through the event's helper
         RegisterEvent.getBus(context.getModBusGroup()).addListener(e -> {
-            if (e.getRegistryKey().equals(Registries.BLOCK) && TestBlocks.wanted()) TestBlocks.register();
+            if (!TestBlocks.wanted()) return;
+            e.register(Registries.BLOCK, h -> TestBlocks.registerBlocks((key, block) -> h.register(key.identifier(), block)));
+            e.register(Registries.ITEM, h -> TestBlocks.registerItems((key, item) -> h.register(key.identifier(), item)));
+            e.register(Registries.BLOCK_ENTITY_TYPE, h -> TestBlocks.registerEntityTypes((key, type) -> h.register(key.identifier(), type)));
         });
         AddReloadListenerEvent.BUS.addListener(e -> e.addListener(GroupData.listener()));
         ServerStartedEvent.BUS.addListener(e -> Hooks.serverStarted(e.getServer()));
@@ -53,6 +57,14 @@ public final class ForgeEntry implements Platform {
         PlayerEvent.PlayerLoggedOutEvent.BUS.addListener(e -> {
             if (e.getEntity() instanceof ServerPlayer p) Hooks.leave(p);
         });
+        // the claims stand-in of the self-test: a listener that returns true cancels the break
+        if (BreakGuard.wanted()) {
+            BlockEvent.BreakEvent.BUS.addListener(e -> {
+                if (!(e.getLevel() instanceof ServerLevel l) || BreakGuard.allows(l, e.getPos())) return false;
+                e.setResult(Result.DENY);
+                return true;
+            });
+        }
         TagsUpdatedEvent.BUS.addListener(e -> Hooks.tagsReloaded());
         RegisterCommandsEvent.BUS.addListener(e -> Hooks.commands(e.getDispatcher()));
     }

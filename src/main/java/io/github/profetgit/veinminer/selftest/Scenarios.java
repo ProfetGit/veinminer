@@ -28,6 +28,13 @@ final class Scenarios {
                 .until("chain frames written", 600, mc -> !SelfTest.capturing())
                 .server(ChainScene::realCheck);
         }
+        if (only.contains("perf")) {
+            s.server(Perf::warm).waitTicks(20);
+            for (int i = 0; i < 3; i++) {
+                s.server(Perf::startRun).until("the perf chain to end", 800, mc -> Perf.done()).waitTicks(10).server(Perf::endRun).waitTicks(10);
+            }
+            s.server(Perf::report);
+        }
         if (only.contains("chainview")) {
             for (String subject : ChainView.SUBJECTS) {
                 if (only.equals("chainview") || only.contains(subject)) chainView(s, subject);
