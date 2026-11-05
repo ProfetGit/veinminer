@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -36,7 +37,7 @@ final class Demo {
                 for (int z = 0; z < 5; z++) set(o.offset(x, y, z), Blocks.STONE);
             }
         }
-        Block vib = BuiltInRegistries.BLOCK.get(new net.minecraft.resources.ResourceLocation("immersiveores", "vibranium_ore"));
+        Block vib = BuiltInRegistries.BLOCK.getOptional(Identifier.fromNamespaceAndPath("immersiveores", "vibranium_ore")).orElse(Blocks.AIR);
         vein(o, 3.5, 4.5, Blocks.COAL_ORE, 30);
         vein(o, 10.5, 4.5, Blocks.IRON_ORE, 12);
         vein(o, 17.5, 4.5, Blocks.COAL_ORE, 80);
@@ -51,7 +52,6 @@ final class Demo {
         inv.setItem(2, Rig.pick(1, 0));
         inv.setItem(3, new ItemStack(Items.NETHERITE_PICKAXE));
         inv.setItem(4, new ItemStack(Items.TORCH, 64));
-        inv.selected = 0;
         Rig.server.getCommands().performPrefixedCommand(Rig.player.createCommandSourceStack().withSuppressedOutput(),
             "setworldspawn " + (o.getX() + 10) + " " + (o.getY() + 1) + " " + (o.getZ() + 12));
         Rig.server.getCommands().performPrefixedCommand(Rig.player.createCommandSourceStack().withSuppressedOutput(), "time set noon");

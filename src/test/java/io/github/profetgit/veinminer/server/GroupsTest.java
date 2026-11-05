@@ -5,6 +5,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 
 class GroupsTest {
+//? if <1.21 {
+/*    static {
+        net.minecraft.SharedConstants.tryDetectVersion();
+        net.minecraft.server.Bootstrap.bootStrap();
+    }
+
+*///?}
     @Test
     void derivesNamesFromUntaggedOres() {
         assertEquals("mymod:tin", Groups.derive("mymod", "tin_ore"));

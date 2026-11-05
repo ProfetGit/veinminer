@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -63,7 +64,7 @@ final class RealMods {
     private static void ownTool(Block ore, String id) {
         var key = BuiltInRegistries.BLOCK.getKey(ore);
         String path = key.getPath().replace("_ore", "") + "_pickaxe";
-        var item = BuiltInRegistries.ITEM.get(new net.minecraft.resources.ResourceLocation(key.getNamespace(), path));
+        var item = BuiltInRegistries.ITEM.getOptional(Identifier.fromNamespaceAndPath(key.getNamespace(), path)).orElse(Items.AIR);
         if (item == Items.AIR) {
             SelfTest.record("real: " + id + " has no pickaxe named " + key.getNamespace() + ":" + path, true, "skipped");
             return;

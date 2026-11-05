@@ -9,6 +9,13 @@ import com.mojang.serialization.DataResult;
 import org.junit.jupiter.api.Test;
 
 class GroupDefTest {
+//? if <1.21 {
+/*    static {
+        net.minecraft.SharedConstants.tryDetectVersion();
+        net.minecraft.server.Bootstrap.bootStrap();
+    }
+
+*///?}
     private static DataResult<GroupDef> parse(String json) {
         return GroupDef.parse(JsonParser.parseString(json));
     }
