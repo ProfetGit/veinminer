@@ -1,9 +1,11 @@
 package io.github.profetgit.veinminer.server;
 
+import io.github.profetgit.veinminer.api.VeinminerEvents;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.function.BiPredicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -27,6 +29,11 @@ public final class Vein {
     private static final int[][] FACES = {{1, 0, 0}, {-1, 0, 0}, {0, 1, 0}, {0, -1, 0}, {0, 0, 1}, {0, 0, -1}};
     private static final int[][] ALL = neighbours();
 
+    /** A vein reaches at most this many blocks from the struck block in each axis (PRD 7). */
+    public static final int REACH = 16;
+    /** Tests: cells this says are unloaded count as unloaded, so a chunk unload mid-chain can be staged. */
+    public static volatile BiPredicate<ServerLevel, BlockPos> unloaded;
+
     private static boolean running;
 
     private Vein() {}
@@ -40,6 +47,13 @@ public final class Vein {
             }
         }
         return o;
+    }
+
+    /** True when the cell is inside the build height and its chunk is loaded; never loads a chunk. */
+    public static boolean loaded(ServerLevel level, BlockPos pos) {
+        if (level.isOutsideBuildHeight(pos) || !level.hasChunkAt(pos)) return false;
+        BiPredicate<ServerLevel, BlockPos> u = unloaded;
+        return u == null || !u.test(level, pos);
     }
 
     /** True while a vein is breaking blocks: those breaks never start another vein. */
@@ -68,7 +82,8 @@ public final class Vein {
                     BlockPos q = p.offset(o[0], o[1], o[2]);
                     if (!visited.add(q.asLong())) continue;
                     seen++;
-                    if (level.isOutsideBuildHeight(q) || !level.hasChunkAt(q)) continue;
+                    if (Math.abs(q.getX() - origin.getX()) > REACH || Math.abs(q.getY() - origin.getY()) > REACH || Math.abs(q.getZ() - origin.getZ()) > REACH) continue;
+                    if (!loaded(level, q)) continue;
                     BlockState s = level.getBlockState(q);
                     if (s.hasBlockEntity() || !group.equals(Groups.of(s.getBlock())) || Chain.claimed(level, q)) continue;
                     found.add(q);
@@ -91,7 +106,7 @@ public final class Vein {
         Result stop = null;
         running = true;
         try {
-            for (BlockPos pos : scan(level, player.position(), origin, group, cfg.maxBlocks() - 1, cfg.visitCap(), cfg.diagonal())) {
+            for (BlockPos pos : scan(level, player.position(), origin, group, Lag.maxBlocks(cfg.maxBlocks()) - 1, cfg.visitCap(), cfg.diagonal())) {
                 Result r = breakOne(player, tool, pos, group);
                 if (r == Result.BROKEN) mined++;
                 else if (r != Result.SKIPPED) {
@@ -103,6 +118,7 @@ public final class Vein {
             running = false;
         }
         if (cfg.feedback()) feedback(player, mined, group, stop);
+        for (VeinminerEvents.AfterVein a : VeinminerEvents.AFTER_VEIN.listeners()) a.after(level, player, origin, group, mined);
         return mined;
     }
 
@@ -125,7 +141,7 @@ public final class Vein {
         if (player.getMainHandItem() != tool) return Result.TOOL_CHANGED;
         if (tool.isDamageableItem() && tool.getMaxDamage() - tool.getDamageValue() <= 1) return Result.WORN;
         ServerLevel level = player.level();
-        if (level.isOutsideBuildHeight(pos) || !level.hasChunkAt(pos)) return Result.SKIPPED;
+        if (!loaded(level, pos) || !level.mayInteract(player, pos)) return Result.SKIPPED;
         BlockState state = level.getBlockState(pos);
         if (state.hasBlockEntity() || !group.equals(Groups.of(state.getBlock())) || !player.hasCorrectToolForDrops(state)) return Result.SKIPPED;
         int damage = tool.getDamageValue();

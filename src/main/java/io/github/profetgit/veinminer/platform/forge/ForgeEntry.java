@@ -3,6 +3,7 @@ package io.github.profetgit.veinminer.platform.forge;
 //? forge {
 /*import io.github.profetgit.veinminer.Veinminer;
 import io.github.profetgit.veinminer.platform.Platform;
+import io.github.profetgit.veinminer.selftest.BreakGuard;
 import io.github.profetgit.veinminer.selftest.TestBlocks;
 import io.github.profetgit.veinminer.server.Hooks;
 import java.nio.file.Path;
@@ -12,6 +13,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.util.Result;
+import net.minecraftforge.event.OnDatapackSyncEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.TagsUpdatedEvent;
 import net.minecraftforge.event.TickEvent;
@@ -19,6 +21,7 @@ import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.event.server.ServerStartedEvent;
 import net.minecraftforge.event.server.ServerStoppedEvent;
+import net.minecraftforge.event.server.ServerStoppingEvent;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -34,7 +37,15 @@ public final class ForgeEntry implements Platform {
             if (e.getRegistryKey().equals(Registries.BLOCK) && TestBlocks.wanted()) TestBlocks.register();
         });
         ServerStartedEvent.BUS.addListener(e -> Hooks.serverStarted(e.getServer()));
+        ServerStoppingEvent.BUS.addListener(e -> Hooks.serverStopping(e.getServer()));
         ServerStoppedEvent.BUS.addListener(e -> Hooks.serverStopped(e.getServer()));
+        // a null player is the sync after /reload (a join syncs to that player only); it comes before the new functions
+        OnDatapackSyncEvent.BUS.addListener(e -> {
+            if (e.getPlayer() == null) Hooks.dataReloadedSoon();
+        });
+        PlayerEvent.PlayerLoggedInEvent.BUS.addListener(e -> {
+            if (e.getEntity() instanceof ServerPlayer p) Hooks.join(p.level().getServer(), p);
+        });
         TickEvent.ServerTickEvent.Post.BUS.addListener(e -> Hooks.serverTickEnd(e.server()));
         PlayerEvent.PlayerLoggedOutEvent.BUS.addListener(e -> {
             if (e.getEntity() instanceof ServerPlayer p) Hooks.leave(p);

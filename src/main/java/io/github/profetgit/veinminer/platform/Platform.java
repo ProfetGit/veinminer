@@ -34,4 +34,9 @@ public interface Platform {
      * already asks it, so the vein path does not call this; it is for callers that break by another route.
      */
     boolean mayBreak(ServerLevel level, ServerPlayer player, BlockPos pos, BlockState state);
+
+    /** Tests: the loader's own fake player for this level (a Fabric {@code FakePlayer}), or null where there is none. */
+    default @Nullable ServerPlayer testFakePlayer(ServerLevel level) {
+        return null;
+    }
 }

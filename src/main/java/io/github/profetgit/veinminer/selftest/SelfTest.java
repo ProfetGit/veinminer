@@ -15,7 +15,7 @@ import net.minecraft.client.gui.screens.TitleScreen;
 
 /**
  * In-game test runner, inert unless -Dveinminer.selftest=&lt;out dir&gt; is set (ModTest sets it). Mode "boot" only
- * checks that the title screen is reached; "full" creates a world and runs {@link Scenarios}. Results go to
+ * checks that the title screen is reached; "full" creates a world and runs {@link Scenarios}; "mp-host" joins a dedicated server and runs {@link MpHost}. Results go to
  * results.json, captured frames to frames/&lt;name&gt;/, then the game quits.
  */
 public final class SelfTest {
@@ -42,6 +42,12 @@ public final class SelfTest {
         if (++ticks % 400 == 0) {
             VeinminerClient.LOG.info("[selftest] step {}/{} screen={}", index, steps == null ? 0 : steps.size(),
                 mc.gui.screen() == null ? null : mc.gui.screen().getClass().getSimpleName());
+        }
+        if (steps == null && MODE.equals("mp-host")) {
+            if (!mc.isGameLoadFinished()) return;
+            ModTestHook.audit();
+            record("boot", true, "game loaded, joining the server");
+            steps = MpHost.build().steps;
         }
         if (steps == null) {
             if (!mc.isGameLoadFinished() || !(mc.gui.screen() instanceof TitleScreen) || ++titleTicks < 20) return;

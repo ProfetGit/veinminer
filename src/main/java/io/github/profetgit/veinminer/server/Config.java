@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -65,6 +66,45 @@ public final class Config {
         }
     }
 
+    /** The keys {@code /veinminer set} takes, besides {@code groups.<name>}. */
+    public static final List<String> KEYS = List.of("max_blocks", "require_sneak", "drops", "durability", "diagonal", "animation", "feedback", "visit_cap");
+
+    /** The values with one key changed; throws {@link IllegalArgumentException} with a message for the player when key or value is wrong. */
+    public static Values with(Values v, String key, String value) {
+        String text = value.trim();
+        if (key.startsWith("groups.")) {
+            String name = key.substring("groups.".length());
+            if (name.isEmpty()) throw new IllegalArgumentException("groups.<name> needs a group name");
+            return v.group(name, bool(key, text));
+        }
+        return switch (key) {
+            case "max_blocks" -> v.maxBlocks(range(key, text, 1, 1024));
+            case "require_sneak" -> v.requireSneak(bool(key, text));
+            case "drops" -> v.drops(range(key, text, 0, 1));
+            case "durability" -> v.durability(bool(key, text));
+            case "diagonal" -> v.diagonal(bool(key, text));
+            case "animation" -> v.animation(bool(key, text));
+            case "feedback" -> v.feedback(bool(key, text));
+            case "visit_cap" -> v.visitCap(range(key, text, 64, 65536));
+            default -> throw new IllegalArgumentException("Unknown key " + key + " (" + String.join(", ", KEYS) + ", groups.<name>)");
+        };
+    }
+
+    private static int range(String key, String text, int min, int max) {
+        try {
+            int n = Integer.parseInt(text);
+            if (n >= min && n <= max) return n;
+        } catch (NumberFormatException ignored) {
+        }
+        throw new IllegalArgumentException(key + " must be a whole number from " + min + " to " + max);
+    }
+
+    private static boolean bool(String key, String text) {
+        if (text.equalsIgnoreCase("true")) return true;
+        if (text.equalsIgnoreCase("false")) return false;
+        throw new IllegalArgumentException(key + " must be true or false");
+    }
+
     private static final String TEMPLATE = """
         {
           // Most blocks one vein mines, the struck block included (1..1024)
@@ -88,10 +128,30 @@ public final class Config {
         }
         """;
 
+    /** The file's text for these values, with the template's comments. */
+    static String render(Values v) {
+        StringBuilder groups = new StringBuilder();
+        for (var e : new TreeMap<>(v.groups()).entrySet()) {
+            groups.append(groups.length() == 0 ? "\n" : ",\n").append("    ").append(new com.google.gson.JsonPrimitive(e.getKey())).append(": ").append(e.getValue());
+        }
+        if (groups.length() > 0) groups.append("\n  ");
+        String t = TEMPLATE;
+        t = t.replace("\"max_blocks\": 64", "\"max_blocks\": " + v.maxBlocks());
+        t = t.replace("\"require_sneak\": true", "\"require_sneak\": " + v.requireSneak());
+        t = t.replace("\"drops\": 0", "\"drops\": " + v.drops());
+        t = t.replace("\"durability\": true", "\"durability\": " + v.durability());
+        t = t.replace("\"diagonal\": true", "\"diagonal\": " + v.diagonal());
+        t = t.replace("\"animation\": true", "\"animation\": " + v.animation());
+        t = t.replace("\"feedback\": true", "\"feedback\": " + v.feedback());
+        t = t.replace("\"visit_cap\": 4096", "\"visit_cap\": " + v.visitCap());
+        return t.replace("\"groups\": {}", "\"groups\": {" + groups + "}");
+    }
+
     private static volatile Values values = Values.DEFAULTS;
     private static long stamp = -1;
     private static boolean broken;
     private static int poll;
+    private static volatile int failures;
 
     private Config() {}
 
@@ -112,6 +172,41 @@ public final class Config {
         return broken;
     }
 
+    /** Unreadable-file warnings logged since the JVM started (tests). */
+    public static int failures() {
+        return failures;
+    }
+
+    /**
+     * {@code /veinminer set}: validates, applies and writes {@code config/veinminer.json} (rewritten from the template,
+     * so hand-written comments go). Returns null on success, else why not.
+     */
+    public static String set(String key, String value) {
+        Values next;
+        try {
+            next = with(values, key, value);
+        } catch (IllegalArgumentException e) {
+            return e.getMessage();
+        }
+        return save(next);
+    }
+
+    /** Applies these values and writes the file; null on success. A reload then reads the same values back. */
+    public static String save(Values next) {
+        Path file = file();
+        try {
+            Files.createDirectories(file.getParent());
+            Files.writeString(file, render(next));
+            stamp = Files.getLastModifiedTime(file).toMillis();
+        } catch (IOException e) {
+            Veinminer.LOG.warn("Veinminer: could not write the config ({})", e.toString());
+            return "Could not write config/veinminer.json: " + e.getMessage();
+        }
+        values = next;
+        broken = false;
+        return null;
+    }
+
     public static void load() {
         Path file = file();
         try {
@@ -125,6 +220,7 @@ public final class Config {
             stamp = Files.getLastModifiedTime(file).toMillis();
             broken = false;
         } catch (IOException | RuntimeException e) {
+            failures++;
             Veinminer.LOG.warn("Veinminer: config unreadable, keeping the current values ({})", e.toString());
             try {
                 stamp = Files.getLastModifiedTime(file).toMillis();
@@ -134,7 +230,7 @@ public final class Config {
         }
     }
 
-    private static Values parse(JsonObject o) {
+    public static Values parse(JsonObject o) {
         Values d = Values.DEFAULTS;
         Map<String, Boolean> groups = new TreeMap<>();
         if (o.has("groups") && o.get("groups").isJsonObject()) {
