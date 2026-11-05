@@ -14,6 +14,7 @@
     "DisplayAccess",
     "EntityMixin",
     "ItemDisplayAccess",
-    "ServerLevelMixin"
+    "ServerLevelMixin",
+    "ServerPlayerGameModeMixin"
   ]
 }

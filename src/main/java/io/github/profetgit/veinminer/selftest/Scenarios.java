@@ -1,6 +1,6 @@
 package io.github.profetgit.veinminer.selftest;
 
-import net.fabricmc.loader.api.FabricLoader;
+import io.github.profetgit.veinminer.platform.Platform;
 
 final class Scenarios {
     private Scenarios() {}
@@ -31,7 +31,7 @@ final class Scenarios {
     }
 
     private static void smoke(Script s) {
-        s.check("mod loaded", mc -> FabricLoader.getInstance().isModLoaded("veinminer") ? null : "veinminer not loaded")
+        s.check("mod loaded", mc -> Platform.get().isModLoaded("veinminer") ? null : "veinminer not loaded")
             .check("player alive", mc -> mc.player.isAlive() ? null : "player not alive")
             .capture("smoke", 1)
             .until("smoke frame written", 200, mc -> !SelfTest.capturing())
