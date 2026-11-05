@@ -21,7 +21,7 @@ final class Fair {
 
     static void run(MinecraftServer server) {
         Rig.begin(server);
-        Config.use(Config.Values.DEFAULTS);
+        Config.use(Rig.PLAIN);
         silk64();
         fortune();
         wear();
@@ -29,7 +29,7 @@ final class Fair {
         durabilityOff();
         cap();
         noDrops();
-        Config.use(Config.Values.DEFAULTS);
+        Config.use(Rig.PLAIN);
         Rig.clear();
     }
 
@@ -115,14 +115,14 @@ final class Fair {
 
     private static void durabilityOff() {
         Rig.clear();
-        Config.use(Config.Values.DEFAULTS.durability(false));
+        Config.use(Rig.PLAIN.durability(false));
         ItemStack pick = Rig.pick(0, 0);
         Rig.hold(pick);
         List<BlockPos> cells = Rig.cube(1, 1, 1, 2, 2, 2, Blocks.COAL_ORE);
         Rig.strike(Rig.at(1, 1, 1), true);
         Rig.eq("durability off: vein broke", 8, Rig.air(cells));
         Rig.eq("durability off: only the struck block cost", 1, pick.getDamageValue());
-        Config.use(Config.Values.DEFAULTS);
+        Config.use(Rig.PLAIN);
         Rig.grab();
     }
 

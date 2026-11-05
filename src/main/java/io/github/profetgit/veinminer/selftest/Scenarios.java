@@ -15,6 +15,18 @@ final class Scenarios {
         if (only.equals("all") || only.contains("smoke")) smoke(s);
         if (only.equals("all") || only.contains("modded")) s.server(Modded::run);
         if (only.equals("all") || only.contains("fair")) s.server(Fair::run);
+        if (only.equals("all") || only.contains("chain")) {
+            s.server(ChainScene::manual)
+                .server(ChainScene::realStart)
+                .run(mc -> {
+                    mc.player.setYRot(180f);
+                    mc.player.setXRot(8f);
+                })
+                .capture("chain", 150)
+                .until("the real chain to end", 800, mc -> ChainScene.realDone())
+                .until("chain frames written", 600, mc -> !SelfTest.capturing())
+                .server(ChainScene::realCheck);
+        }
         return s;
     }
 

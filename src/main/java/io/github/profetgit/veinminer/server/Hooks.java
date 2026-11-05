@@ -29,6 +29,7 @@ public final class Hooks {
     private record Start(ServerLevel level, ServerPlayer player, BlockPos pos, String group, ItemStack tool) {}
 
     private static final List<Start> PENDING = new ArrayList<>();
+    private static int sweep;
 
     private Hooks() {}
 
@@ -39,6 +40,7 @@ public final class Hooks {
 
     public static void serverStopped(MinecraftServer server) {
         PENDING.clear();
+        Chain.reset();
     }
 
     public static void tagsReloaded() {
@@ -47,10 +49,16 @@ public final class Hooks {
 
     public static void leave(ServerPlayer player) {
         PENDING.removeIf(s -> s.player == player);
+        Chain.flushFor(player);
     }
 
     public static void serverTickEnd(MinecraftServer server) {
         Config.pollReload();
+        if (server.tickRateManager().runsNormally()) Chain.tickAll();
+        if (++sweep >= 100) {
+            sweep = 0;
+            Fx.sweep();
+        }
         drain();
     }
 
@@ -63,6 +71,7 @@ public final class Hooks {
         if (Vein.running()) return;
         String group = Groups.of(state.getBlock());
         if (group == null) return;
+        if (Chain.claimed(level, pos)) return;
         if (player.getClass() != ServerPlayer.class || Platform.get().isFakePlayer(player)) return;
         if (player.gameMode() != GameType.SURVIVAL) return;
         if (!Players.enabled(player)) return;
@@ -82,7 +91,8 @@ public final class Hooks {
         PENDING.clear();
         for (Start s : todo) {
             if (s.player.isRemoved() || s.player.getMainHandItem() != s.tool || s.tool.isEmpty()) continue;
-            Vein.run(s.level, s.player, s.pos, s.group, s.tool);
+            if (Config.get().animation()) Chain.start(s.level, s.player, s.pos, s.group, s.tool);
+            else Vein.run(s.level, s.player, s.pos, s.group, s.tool);
         }
     }
 

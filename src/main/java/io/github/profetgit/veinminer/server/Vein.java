@@ -70,7 +70,7 @@ public final class Vein {
                     seen++;
                     if (level.isOutsideBuildHeight(q) || !level.hasChunkAt(q)) continue;
                     BlockState s = level.getBlockState(q);
-                    if (s.hasBlockEntity() || !group.equals(Groups.of(s.getBlock()))) continue;
+                    if (s.hasBlockEntity() || !group.equals(Groups.of(s.getBlock())) || Chain.claimed(level, q)) continue;
                     found.add(q);
                 }
             }
@@ -102,13 +102,18 @@ public final class Vein {
         } finally {
             running = false;
         }
-        if (cfg.feedback() && mined > 0) {
+        if (cfg.feedback()) feedback(player, mined, group, stop);
+        return mined;
+    }
+
+    /** The action-bar message at the end of a vein or chain. */
+    static void feedback(ServerPlayer player, int mined, String group, Result stop) {
+        if (mined > 0) {
             player.sendOverlayMessage(Component.translatableWithFallback("veinminer.msg.veined", "Veined " + (mined + 1) + " " + group, mined + 1, group));
         }
-        if (cfg.feedback() && stop == Result.WORN) {
+        if (stop == Result.WORN) {
             player.sendOverlayMessage(Component.translatableWithFallback("veinminer.msg.worn", "Pickaxe is too worn"));
         }
-        return mined;
     }
 
     /**

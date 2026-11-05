@@ -50,6 +50,14 @@ public final class Config {
             return new Values(maxBlocks, requireSneak, drops, durability, diagonal, animation, feedback, v, groups);
         }
 
+        public Values drops(int v) {
+            return new Values(maxBlocks, requireSneak, v, durability, diagonal, animation, feedback, visitCap, groups);
+        }
+
+        public Values animation(boolean v) {
+            return new Values(maxBlocks, requireSneak, drops, durability, diagonal, v, feedback, visitCap, groups);
+        }
+
         public Values group(String name, boolean on) {
             Map<String, Boolean> g = new HashMap<>(groups);
             g.put(name, on);
@@ -69,7 +77,7 @@ public final class Config {
           "durability": true,
           // true: veins also run through the 20 diagonal neighbours of a block
           "diagonal": true,
-          // true: the chain animation (not built yet, unused)
+          // true: the blocks pop one after another in a chain; false: the whole vein breaks at once
           "animation": true,
           // true: action bar message when a vein ends
           "feedback": true,

@@ -18,7 +18,7 @@ final class Modded {
 
     static void run(MinecraftServer server) {
         Rig.begin(server);
-        Config.use(Config.Values.DEFAULTS);
+        Config.use(Rig.PLAIN);
         Groups.invalidate();
         String report = Groups.report();
         SelfTest.record("c:ores tag present", Groups.oresTagSize() > 0, report);
@@ -129,18 +129,18 @@ final class Modded {
         cells = Rig.cube(1, 1, 1, 5, 1, 1, TestBlocks.tin);
         Rig.strike(cells.get(0), true);
         Rig.eq("group switched off: one block", 1, Rig.air(cells));
-        Config.use(Config.Values.DEFAULTS);
+        Config.use(Rig.PLAIN);
 
         for (boolean diagonal : new boolean[]{true, false}) {
             Rig.clear();
             Rig.hold(Rig.pick(0, 0));
-            Config.use(Config.Values.DEFAULTS.diagonal(diagonal));
+            Config.use(Rig.PLAIN.diagonal(diagonal));
             Rig.set(Rig.at(1, 1, 1), TestBlocks.tin.defaultBlockState());
             Rig.set(Rig.at(2, 2, 1), TestBlocks.tin.defaultBlockState());
             Rig.strike(Rig.at(1, 1, 1), true);
             Rig.eq("diagonal " + (diagonal ? "on" : "off") + ": corner-touching block", diagonal ? 1 : 0, Rig.air(List.of(Rig.at(2, 2, 1))));
         }
-        Config.use(Config.Values.DEFAULTS);
+        Config.use(Rig.PLAIN);
         Rig.grab();
         Rig.clear();
     }

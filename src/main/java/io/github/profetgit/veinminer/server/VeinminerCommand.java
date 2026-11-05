@@ -1,12 +1,14 @@
 package io.github.profetgit.veinminer.server;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.DoubleArgumentType;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
-/** {@code /veinminer} (toggle yourself), {@code status}, and {@code reload} (level 2). */
+/** {@code /veinminer} (toggle yourself), {@code status}, and {@code reload} and {@code tune} (level 2). */
 public final class VeinminerCommand {
     private VeinminerCommand() {}
 
@@ -18,7 +20,24 @@ public final class VeinminerCommand {
                 Config.load();
                 c.getSource().sendSuccess(() -> Component.literal(Config.broken() ? "Veinminer config unreadable, keeping the current values" : "Veinminer config reloaded"), true);
                 return 1;
+            }))
+            .then(tune()));
+    }
+
+    private static LiteralArgumentBuilder<CommandSourceStack> tune() {
+        LiteralArgumentBuilder<CommandSourceStack> tune = Commands.literal("tune").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
+            .executes(c -> {
+                c.getSource().sendSuccess(() -> Component.literal("Veinminer tune: " + Tune.describe()), false);
+                return 1;
+            });
+        for (String name : new String[]{"delay_k", "arc", "squash"}) {
+            tune.then(Commands.literal(name).then(Commands.argument("value", DoubleArgumentType.doubleArg()).executes(c -> {
+                Tune.set(name, DoubleArgumentType.getDouble(c, "value"));
+                c.getSource().sendSuccess(() -> Component.literal("Veinminer tune: " + Tune.describe()), true);
+                return 1;
             })));
+        }
+        return tune;
     }
 
     private static int toggle(CommandSourceStack src) {
@@ -35,7 +54,8 @@ public final class VeinminerCommand {
     private static int status(CommandSourceStack src) {
         Config.Values v = Config.get();
         src.sendSuccess(() -> Component.literal("max_blocks " + v.maxBlocks() + ", require_sneak " + v.requireSneak() + ", drops " + v.drops()
-            + ", durability " + v.durability() + ", diagonal " + v.diagonal() + ", visit_cap " + v.visitCap()), false);
+            + ", durability " + v.durability() + ", diagonal " + v.diagonal() + ", animation " + v.animation() + ", visit_cap " + v.visitCap()
+            + ", chains running " + Chain.count()), false);
         src.sendSuccess(() -> Component.literal(Groups.report()), false);
         return 1;
     }

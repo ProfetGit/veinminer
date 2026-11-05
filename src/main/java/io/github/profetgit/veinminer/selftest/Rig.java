@@ -1,5 +1,7 @@
 package io.github.profetgit.veinminer.selftest;
 
+import io.github.profetgit.veinminer.server.Chain;
+import io.github.profetgit.veinminer.server.Config;
 import io.github.profetgit.veinminer.server.Hooks;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,6 +33,8 @@ final class Rig {
     static ServerPlayer player;
     static BlockPos base;
     static final int SIZE = 12;
+    /** The defaults with the chain off: the scenes that count blocks right after a strike break the whole vein at once. */
+    static final Config.Values PLAIN = Config.Values.DEFAULTS.animation(false);
 
     private Rig() {}
 
@@ -106,6 +110,16 @@ final class Rig {
         Hooks.drain();
         player.setShiftKeyDown(false);
         return ok;
+    }
+
+    /** Ticks every running chain, the way the server tick does, until none is left; returns the ticks it took. */
+    static int settle() {
+        int n = 0;
+        while (Chain.count() > 0 && n < 400) {
+            Chain.tickAll();
+            n++;
+        }
+        return n;
     }
 
     /** The loot in the work volume: items by type and the XP of the orbs. The entities are removed. */
