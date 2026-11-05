@@ -91,7 +91,7 @@ public final class Vein {
         Result stop = null;
         running = true;
         try {
-            for (BlockPos pos : scan(level, player.position(), origin, group, cfg.maxBlocks() - 1, cfg.visitCap(), cfg.diagonal())) {
+            for (BlockPos pos : scan(level, player.position(), origin, group, GroupData.cap(group, cfg.maxBlocks()) - 1, cfg.visitCap(), cfg.diagonal())) {
                 Result r = breakOne(player, tool, pos, group);
                 if (r == Result.BROKEN) mined++;
                 else if (r != Result.SKIPPED) {

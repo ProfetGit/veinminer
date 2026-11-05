@@ -74,6 +74,13 @@ public final class Groups {
     private static Map<Block, String> build() {
         Map<Block, String> t = new HashMap<>();
         int ores = 0;
+        for (Map.Entry<String, GroupData.Group> e : GroupData.groups().entrySet()) {
+            for (TagKey<Block> tag : e.getValue().tags()) {
+                for (var holder : BuiltInRegistries.BLOCK.get(tag).map(s -> (Iterable<net.minecraft.core.Holder<Block>>) s).orElse(List.of())) {
+                    t.putIfAbsent(holder.value(), e.getKey());
+                }
+            }
+        }
         if (!ignoreCommon) {
             Map<String, HolderSet.Named<Block>> subtags = new TreeMap<>();
             for (HolderSet.Named<Block> tag : (Iterable<HolderSet.Named<Block>>) BuiltInRegistries.BLOCK.getTags()::iterator) {
@@ -105,6 +112,9 @@ public final class Groups {
                     }
                 }
             }
+        }
+        for (var holder : BuiltInRegistries.BLOCK.get(GroupData.NEVER).map(s -> (Iterable<net.minecraft.core.Holder<Block>>) s).orElse(List.of())) {
+            t.remove(holder.value());
         }
         Map<String, Integer> counts = new TreeMap<>();
         for (String g : t.values()) counts.merge(g, 1, Integer::sum);

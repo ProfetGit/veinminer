@@ -15,6 +15,30 @@
     {
       "id": "veinminer:test_ore_be",
       "required": false
+    },
+    {
+      "id": "veinminer:test_ore_ext",
+      "required": false
+    },
+    {
+      "id": "veinminer:test_ore_ga",
+      "required": false
+    },
+    {
+      "id": "veinminer:test_ore_win",
+      "required": false
+    },
+    {
+      "id": "veinminer:test_ore_cap",
+      "required": false
+    },
+    {
+      "id": "veinminer:test_ore_never",
+      "required": false
+    },
+    {
+      "id": "veinminer:test_ore_custom",
+      "required": false
     }
   ]
 }

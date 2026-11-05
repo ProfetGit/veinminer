@@ -1,0 +1,45 @@
+package io.github.profetgit.veinminer.server;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import com.google.gson.JsonParser;
+import com.mojang.serialization.DataResult;
+import org.junit.jupiter.api.Test;
+
+class GroupDefTest {
+    private static DataResult<GroupDef> parse(String json) {
+        return GroupDef.parse(JsonParser.parseString(json));
+    }
+
+    @Test
+    void readsTagAndOptionalCap() {
+        GroupDef d = parse("{\"blocks\":\"#c:ores/tin\"}").getOrThrow();
+        assertEquals("c:ores/tin", d.blocks().location().toString());
+        assertNull(d.maxBlocks());
+        assertEquals(7, parse("{\"blocks\":\"#mymod:ruby\",\"max_blocks\":7}").getOrThrow().maxBlocks());
+    }
+
+    @Test
+    void acceptsNullCapAndIgnoresXpToggle() {
+        GroupDef d = parse("{\"blocks\":\"#mymod:ruby\",\"max_blocks\":null,\"xp_toggle\":null}").getOrThrow();
+        assertNull(d.maxBlocks());
+        assertTrue(parse("{\"blocks\":\"#mymod:ruby\",\"xp_toggle\":false}").isSuccess());
+    }
+
+    @Test
+    void rejectsMalformedFiles() {
+        for (String bad : new String[]{"[]", "\"x\"", "{}", "{\"blocks\":5}", "{\"blocks\":\"c:ores/tin\"}", "{\"blocks\":\"#Bad Id\"}",
+            "{\"blocks\":\"#a:b\",\"max_blocks\":0}", "{\"blocks\":\"#a:b\",\"max_blocks\":1025}", "{\"blocks\":\"#a:b\",\"max_blocks\":2.5}",
+            "{\"blocks\":\"#a:b\",\"max_blocks\":\"9\"}"}) {
+            assertTrue(parse(bad).isError(), bad);
+        }
+    }
+
+    @Test
+    void capsAreInclusive() {
+        assertEquals(1, parse("{\"blocks\":\"#a:b\",\"max_blocks\":1}").getOrThrow().maxBlocks());
+        assertEquals(1024, parse("{\"blocks\":\"#a:b\",\"max_blocks\":1024}").getOrThrow().maxBlocks());
+    }
+}

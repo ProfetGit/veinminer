@@ -4,6 +4,7 @@ package io.github.profetgit.veinminer.platform.forge;
 /*import io.github.profetgit.veinminer.Veinminer;
 import io.github.profetgit.veinminer.platform.Platform;
 import io.github.profetgit.veinminer.selftest.TestBlocks;
+import io.github.profetgit.veinminer.server.GroupData;
 import io.github.profetgit.veinminer.server.Hooks;
 import java.nio.file.Path;
 import net.minecraft.core.BlockPos;
@@ -12,6 +13,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.util.Result;
+import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.TagsUpdatedEvent;
 import net.minecraftforge.event.TickEvent;
@@ -33,6 +35,7 @@ public final class ForgeEntry implements Platform {
         RegisterEvent.getBus(context.getModBusGroup()).addListener(e -> {
             if (e.getRegistryKey().equals(Registries.BLOCK) && TestBlocks.wanted()) TestBlocks.register();
         });
+        AddReloadListenerEvent.BUS.addListener(e -> e.addListener(GroupData.listener()));
         ServerStartedEvent.BUS.addListener(e -> Hooks.serverStarted(e.getServer()));
         ServerStoppedEvent.BUS.addListener(e -> Hooks.serverStopped(e.getServer()));
         TickEvent.ServerTickEvent.Post.BUS.addListener(e -> Hooks.serverTickEnd(e.server()));

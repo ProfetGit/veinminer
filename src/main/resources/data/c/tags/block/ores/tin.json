@@ -7,6 +7,14 @@
     {
       "id": "veinminer:test_ore_be",
       "required": false
+    },
+    {
+      "id": "veinminer:test_ore_win",
+      "required": false
+    },
+    {
+      "id": "veinminer:test_ore_never",
+      "required": false
     }
   ]
 }

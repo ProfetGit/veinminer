@@ -4,6 +4,7 @@ package io.github.profetgit.veinminer.platform.fabric;
 import io.github.profetgit.veinminer.Veinminer;
 import io.github.profetgit.veinminer.platform.Platform;
 import io.github.profetgit.veinminer.selftest.TestBlocks;
+import io.github.profetgit.veinminer.server.GroupData;
 import io.github.profetgit.veinminer.server.Hooks;
 import java.nio.file.Path;
 import net.fabricmc.api.ModInitializer;
@@ -14,9 +15,11 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
+import net.fabricmc.fabric.api.resource.v1.ResourceLoader;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.packs.PackType;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -26,6 +29,7 @@ public final class FabricEntry implements ModInitializer, Platform {
     public void onInitialize() {
         Veinminer.init(this);
         if (TestBlocks.wanted()) TestBlocks.register();
+        ResourceLoader.get(PackType.SERVER_DATA).registerReloadListener(GroupData.ID, GroupData.listener());
         ServerLifecycleEvents.SERVER_STARTED.register(Hooks::serverStarted);
         ServerLifecycleEvents.SERVER_STOPPED.register(Hooks::serverStopped);
         ServerTickEvents.END_SERVER_TICK.register(Hooks::serverTickEnd);
