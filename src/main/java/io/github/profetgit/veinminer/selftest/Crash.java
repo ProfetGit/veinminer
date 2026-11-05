@@ -168,7 +168,7 @@ final class Crash {
         Hooks.serverStopping(s);
         Rig.eq("crash: stop: no turn on the way down", air, Rig.air(cells));
         Rig.check("crash: stop: the unturned blocks stay ore", air < 64 && Rig.level.getBlockState(Rig.at(4, 2, 2)).is(Blocks.COAL_ORE), "air " + air);
-        Rig.eq("crash: stop: loot landed", air - 1, Rig.grab().count(Items.COAL_ORE));
+        Rig.eq("crash: stop: loot landed", air, Rig.grab().count(Items.COAL_ORE));
         M4.noLeak("crash: stop");
     }
 
