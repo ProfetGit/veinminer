@@ -9,6 +9,13 @@ import com.google.gson.JsonParser;
 import org.junit.jupiter.api.Test;
 
 class ConfigTest {
+//? if <1.21 {
+/*    static {
+        net.minecraft.SharedConstants.tryDetectVersion();
+        net.minecraft.server.Bootstrap.bootStrap();
+    }
+
+*///?}
     private static final Config.Values D = Config.Values.DEFAULTS;
 
     @Test
