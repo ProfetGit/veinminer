@@ -20,49 +20,54 @@ import java.util.TreeMap;
  */
 public final class Config {
     public record Values(int maxBlocks, boolean requireSneak, int drops, boolean durability, boolean diagonal, boolean animation,
-                         boolean feedback, int visitCap, Map<String, Boolean> groups) {
-        public static final Values DEFAULTS = new Values(64, true, 0, true, true, true, true, 4096, Map.of());
+                         boolean feedback, int visitCap, Map<String, Boolean> groups, List<String> customBlocks) {
+        public static final Values DEFAULTS = new Values(64, true, 0, true, true, true, true, 4096, Map.of(), List.of());
 
         public boolean groupOn(String group) {
             return groups.getOrDefault(group, GroupData.defaultOn(group));
         }
 
         public Values maxBlocks(int v) {
-            return new Values(v, requireSneak, drops, durability, diagonal, animation, feedback, visitCap, groups);
+            return new Values(v, requireSneak, drops, durability, diagonal, animation, feedback, visitCap, groups, customBlocks);
         }
 
         public Values requireSneak(boolean v) {
-            return new Values(maxBlocks, v, drops, durability, diagonal, animation, feedback, visitCap, groups);
+            return new Values(maxBlocks, v, drops, durability, diagonal, animation, feedback, visitCap, groups, customBlocks);
         }
 
         public Values durability(boolean v) {
-            return new Values(maxBlocks, requireSneak, drops, v, diagonal, animation, feedback, visitCap, groups);
+            return new Values(maxBlocks, requireSneak, drops, v, diagonal, animation, feedback, visitCap, groups, customBlocks);
         }
 
         public Values diagonal(boolean v) {
-            return new Values(maxBlocks, requireSneak, drops, durability, v, animation, feedback, visitCap, groups);
+            return new Values(maxBlocks, requireSneak, drops, durability, v, animation, feedback, visitCap, groups, customBlocks);
         }
 
         public Values feedback(boolean v) {
-            return new Values(maxBlocks, requireSneak, drops, durability, diagonal, animation, v, visitCap, groups);
+            return new Values(maxBlocks, requireSneak, drops, durability, diagonal, animation, v, visitCap, groups, customBlocks);
         }
 
         public Values visitCap(int v) {
-            return new Values(maxBlocks, requireSneak, drops, durability, diagonal, animation, feedback, v, groups);
+            return new Values(maxBlocks, requireSneak, drops, durability, diagonal, animation, feedback, v, groups, customBlocks);
         }
 
         public Values drops(int v) {
-            return new Values(maxBlocks, requireSneak, v, durability, diagonal, animation, feedback, visitCap, groups);
+            return new Values(maxBlocks, requireSneak, v, durability, diagonal, animation, feedback, visitCap, groups, customBlocks);
         }
 
         public Values animation(boolean v) {
-            return new Values(maxBlocks, requireSneak, drops, durability, diagonal, v, feedback, visitCap, groups);
+            return new Values(maxBlocks, requireSneak, drops, durability, diagonal, v, feedback, visitCap, groups, customBlocks);
+        }
+
+        /** Entries of {@code custom_blocks}: block ids ({@code minecraft:netherrack}) and block tags ({@code #minecraft:logs}). */
+        public Values customBlocks(List<String> v) {
+            return new Values(maxBlocks, requireSneak, drops, durability, diagonal, animation, feedback, visitCap, groups, List.copyOf(v));
         }
 
         public Values group(String name, boolean on) {
             Map<String, Boolean> g = new HashMap<>(groups);
             g.put(name, on);
-            return new Values(maxBlocks, requireSneak, drops, durability, diagonal, animation, feedback, visitCap, Map.copyOf(g));
+            return new Values(maxBlocks, requireSneak, drops, durability, diagonal, animation, feedback, visitCap, Map.copyOf(g), customBlocks);
         }
     }
 
@@ -123,6 +128,8 @@ public final class Config {
           "feedback": true,
           // Most cells one scan looks at (64..65536)
           "visit_cap": 4096,
+          // Your own blocks: block ids ("minecraft:netherrack") or block tags ("#minecraft:logs"); each entry is a group of its own
+          "custom_blocks": [],
           // Switch a group on or off: "tin": false, "dirt": true. Groups missing here use their default: ores on; dirt, sand, gravel, clay off
           "groups": {}
         }
@@ -144,6 +151,9 @@ public final class Config {
         t = t.replace("\"animation\": true", "\"animation\": " + v.animation());
         t = t.replace("\"feedback\": true", "\"feedback\": " + v.feedback());
         t = t.replace("\"visit_cap\": 4096", "\"visit_cap\": " + v.visitCap());
+        StringBuilder custom = new StringBuilder();
+        for (String c : v.customBlocks()) custom.append(custom.length() == 0 ? "" : ", ").append(new com.google.gson.JsonPrimitive(c));
+        t = t.replace("\"custom_blocks\": []", "\"custom_blocks\": [" + custom + "]");
         return t.replace("\"groups\": {}", "\"groups\": {" + groups + "}");
     }
 
@@ -251,7 +261,22 @@ public final class Config {
             bool(o, "animation", d.animation()),
             bool(o, "feedback", d.feedback()),
             number(o, "visit_cap", d.visitCap(), 64, 65536),
-            Map.copyOf(groups));
+            Map.copyOf(groups),
+            customBlocks(o));
+    }
+
+    private static List<String> customBlocks(JsonObject o) {
+        if (!o.has("custom_blocks") || !o.get("custom_blocks").isJsonArray()) return List.of();
+        List<String> out = new java.util.ArrayList<>();
+        for (JsonElement e : o.getAsJsonArray("custom_blocks")) {
+            if (e.isJsonPrimitive() && e.getAsJsonPrimitive().isString() && !e.getAsString().isBlank()) {
+                String c = e.getAsString().trim();
+                if (!out.contains(c)) out.add(c);
+            } else {
+                Veinminer.LOG.warn("Veinminer: config custom_blocks entry {} is not a block id or #tag, ignored", e);
+            }
+        }
+        return List.copyOf(out);
     }
 
     private static int number(JsonObject o, String key, int def, int min, int max) {
