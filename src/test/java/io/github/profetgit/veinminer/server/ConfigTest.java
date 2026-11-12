@@ -43,4 +43,19 @@ class ConfigTest {
         assertEquals(12, Config.with(D, "max_blocks", " 12 ").maxBlocks());
         assertFalse(Config.with(D, "diagonal", "FALSE").diagonal());
     }
+
+    @Test
+    void customBlocksRoundTripWithAwkwardEntries() {
+        Config.Values v = D.customBlocks(java.util.List.of("minecraft:netherrack", "#minecraft:logs", "mymod:odd\"name", "minecraft:nope")).group("minecraft:netherrack", false);
+        Config.Values back = Config.parse(JsonParser.parseString(Config.render(v)).getAsJsonObject());
+        assertEquals(v, back);
+        assertEquals(java.util.List.of("minecraft:netherrack", "#minecraft:logs", "mymod:odd\"name", "minecraft:nope"), back.customBlocks());
+    }
+
+    @Test
+    void customBlocksParseDropsDuplicatesAndNonStrings() {
+        Config.Values v = Config.parse(JsonParser.parseString("{\"custom_blocks\": [\"a:b\", \" a:b \", 5, \"\", \"#c:d\"]}").getAsJsonObject());
+        assertEquals(java.util.List.of("a:b", "#c:d"), v.customBlocks());
+        assertTrue(Config.parse(JsonParser.parseString("{\"custom_blocks\": \"x\"}").getAsJsonObject()).customBlocks().isEmpty());
+    }
 }

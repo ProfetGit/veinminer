@@ -60,6 +60,9 @@ final class Scenarios {
                     .server(server -> GroundScene.finish(server, name));
             }
         }
+        if (only.equals("all") || List.of(only.split(",")).contains("custom")) {
+            s.server(CustomScene::run).server(CustomScene::edit).waitTicks(60).server(CustomScene::checkEdit);
+        }
         if (M4.want(only, "conflict")) s.server(Gates::conflict);
         if (M4.want(only, "fake")) s.server(Gates::fake);
         if (M4.want(only, "claims")) s.server(Gates::claims);

@@ -22,4 +22,13 @@ class GroupsTest {
         assertEquals("veinminer:test_ore_odd", Groups.derive("veinminer", "test_ore_odd"));
         assertEquals("mymod:ore", Groups.derive("mymod", "ore"));
     }
+
+    @Test
+    void readableNamesForCustomEntries() {
+        assertEquals("Netherrack", Groups.readable("minecraft:netherrack"));
+        assertEquals("Polished Andesite", Groups.readable("minecraft:polished_andesite"));
+        assertEquals("Logs", Groups.readable("#minecraft:logs"));
+        assertEquals("Ores Iron", Groups.readable("#c:ores/iron"));
+        assertEquals("Nothing", Groups.readable("nothing"));
+    }
 }

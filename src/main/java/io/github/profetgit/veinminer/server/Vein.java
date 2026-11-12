@@ -10,6 +10,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
@@ -125,7 +126,9 @@ public final class Vein {
     /** The action-bar message at the end of a vein or chain. */
     static void feedback(ServerPlayer player, int mined, String group, Result stop) {
         if (mined > 0) {
-            player.sendOverlayMessage(Component.translatableWithFallback("veinminer.msg.veined", "Veined " + (mined + 1) + " " + group, mined + 1, group));
+            Object label = Groups.label(group);
+            String text = Groups.isCustom(group) ? Groups.readable(group) : group;
+            player.sendOverlayMessage(Component.translatableWithFallback("veinminer.msg.veined", "Veined " + (mined + 1) + " " + text, mined + 1, label));
         }
         if (stop == Result.WORN) {
             player.sendOverlayMessage(Component.translatableWithFallback("veinminer.msg.worn", "Tool is too worn"));
@@ -138,8 +141,19 @@ public final class Vein {
      * tool rules make it correct for the block; the player-level check would say yes to any item for a block that needs no tool.
      */
     public static boolean toolFits(ServerPlayer player, ItemStack tool, BlockState state, String group) {
+        if (Groups.isCustom(group)) return tool.isCorrectToolForDrops(state) || needsNoTool(state);
         if (GroupData.tool(group) == GroupDef.Tool.CORRECT) return tool.isCorrectToolForDrops(state);
         return tool.is(Hooks.TOOLS) && player.hasCorrectToolForDrops(state);
+    }
+
+    /** The vein's tool broke or was used up; the empty hand itself ({@link ItemStack#EMPTY}) is a fine tool for a block that needs none. */
+    static boolean gone(ItemStack tool) {
+        return tool.isEmpty() && tool != ItemStack.EMPTY;
+    }
+
+    /** True for a block no tool is made for (glass, cobweb): in none of the pickaxe, axe, shovel and hoe tags. */
+    static boolean needsNoTool(BlockState state) {
+        return !(state.is(BlockTags.MINEABLE_WITH_PICKAXE) || state.is(BlockTags.MINEABLE_WITH_AXE) || state.is(BlockTags.MINEABLE_WITH_SHOVEL) || state.is(BlockTags.MINEABLE_WITH_HOE));
     }
 
     /**

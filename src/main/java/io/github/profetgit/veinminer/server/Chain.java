@@ -278,7 +278,7 @@ public final class Chain {
             end(false);
             return;
         }
-        if (!stopped && (player.getMainHandItem() != tool || tool.isEmpty())) halt(Vein.Result.TOOL_CHANGED);
+        if (!stopped && (player.getMainHandItem() != tool || Vein.gone(tool))) halt(Vein.Result.TOOL_CHANGED);
         for (int i = 0; i < standing.size();) {
             Node n = standing.get(i);
             int o = age - n.turned;

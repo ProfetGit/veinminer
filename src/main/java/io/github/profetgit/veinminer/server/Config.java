@@ -175,7 +175,12 @@ public final class Config {
 
     /** Tests: use these values until the next {@link #load}. */
     public static void use(Values v) {
-        values = v;
+        swap(v);
+    }
+
+    private static void swap(Values next) {
+        if (!next.customBlocks().equals(values.customBlocks())) Groups.invalidate();
+        values = next;
     }
 
     public static boolean broken() {
@@ -212,7 +217,7 @@ public final class Config {
             Veinminer.LOG.warn("Veinminer: could not write the config ({})", e.toString());
             return "Could not write config/veinminer.json: " + e.getMessage();
         }
-        values = next;
+        swap(next);
         broken = false;
         return null;
     }
@@ -226,7 +231,7 @@ public final class Config {
             }
             JsonElement e = JsonParser.parseString(Files.readString(file));
             if (!e.isJsonObject()) throw new IllegalStateException("not a JSON object");
-            values = parse(e.getAsJsonObject());
+            swap(parse(e.getAsJsonObject()));
             stamp = Files.getLastModifiedTime(file).toMillis();
             broken = false;
         } catch (IOException | RuntimeException e) {

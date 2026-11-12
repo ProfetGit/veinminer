@@ -126,7 +126,7 @@ public final class Hooks {
         List<Start> todo = new ArrayList<>(PENDING);
         PENDING.clear();
         for (Start s : todo) {
-            if (s.player.isRemoved() || !s.player.isAlive() || s.player.level() != s.level || s.player.getMainHandItem() != s.tool || s.tool.isEmpty()) continue;
+            if (s.player.isRemoved() || !s.player.isAlive() || s.player.level() != s.level || s.player.getMainHandItem() != s.tool || Vein.gone(s.tool)) continue;
             try {
                 if (Api.cancelled(s.level, s.player, s.pos, s.state, s.group)) continue;
                 if (Config.get().animation()) Chain.start(s.level, s.player, s.pos, s.group, s.tool, s.mark);
