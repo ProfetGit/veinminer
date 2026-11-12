@@ -167,6 +167,7 @@ public final class BlockPickerScreen extends Screen {
             b.setMessage(Component.literal(switch (row.kind()) {
                 case REMOVE -> "Remove";
                 case ADDED -> "Added";
+                case BLOCKED -> "Can't";
                 default -> "Add";
             }));
         }
@@ -199,7 +200,7 @@ public final class BlockPickerScreen extends Screen {
             String id = q.contains(":") ? q : "minecraft:" + q;
             if (!q.isEmpty() && Identifier.tryParse(id) != null) {
                 String entry = "#" + id;
-                rows.add(new Row(entry, entry, "Tags can only be checked inside a world", ItemStack.EMPTY, entries.contains(entry) ? Kind.ADDED : Kind.ADD));
+                rows.add(new Row(entry, entry, "Checked in a world", ItemStack.EMPTY, entries.contains(entry) ? Kind.ADDED : Kind.ADD));
             }
             return;
         }
@@ -265,8 +266,12 @@ public final class BlockPickerScreen extends Screen {
     }
 
     private void rows(GuiGraphicsExtractor g, int mouseX, int mouseY) {
+        if (search.isFocused() && search.getValue().isEmpty()) {
+            // EditBox hides its hint while focused, and the picker opens focused: draw it after the cursor
+            Compat.text(g, font, "Search blocks or type #tag", search.getX() + 4 + font.width("_") + 2, search.getY() + (search.getHeight() - 8) / 2, 0xFF808080);
+        }
         if (rows.isEmpty()) {
-            String none = query.isBlank() ? "Nothing added yet. Search above to add blocks." : query.trim().startsWith("#") ? "No tags match" : "No blocks match";
+            String none = query.isBlank() ? "Nothing added yet" : query.trim().startsWith("#") ? "No tags match" : "No blocks match";
             Compat.text(g, font, none, width / 2 - font.width(none) / 2, listTop + 10, GRAY);
             return;
         }
@@ -279,7 +284,7 @@ public final class BlockPickerScreen extends Screen {
             if (hover) g.fill(left, y, left + WIDTH, y + ROW, 0x25FFFFFF);
             if (!row.icon().isEmpty()) Compat.item(g, row.icon(), left + 4, y + 4);
             Compat.text(g, font, fit(row.name(), textWidth), left + 26, y + 3, grey ? DIM : WHITE);
-            Compat.text(g, font, fit(row.detail(), textWidth), left + 26, y + 13, DIM);
+            Compat.text(g, font, fit(row.detail(), textWidth), left + 26, y + 13, grey ? DIM : GRAY);
             if (grey && hover) Compat.tooltip(g, font, Component.literal("Blocks that hold items never vein"), mouseX, mouseY);
         }
     }

@@ -5,6 +5,7 @@
 ### Added
 - **Settings screen.** All settings in one menu, no file editing: on Fabric through Mod Menu's configure button (Mod Menu is optional), on NeoForge and Forge through the mod list's Config button. It edits your single-player settings, which apply right away in your world and on a LAN world you host. On a server, its operators still use `/veinminer set`.
 - **Dirt, sand, gravel and clay.** Sneak and dig with any shovel, modded ones too, and the whole patch comes out in the same chain. Dirt includes grass, podzol and mycelium. These four are off by default: turn them on in the settings screen or with `/veinminer set groups.dirt true`. A pickaxe never veins them, and suspicious sand and gravel are left alone.
+- **Your own blocks.** Add any block, or a whole block tag such as `#minecraft:logs`, to your own list, and it veins too. Use the settings screen's "Add or remove blocks..." (search every block, modded ones included, or "Add the block I'm looking at"), or `/veinminer add` and `/veinminer remove` on a server. Each entry veins with the right tool for it; blocks no tool is made for, like glass, vein with anything. Your list wins over the built-in switches, but blocks that hold items (chests and the like) never vein.
 - Sand and gravel stay put while the chain runs, so they don't fall away before their turn. If the chain stops early, what's left falls as normal.
 - **Data groups** take `"tool": "correct"` (any tool that is right for the block, such as a shovel or an axe) and `"default": false` (the group starts off).
 

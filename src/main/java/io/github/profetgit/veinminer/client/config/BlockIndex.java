@@ -29,6 +29,9 @@ final class BlockIndex {
         List<Entry> out = new ArrayList<>();
         for (Block block : BuiltInRegistries.BLOCK) {
             if (block.defaultBlockState().isAir() || block instanceof LiquidBlock || block instanceof BubbleColumnBlock) continue;
+            // no item form (portals, fire, moving pistons) or unbreakable (bedrock, barriers): never mined, so never veined
+            if (block.asItem() == net.minecraft.world.item.Items.AIR
+                || block.defaultBlockState().getDestroySpeed(net.minecraft.world.level.EmptyBlockGetter.INSTANCE, net.minecraft.core.BlockPos.ZERO) < 0) continue;
             String id = BuiltInRegistries.BLOCK.getKey(block).toString();
             String name = block.getName().getString();
             out.add(new Entry(id, name, name.toLowerCase(Locale.ROOT), block));
