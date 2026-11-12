@@ -1,6 +1,7 @@
 package io.github.profetgit.veinminer.server;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -48,5 +49,33 @@ class GroupDefTest {
     void capsAreInclusive() {
         assertEquals(1, parse("{\"blocks\":\"#a:b\",\"max_blocks\":1}").result().get().maxBlocks());
         assertEquals(1024, parse("{\"blocks\":\"#a:b\",\"max_blocks\":1024}").result().get().maxBlocks());
+    }
+
+    @Test
+    void toolAndDefaultAreOptional() {
+        GroupDef d = parse("{\"blocks\":\"#a:b\"}").result().get();
+        assertEquals(GroupDef.Tool.PICKAXE, d.tool());
+        assertTrue(d.defaultOn());
+        GroupDef n = parse("{\"blocks\":\"#a:b\",\"tool\":null,\"default\":null}").result().get();
+        assertEquals(GroupDef.Tool.PICKAXE, n.tool());
+        assertTrue(n.defaultOn());
+    }
+
+    @Test
+    void readsToolAndDefault() {
+        GroupDef d = parse("{\"blocks\":\"#a:b\",\"tool\":\"correct\",\"default\":false}").result().get();
+        assertEquals(GroupDef.Tool.CORRECT, d.tool());
+        assertFalse(d.defaultOn());
+        GroupDef p = parse("{\"blocks\":\"#a:b\",\"tool\":\"pickaxe\",\"default\":true}").result().get();
+        assertEquals(GroupDef.Tool.PICKAXE, p.tool());
+        assertTrue(p.defaultOn());
+    }
+
+    @Test
+    void rejectsBadToolAndDefault() {
+        for (String bad : new String[]{"{\"blocks\":\"#a:b\",\"tool\":\"shovel\"}", "{\"blocks\":\"#a:b\",\"tool\":true}", "{\"blocks\":\"#a:b\",\"tool\":\"Correct\"}",
+            "{\"blocks\":\"#a:b\",\"default\":\"false\"}", "{\"blocks\":\"#a:b\",\"default\":0}", "{\"blocks\":\"#a:b\",\"default\":[]}"}) {
+            assertTrue(parse(bad).result().isEmpty(), bad);
+        }
     }
 }

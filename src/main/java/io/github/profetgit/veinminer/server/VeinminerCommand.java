@@ -77,6 +77,8 @@ public final class VeinminerCommand {
             + ", durability " + v.durability() + ", diagonal " + v.diagonal() + ", animation " + v.animation() + ", visit_cap " + v.visitCap()
             + ", chains running " + Chain.count()), false);
         src.sendSuccess(() -> Component.literal(Groups.report()), false);
+        String off = String.join(", ", Groups.sizes().keySet().stream().filter(g -> !v.groupOn(g)).toList());
+        src.sendSuccess(() -> Component.literal("groups off: " + (off.isEmpty() ? "none" : off)), false);
         return 1;
     }
 }

@@ -26,6 +26,7 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.FallingBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -386,6 +387,7 @@ public final class Chain {
         } else {
             dropStand(n);
             if (r != Vein.Result.SKIPPED) halt(r);
+            fall(n.pos);
         }
     }
 
@@ -393,8 +395,26 @@ public final class Chain {
     private void halt(Vein.Result why) {
         stopped = true;
         stop = why;
-        remaining.clear();
+        release();
         for (Node n : nodes) if (n.turned < 0) dropStand(n);
+    }
+
+    /**
+     * The blocks not yet turned stop being claimed. Falling blocks among them had their scheduled tick dropped while claimed
+     * (see {@code FallingBlockMixin}), so each gets a new one and none hovers.
+     */
+    private void release() {
+        if (remaining.isEmpty()) return;
+        List<BlockPos> left = new ArrayList<>();
+        for (Node n : nodes) if (n.turned < 0 && remaining.contains(n.pos.asLong())) left.add(n.pos);
+        remaining.clear();
+        for (BlockPos p : left) fall(p);
+    }
+
+    private void fall(BlockPos pos) {
+        if (!Vein.loaded(level, pos)) return;
+        BlockState st = level.getBlockState(pos);
+        if (st.getBlock() instanceof FallingBlock) level.scheduleTick(pos, st.getBlock(), 2);
     }
 
     /** Entity ids only grow, so what the break dropped is whatever near the block has an id above the mark taken before it. */
@@ -552,7 +572,7 @@ public final class Chain {
     private void end(boolean message) {
         if (finished) return;
         finished = true;
-        remaining.clear();
+        release();
         for (Ghost g : ghosts) land(g);
         ghosts.clear();
         payXp();

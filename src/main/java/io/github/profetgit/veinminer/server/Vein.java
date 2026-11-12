@@ -128,8 +128,18 @@ public final class Vein {
             player.sendOverlayMessage(Component.translatableWithFallback("veinminer.msg.veined", "Veined " + (mined + 1) + " " + group, mined + 1, group));
         }
         if (stop == Result.WORN) {
-            player.sendOverlayMessage(Component.translatableWithFallback("veinminer.msg.worn", "Pickaxe is too worn"));
+            player.sendOverlayMessage(Component.translatableWithFallback("veinminer.msg.worn", "Tool is too worn"));
         }
+    }
+
+    /**
+     * Whether {@code tool} may mine {@code state} as a vein of {@code group}. Pickaxe groups (the ores): an item of
+     * {@code #veinminer:tools} that is correct for the block. {@code "tool": "correct"} groups (dirt, sand...): the stack's own
+     * tool rules make it correct for the block; the player-level check would say yes to any item for a block that needs no tool.
+     */
+    public static boolean toolFits(ServerPlayer player, ItemStack tool, BlockState state, String group) {
+        if (GroupData.tool(group) == GroupDef.Tool.CORRECT) return tool.isCorrectToolForDrops(state);
+        return tool.is(Hooks.TOOLS) && player.hasCorrectToolForDrops(state);
     }
 
     /**
@@ -143,7 +153,7 @@ public final class Vein {
         ServerLevel level = player.level();
         if (!loaded(level, pos) || !level.mayInteract(player, pos)) return Result.SKIPPED;
         BlockState state = level.getBlockState(pos);
-        if (state.hasBlockEntity() || !group.equals(Groups.of(state.getBlock())) || !player.hasCorrectToolForDrops(state)) return Result.SKIPPED;
+        if (state.hasBlockEntity() || !group.equals(Groups.of(state.getBlock())) || !toolFits(player, tool, state, group)) return Result.SKIPPED;
         int damage = tool.getDamageValue();
         boolean was = running;
         running = true;

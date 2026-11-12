@@ -1,0 +1,5 @@
+{
+  "blocks": "#veinminer:ground/clay",
+  "tool": "correct",
+  "default": false
+}

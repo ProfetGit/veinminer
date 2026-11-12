@@ -24,7 +24,7 @@ public final class Config {
         public static final Values DEFAULTS = new Values(64, true, 0, true, true, true, true, 4096, Map.of());
 
         public boolean groupOn(String group) {
-            return groups.getOrDefault(group, true);
+            return groups.getOrDefault(group, GroupData.defaultOn(group));
         }
 
         public Values maxBlocks(int v) {
@@ -113,7 +113,7 @@ public final class Config {
           "require_sneak": true,
           // 0: loot lands in front of the player's feet; 1: at the player's feet
           "drops": 0,
-          // true: every extra block costs pickaxe durability (Unbreaking applies); a vein never breaks the pickaxe
+          // true: every extra block costs tool durability (Unbreaking applies); a vein never breaks the tool
           "durability": true,
           // true: veins also run through the 20 diagonal neighbours of a block
           "diagonal": true,
@@ -123,7 +123,7 @@ public final class Config {
           "feedback": true,
           // Most cells one scan looks at (64..65536)
           "visit_cap": 4096,
-          // Switch one group off with "tin": false; groups missing here are on
+          // Switch a group on or off: "tin": false, "dirt": true. Groups missing here use their default: ores on; dirt, sand, gravel, clay off
           "groups": {}
         }
         """;

@@ -1,5 +1,5 @@
 {
   "veinminer.name": "Veinminer",
   "veinminer.msg.veined": "Veined %s %s",
-  "veinminer.msg.worn": "Pickaxe is too worn"
+  "veinminer.msg.worn": "Tool is too worn"
 }

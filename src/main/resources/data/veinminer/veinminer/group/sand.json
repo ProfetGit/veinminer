@@ -1,0 +1,5 @@
+{
+  "blocks": "#veinminer:ground/sand",
+  "tool": "correct",
+  "default": false
+}

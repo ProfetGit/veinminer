@@ -13,10 +13,18 @@ import net.minecraft.world.level.block.Block;
 import org.jspecify.annotations.Nullable;
 
 /**
- * One {@code data/<ns>/veinminer/group/<id>.json} (PRD 5.3): {@code {"blocks": "#ns:tag", "max_blocks": 1..1024?}}.
+ * One {@code data/<ns>/veinminer/group/<id>.json} (PRD 5.3): {@code {"blocks": "#ns:tag", "max_blocks": 1..1024?,
+ * "tool": "pickaxe"|"correct"?, "default": true|false?}}. {@code tool} says what starts a vein of the group: a pickaxe-tag item
+ * that is correct for the block (default), or any stack whose own tool rules make it correct for the block. {@code default}
+ * is whether the group is on while {@code config/veinminer.json} has no entry for it.
  * {@code xp_toggle} is accepted and ignored: XP is whatever the real break path pays, there is nothing to toggle.
  */
-public record GroupDef(TagKey<Block> blocks, @Nullable Integer maxBlocks) {
+public record GroupDef(TagKey<Block> blocks, @Nullable Integer maxBlocks, Tool tool, boolean defaultOn) {
+    public enum Tool {
+        PICKAXE,
+        CORRECT
+    }
+
     public static final int MAX_CAP = 1024;
     public static final Codec<GroupDef> CODEC = ExtraCodecs.JSON.flatXmap(GroupDef::parse, d -> DataResult.error(() -> "group files are read-only"));
 
@@ -35,6 +43,20 @@ public record GroupDef(TagKey<Block> blocks, @Nullable Integer maxBlocks) {
             }
             cap = m.getAsInt();
         }
-        return DataResult.success(new GroupDef(TagKey.create(Registries.BLOCK, tag), cap));
+        Tool tool = Tool.PICKAXE;
+        JsonElement t = o.get("tool");
+        if (t != null && !t.isJsonNull()) {
+            if (!(t instanceof JsonPrimitive n) || !n.isString() || !(n.getAsString().equals("pickaxe") || n.getAsString().equals("correct"))) {
+                return DataResult.error(() -> "\"tool\" must be \"pickaxe\" or \"correct\"");
+            }
+            tool = n.getAsString().equals("correct") ? Tool.CORRECT : Tool.PICKAXE;
+        }
+        boolean on = true;
+        JsonElement d = o.get("default");
+        if (d != null && !d.isJsonNull()) {
+            if (!(d instanceof JsonPrimitive n) || !n.isBoolean()) return DataResult.error(() -> "\"default\" must be true or false");
+            on = n.getAsBoolean();
+        }
+        return DataResult.success(new GroupDef(TagKey.create(Registries.BLOCK, tag), cap, tool, on));
     }
 }

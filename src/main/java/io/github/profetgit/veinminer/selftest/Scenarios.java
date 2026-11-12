@@ -50,6 +50,14 @@ final class Scenarios {
                 .server(GroupsScene::afterReload);
         }
         if (only.equals("all") || only.contains("blockentity")) s.server(BlockEntityScene::run);
+        if (only.equals("all") || only.contains("ground")) {
+            s.server(GroundScene::instant);
+            for (String name : GroundScene.LIVE) {
+                s.server(server -> GroundScene.start(server, name))
+                    .until("the ground case " + name, 900, mc -> GroundScene.poll(mc, name))
+                    .server(server -> GroundScene.finish(server, name));
+            }
+        }
         if (M4.want(only, "conflict")) s.server(Gates::conflict);
         if (M4.want(only, "fake")) s.server(Gates::fake);
         if (M4.want(only, "claims")) s.server(Gates::claims);

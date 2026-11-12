@@ -116,8 +116,7 @@ public final class Hooks {
         if (!cfg.groupOn(group)) return;
         if (cfg.requireSneak() && !player.isShiftKeyDown()) return;
         ItemStack tool = player.getMainHandItem();
-        if (!tool.is(TOOLS)) return;
-        if (be != null || !player.hasCorrectToolForDrops(state)) return;
+        if (be != null || !Vein.toolFits(player, tool, state, group)) return;
         PENDING.add(new Start(level, player, pos.immutable(), state, group, tool, mark >= 0 ? mark : Chain.mark(level)));
     }
 

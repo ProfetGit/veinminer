@@ -1,0 +1,5 @@
+{
+  "blocks": "#veinminer:ground/gravel",
+  "tool": "correct",
+  "default": false
+}

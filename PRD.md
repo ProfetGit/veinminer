@@ -276,15 +276,21 @@ Judge: pacing, landing, sound. Tunables: `/veinminer tune delay_k|arc|squash <va
 - The 1.3.x line is frozen, not removed.
 
 ## 15. Roadmap
-- 2.1: any block (logs, stone, sand) via data groups with their own tool check; vein preview outline for modded
-  clients; `shape` modes (tunnel, 3×3).
-- 2.2: client mesh for modded viewers (Timber's drawing path), no display cap.
+- 2.1 (2026-11-12, from a player's comment: "You shouldn't have to be a coder to config a mod. I just wanna vein mine
+  dirt, sand, clay, and gravel"):
+  - In-game settings screen: Mod Menu on Fabric (compileOnly, optional), Mods → Config on NeoForge/Forge. It edits
+    `config/veinminer.json` (singleplayer and LAN host apply live; on a remote server it says ops use `/veinminer set`).
+  - Shovel groups dirt (+grass, podzol, mycelium), sand, gravel, clay, off by default. Group files gain
+    `"tool": "pickaxe"|"correct"` (correct = the held item's own tool rules) and `"default": bool`.
+  - Sand and gravel in a running chain never fall; leftovers of a stopped chain fall.
+- 2.2: vein preview outline for modded clients; `shape` modes (tunnel, 3×3); client mesh for modded viewers (Timber's
+  drawing path), no display cap.
 
 ## 16. Cut
-- Aim preview and shape modes (vs FTB Ultimine): not the promise; 2.1 at most.
-- Non-ore blocks: scope decision; ores only.
-- The 1.3.3 clickable settings menu: replaced by `/veinminer status` and the config file.
-- A client install with extra behaviour: not needed for the promise.
+- Aim preview and shape modes (vs FTB Ultimine): not the promise; 2.2 at most.
+- Non-ore blocks: ores only in 2.0; 2.1 adds the four shovel groups and the data-group tool rule.
+- The 1.3.3 clickable chat menu: replaced by `/veinminer status`, the config file and (2.1) the settings screen.
+- A client install with extra gameplay behaviour: not needed for the promise (the 2.1 screen only edits the config).
 
 ## 17. Prior art
 Checked 2026-11-05 by web search (download counts not all visible):
