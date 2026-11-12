@@ -30,7 +30,7 @@ final class ScreenScene {
     private ScreenScene() {}
 
     static boolean wanted(String only) {
-        return only.contains("screen");
+        return only.equals("all") || only.contains("screen");
     }
 
     /** Before the world is created: open and close the screen on the title screen. */
@@ -41,19 +41,25 @@ final class ScreenScene {
             })
             .waitTicks(10)
             .check("screen: opens from the title screen", mc -> mc.gui.screen() == screen && widget("Sneak to vein") != null ? null : "screen " + mc.gui.screen())
+            .check("screen: dirt shows its default off before any world", ScreenScene::dirtOff)
             .run(mc -> screen.onClose())
             .waitTicks(5)
             .check("screen: closes back to the title screen", mc -> mc.gui.screen() instanceof TitleScreen ? null : "screen " + mc.gui.screen());
     }
 
     static void world(Script s) {
-        s.server(server -> Config.save(Config.Values.DEFAULTS.group("dirt", false)))
+        s.server(server -> Config.save(Config.Values.DEFAULTS))
             .run(mc -> {
                 screen = new VeinminerScreen(null);
                 mc.gui.setScreen(screen);
             })
             .waitTicks(40)
             .check("screen: opens in the world with every row", ScreenScene::rows)
+            .check("screen: dirt shows its default off in the world", ScreenScene::dirtOff)
+            .check("screen: one options list after the server's groups arrived", mc -> {
+                long lists = screen.children().stream().filter(c -> c instanceof net.minecraft.client.gui.components.OptionsList).count();
+                return lists == 1 ? null : lists + " option lists";
+            })
             .capture("screen-top", 1)
             .until("the top still written", 200, mc -> !SelfTest.capturing())
             .run(ScreenScene::scrollToGroups)
@@ -77,6 +83,13 @@ final class ScreenScene {
             if (widget(row) == null) return "no row " + row;
         }
         return null;
+    }
+
+    private static String dirtOff(Minecraft mc) {
+        AbstractWidget dirt = widget("Dirt and grass");
+        if (dirt == null) return "no Dirt and grass row";
+        String d = dirt.getMessage().getString();
+        return d.contains("OFF") ? null : "dirt '" + d + "'";
     }
 
     private static void scrollToGroups(Minecraft mc) {

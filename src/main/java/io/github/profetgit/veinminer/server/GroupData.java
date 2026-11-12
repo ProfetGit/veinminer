@@ -73,10 +73,13 @@ public final class GroupData {
         return g != null ? g.tool() : GroupDef.Tool.PICKAXE;
     }
 
+    /** The shipped groups that are off by default, for a lookup before any data loaded (the settings screen on the title screen or a remote server). */
+    private static final java.util.Set<String> SHIPPED_OFF = java.util.Set.of("dirt", "sand", "gravel", "clay");
+
     /** Whether {@code group} is on while the config has no entry for it: off when any file of that name says {@code "default": false}; built-in ores are on. */
     public static boolean defaultOn(String group) {
         Group g = groups.get(group);
-        return g == null || g.defaultOn();
+        return g != null ? g.defaultOn() : !SHIPPED_OFF.contains(group);
     }
 
     /** Replaces the data groups with those parsed from {@code defs} (keys are file ids) and rebuilds the block table. */

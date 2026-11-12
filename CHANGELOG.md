@@ -1,5 +1,17 @@
 # Changelog
 
+## 2.1.0 — unreleased
+
+### Added
+- **Settings screen.** All settings in one menu, no file editing: on Fabric through Mod Menu's configure button (Mod Menu is optional), on NeoForge and Forge through the mod list's Config button. It edits your single-player settings, which apply right away in your world and on a LAN world you host. On a server, its operators still use `/veinminer set`.
+- **Dirt, sand, gravel and clay.** Sneak and dig with any shovel, modded ones too, and the whole patch comes out in the same chain. Dirt includes grass, podzol and mycelium. These four are off by default: turn them on in the settings screen or with `/veinminer set groups.dirt true`. A pickaxe never veins them, and suspicious sand and gravel are left alone.
+- Sand and gravel stay put while the chain runs, so they don't fall away before their turn. If the chain stops early, what's left falls as normal.
+- **Data groups** take `"tool": "correct"` (any tool that is right for the block, such as a shovel or an axe) and `"default": false` (the group starts off).
+
+### Changed
+- "Pickaxe is too worn" now says "Tool is too worn".
+- `/veinminer status` lists the groups that are off.
+
 ## 2.0.0 — 2026-11-05
 
 Veinminer is now a mod. It replaces the data pack and keeps the same chain: the vein pops block by block from the ore you mined, faster and faster, and the loot flies in an arc to land at your feet. It runs on Minecraft **26.3, 26.2, 1.21.1 and 1.20.1**, with **Fabric** (needs Fabric API), **Quilt**, **NeoForge** and **Forge**. On 1.20.1 one jar serves Forge and NeoForge.

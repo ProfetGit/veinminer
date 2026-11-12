@@ -37,6 +37,7 @@ public final class VeinminerScreen extends OptionsSubScreen {
     private Config.Values original;
     private Config.Values pending;
     private final Set<String> live = new TreeSet<>();
+    private final Set<String> shown = new java.util.HashSet<>();
 
     public VeinminerScreen(Screen parent) {
         super(parent, Minecraft.getInstance().options, Component.literal("Veinminer"));
@@ -46,10 +47,7 @@ public final class VeinminerScreen extends OptionsSubScreen {
         original = pending = Config.get();
         if (server != null) {
             try {
-                server.submit(() -> new ArrayList<>(Groups.sizes().keySet())).thenAccept(names -> mc.execute(() -> {
-                    live.addAll(names);
-                    if (mc.gui.screen() == this) rebuildWidgets();
-                }));
+                server.submit(() -> new ArrayList<>(Groups.sizes().keySet())).thenAccept(names -> mc.execute(() -> addLive(names)));
             } catch (RuntimeException e) {
                 VeinminerClient.LOG.warn("Veinminer: could not ask the server for its groups ({})", e.toString());
             }
@@ -78,13 +76,14 @@ public final class VeinminerScreen extends OptionsSubScreen {
     @Override
 //?}
     protected void addOptions() {
+        shown.clear();
         Minecraft mc = Minecraft.getInstance();
         if (mc.getSingleplayerServer() == null && mc.level != null) {
-            Compat.header(list, "On a server, its operators set these with /veinminer set. These are your single-player settings.");
+            Compat.header(list, "On a server, the server's own settings apply");
         }
         Compat.header(list, "Veining");
         List<OptionInstance<?>> veining = new ArrayList<>();
-        veining.add(bool("Sneak to vein", "Veins only start while you sneak. Off: every ore you mine starts one.", pending.requireSneak(), v -> pending = pending.requireSneak(v)));
+        veining.add(bool("Sneak to vein", "Veins only start while you sneak. Off: every block you mine starts one.", pending.requireSneak(), v -> pending = pending.requireSneak(v)));
         veining.add(new OptionInstance<>("Most blocks", tip("The most blocks one vein mines, the one you struck included."),
             (caption, v) -> Component.literal("Most blocks: " + STEPS[v]), new OptionInstance.IntRange(0, STEPS.length - 1), step(pending.maxBlocks()),
             v -> pending = pending.maxBlocks(STEPS[v])));
@@ -113,8 +112,23 @@ public final class VeinminerScreen extends OptionsSubScreen {
     }
 
     private OptionInstance<Boolean> group(String name) {
+        shown.add(name);
         String label = label(name);
-        return bool(label, "Veins of " + label.toLowerCase(Locale.ROOT) + " mine together.", pending.groupOn(name), v -> pending = pending.group(name, v));
+        String lower = label.toLowerCase(Locale.ROOT);
+        String tooltip = EARTH.containsKey(name) ? "Mine a whole patch of " + lower + " at once with any shovel." : "Mine the whole vein of " + lower + " at once.";
+        return bool(label, tooltip, pending.groupOn(name), v -> pending = pending.group(name, v));
+    }
+
+    /**
+     * The server's group list arrived: rows for groups not shown yet go at the end of the list (the ores come last).
+     * Never {@code rebuildWidgets()}: on 26.x it adds a second options list to the layout and the old one stays drawn behind.
+     */
+    private void addLive(List<String> names) {
+        live.addAll(names);
+        if (list == null) return;
+        List<OptionInstance<?>> more = new ArrayList<>();
+        for (String g : oreNames()) if (!shown.contains(g)) more.add(group(g));
+        if (!more.isEmpty()) row(more);
     }
 
     private List<String> oreNames() {
