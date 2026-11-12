@@ -8,12 +8,14 @@ final class Scenarios {
 
     static Script build() {
         Script s = new Script();
+        String only = System.getProperty("veinminer.selftest.scene", "all");
+        if (ScreenScene.wanted(only)) ScreenScene.title(s);
         s.run(mc -> TestCompat.createWorld(mc, "veinminertest-" + System.currentTimeMillis()))
             .until("world to load", 2400, mc -> mc.player != null && mc.level != null && mc.gui.screen() == null)
             .waitTicks(40)
             .check("world loaded", mc -> mc.player.isAlive() ? null : "player not alive");
-        String only = System.getProperty("veinminer.selftest.scene", "all");
         if (only.equals("all") || only.contains("smoke")) smoke(s);
+        if (ScreenScene.wanted(only)) ScreenScene.world(s);
         if (only.equals("all") || only.contains("modded")) s.server(Modded::run);
         if (only.equals("all") || only.contains("fair")) s.server(Fair::run);
         if (only.equals("all") || List.of(only.split(",")).contains("chain")) {

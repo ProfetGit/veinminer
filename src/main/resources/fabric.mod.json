@@ -18,6 +18,9 @@
     ],
     "client": [
       "io.github.profetgit.veinminer.platform.fabric.FabricClientEntry"
+    ],
+    "modmenu": [
+      "io.github.profetgit.veinminer.platform.fabric.ModMenuEntry"
     ]
   },
   "mixins": [

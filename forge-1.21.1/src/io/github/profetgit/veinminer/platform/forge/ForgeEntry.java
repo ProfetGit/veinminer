@@ -35,6 +35,7 @@ import net.minecraftforge.registries.RegisterEvent;
 public final class ForgeEntry implements Platform {
     public ForgeEntry() {
         Veinminer.init(this);
+        if (net.minecraftforge.fml.loading.FMLEnvironment.dist.isClient()) ForgeClient.register();
         IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
         // each registry takes its entries during its own event
         modBus.addListener((RegisterEvent e) -> {
