@@ -12,7 +12,9 @@ import java.util.TreeSet;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.OptionInstance;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.OptionsList;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.network.chat.Component;
@@ -38,13 +40,27 @@ public final class VeinminerScreen extends OptionsSubScreen {
     private Config.Values pending;
     private final Set<String> live = new TreeSet<>();
     private final Set<String> shown = new java.util.HashSet<>();
+    private final Set<String> customSeen = new java.util.HashSet<>();
+    private boolean handedOver;
 
     public VeinminerScreen(Screen parent) {
+        this(parent, null, null, Set.of());
+    }
+
+    private VeinminerScreen(Screen parent, Config.Values original, Config.Values pending, Set<String> seen) {
         super(parent, Minecraft.getInstance().options, Component.literal("Veinminer"));
         Minecraft mc = Minecraft.getInstance();
         IntegratedServer server = mc.getSingleplayerServer();
-        if (server == null) Config.load();
-        original = pending = Config.get();
+        if (pending == null) {
+            if (server == null) Config.load();
+            this.original = this.pending = Config.get();
+        } else {
+            this.original = original;
+            this.pending = pending;
+        }
+        customSeen.addAll(seen);
+        customSeen.addAll(this.original.customBlocks());
+        customSeen.addAll(this.pending.customBlocks());
         if (server != null) {
             try {
                 server.submit(() -> new ArrayList<>(Groups.sizes().keySet())).thenAccept(names -> mc.execute(() -> addLive(names)));
@@ -62,8 +78,11 @@ public final class VeinminerScreen extends OptionsSubScreen {
         list = new OptionsList(minecraft, width, height, 32, height - 32, 25);
         addOptions();
         addWidget(list);
-        addRenderableWidget(net.minecraft.client.gui.components.Button.builder(net.minecraft.network.chat.CommonComponents.GUI_DONE, b -> onClose())
-            .bounds(width / 2 - 100, height - 27, 200, 20).build());
+        addRenderableWidget(Button.builder(Component.literal("Add or remove blocks..."), b -> openPicker())
+            .tooltip(Tooltip.create(Component.literal("Pick any block, or a block tag, to mine as a vein.")))
+            .bounds(width / 2 - 155, height - 27, 150, 20).build());
+        addRenderableWidget(Button.builder(net.minecraft.network.chat.CommonComponents.GUI_DONE, b -> onClose())
+            .bounds(width / 2 + 5, height - 27, 150, 20).build());
     }
 
     @Override
@@ -101,6 +120,15 @@ public final class VeinminerScreen extends OptionsSubScreen {
         for (String g : EARTH_ORDER) earth.add(group(g));
         row(earth);
 
+        Compat.header(list, "Your blocks");
+        if (pending.customBlocks().isEmpty()) Compat.header(list, "Add any block, or a tag like #logs, and it veins too.");
+        List<OptionInstance<?>> mine = new ArrayList<>();
+        for (String entry : pending.customBlocks()) mine.add(custom(entry));
+        if (!mine.isEmpty()) row(mine);
+        Compat.button(list, Button.builder(Component.literal("Add or remove blocks..."), b -> openPicker())
+            .tooltip(Tooltip.create(Component.literal("Pick any block, or a block tag, to mine as a vein.")))
+            .width(310).build());
+
         Compat.header(list, "Ores");
         List<OptionInstance<?>> ores = new ArrayList<>();
         for (String g : oreNames()) ores.add(group(g));
@@ -109,6 +137,28 @@ public final class VeinminerScreen extends OptionsSubScreen {
 
     private void row(List<OptionInstance<?>> options) {
         list.addSmall(options.toArray(new OptionInstance<?>[0]));
+    }
+
+    private OptionInstance<Boolean> custom(String entry) {
+        shown.add(entry);
+        String label = BlockIndex.label(entry);
+        String tooltip = entry.startsWith("#") ? "Mine connected blocks of this tag at once with the right tool." : "Mine a whole patch of " + label.toLowerCase(Locale.ROOT) + " at once with the right tool.";
+        return bool(label, tooltip, pending.groupOn(entry), v -> pending = pending.group(entry, v));
+    }
+
+    private void openPicker() {
+        handedOver = true;
+        minecraft.gui.setScreen(new BlockPickerScreen(this, pending.customBlocks()));
+    }
+
+    /** The settings screen again with the picker's list; this one is dropped without saving, the new one saves on close. */
+    Screen withBlocks(List<String> entries) {
+        Config.Values next = pending.customBlocks(entries);
+        Map<String, Boolean> groups = new java.util.HashMap<>(next.groups());
+        for (String gone : pending.customBlocks()) if (!entries.contains(gone)) groups.remove(gone);
+        next = new Config.Values(next.maxBlocks(), next.requireSneak(), next.drops(), next.durability(), next.diagonal(), next.animation(),
+            next.feedback(), next.visitCap(), Map.copyOf(groups), next.customBlocks());
+        return new VeinminerScreen(lastScreen, original, next, customSeen);
     }
 
     private OptionInstance<Boolean> group(String name) {
@@ -136,6 +186,8 @@ public final class VeinminerScreen extends OptionsSubScreen {
         extra.addAll(live);
         extra.removeAll(ORES);
         extra.removeAll(EARTH.keySet());
+        extra.removeAll(customSeen);
+        extra.removeIf(n -> n.startsWith("#") || customSeen.contains("minecraft:" + n));
         List<String> all = new ArrayList<>(ORES);
         all.addAll(extra);
         return all;
@@ -155,7 +207,7 @@ public final class VeinminerScreen extends OptionsSubScreen {
         };
     }
 
-    private static String pretty(String path) {
+    static String pretty(String path) {
         StringBuilder out = new StringBuilder();
         for (String word : path.split("_")) {
             if (word.isEmpty()) continue;
@@ -188,7 +240,7 @@ public final class VeinminerScreen extends OptionsSubScreen {
 
     @Override
     public void removed() {
-        if (!pending.equals(original)) {
+        if (!handedOver && !pending.equals(original)) {
             Config.Values next = pending;
             original = next;
             save(Minecraft.getInstance(), next);

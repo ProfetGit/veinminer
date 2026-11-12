@@ -16,6 +16,7 @@ final class Scenarios {
             .check("world loaded", mc -> mc.player.isAlive() ? null : "player not alive");
         if (only.equals("all") || only.contains("smoke")) smoke(s);
         if (ScreenScene.wanted(only)) ScreenScene.world(s);
+        if (ScreenScene.pickerWanted(only)) ScreenScene.picker(s);
         if (only.equals("all") || only.contains("modded")) s.server(Modded::run);
         if (only.equals("all") || only.contains("fair")) s.server(Fair::run);
         if (only.equals("all") || List.of(only.split(",")).contains("chain")) {
