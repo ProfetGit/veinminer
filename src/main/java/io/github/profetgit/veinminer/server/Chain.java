@@ -55,6 +55,7 @@ public final class Chain {
         private Display.BlockDisplay stand;
         private int[] offset = StandKeys.offset("0");
         private int turned = -1;
+        private int light = -1;
 
         private Node(BlockPos pos, int delay) {
             this.pos = pos;
@@ -104,6 +105,9 @@ public final class Chain {
     private Vein.Result stop;
     private boolean stopped, finished;
 
+    /** The light at the opened face; a block deep in the vein is never darker than this less one, since the light engine lags behind the vanishing blocks. */
+    private final net.minecraft.util.Brightness open;
+
     private Chain(ServerLevel level, ServerPlayer player, ItemStack tool, String group, BlockPos origin, List<BlockPos> cells, boolean own) {
         this.level = level;
         this.player = player;
@@ -128,6 +132,7 @@ public final class Chain {
         Vec3 eyes = player.getEyePosition();
         face = StandKeys.face(eyes.x - center.x, eyes.y - center.y, eyes.z - center.z);
         landing = landingSpot(center, eyes);
+        open = Fx.lightAround(level, origin);
     }
 
     /** True while a chain runs: its blocks cannot start or join another vein. */
@@ -288,6 +293,11 @@ public final class Chain {
                 standing.remove(i);
                 continue;
             }
+            net.minecraft.util.Brightness light = lightFor(n);
+            if (light.pack() != n.light) {
+                n.light = light.pack();
+                Fx.setLight(n.stand, light);
+            }
             for (StandKeys.Key k : StandKeys.KEYS) if (k.tick() == o) Fx.key(n.stand, n.offset, k, Tune.squash());
             i++;
         }
@@ -320,6 +330,18 @@ public final class Chain {
         for (Node n : byDelay.get(age + 1)) if (n.stand == null && n.turned < 0 && remaining.contains(n.pos.asLong())) prep(n);
     }
 
+    /** A loot ghost starts inside the wall, where the light is 0, and flies out: it carries the light of the opened face or of where it lands, whichever is brighter. */
+    private net.minecraft.util.Brightness ghostLight(Vec3 spot) {
+        BlockPos cell = BlockPos.containing(spot);
+        net.minecraft.util.Brightness at = new net.minecraft.util.Brightness(level.getBrightness(net.minecraft.world.level.LightLayer.BLOCK, cell), level.getBrightness(net.minecraft.world.level.LightLayer.SKY, cell));
+        return new net.minecraft.util.Brightness(Math.max(at.block(), open.block()), Math.max(at.sky(), open.sky()));
+    }
+
+    private net.minecraft.util.Brightness lightFor(Node n) {
+        net.minecraft.util.Brightness own = Fx.lightAround(level, n.pos);
+        return new net.minecraft.util.Brightness(Math.max(own.block(), open.block() - 1), Math.max(own.sky(), open.sky() - 1));
+    }
+
     private void prep(Node n) {
         if (!Vein.loaded(level, n.pos)) return;
         BlockState st = level.getBlockState(n.pos);
@@ -339,7 +361,9 @@ public final class Chain {
             }
         }
         n.offset = StandKeys.offset(cell);
-        n.stand = Fx.stand(this, level, st, n.pos, n.offset);
+        net.minecraft.util.Brightness light = lightFor(n);
+        n.stand = Fx.stand(this, level, st, n.pos, n.offset, light);
+        n.light = light.pack();
     }
 
     /** An entity id that every entity created after this call is above (ids are per level from 1.21.2, one global counter before). */
@@ -452,7 +476,7 @@ public final class Chain {
         g.born = age;
         g.amp = (own ? Arc.BUMP_LO : Arc.BUMP_HI) * Tune.arc();
         g.spot = spotFor(start, hide, g.cube);
-        if (!hide) g.display = Fx.ghost(this, level, stack.copy(), g.spot, start.subtract(g.spot));
+        if (!hide) g.display = Fx.ghost(this, level, stack.copy(), g.spot, start.subtract(g.spot), ghostLight(g.spot));
         ghosts.add(g);
     }
 
@@ -555,8 +579,8 @@ public final class Chain {
         Node first = null;
         for (Node n : standing) {
             if (age - n.turned != StandKeys.VANISH + SOUND_LAG) continue;
-            Vec3 c = Vec3.atCenterOf(n.pos);
-            level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, n.state), c.x, c.y, c.z, 12, 0.25, 0.25, 0.25, 0);
+            Vec3 c = Vec3.atCenterOf(n.pos).add(n.offset[0] * 0.6, n.offset[1] * 0.6, n.offset[2] * 0.6);
+            level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, n.state), c.x, c.y, c.z, 12, 0.2, 0.2, 0.2, 0);
             level.sendParticles(ParticleTypes.SMALL_GUST, c.x, c.y, c.z, 1, 0.15, 0.15, 0.15, 0);
             if (first == null) first = n;
         }

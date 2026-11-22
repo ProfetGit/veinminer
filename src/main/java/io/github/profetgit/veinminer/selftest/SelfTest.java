@@ -70,7 +70,31 @@ public final class SelfTest {
         if (index >= steps.size()) finish(mc);
     }
 
+    private static boolean timing;
+    private static long lastFrameNs;
+    private static final java.util.ArrayList<Long> FRAME_NS = new java.util.ArrayList<>();
+
+    /** Starts (or restarts) recording the time between rendered frames. */
+    static void frameTimes(boolean on) {
+        timing = on;
+        lastFrameNs = 0;
+        if (on) FRAME_NS.clear();
+    }
+
+    /** The recorded frame times in ms, sorted. */
+    static double[] frameMs() {
+        double[] a = new double[FRAME_NS.size()];
+        for (int i = 0; i < a.length; i++) a[i] = FRAME_NS.get(i) / 1e6;
+        java.util.Arrays.sort(a);
+        return a;
+    }
+
     public static void onFrame(Minecraft mc) {
+        if (timing) {
+            long now = System.nanoTime();
+            if (lastFrameNs != 0) FRAME_NS.add(now - lastFrameNs);
+            lastFrameNs = now;
+        }
         if (captureLeft <= 0) return;
         Path out = Path.of(OUT, "frames", captureName, String.format("f%03d.png", captureFrame++));
         captureLeft--;

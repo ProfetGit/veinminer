@@ -45,6 +45,7 @@ final class Scenarios {
                 if (only.equals("chainview") || only.contains(subject)) chainView(s, subject);
             }
         }
+        if (only.contains("chainperf")) chainPerf(s);
         if (only.equals("all") || only.contains("groups")) {
             s.server(GroupsScene::run)
                 .server(GroupsScene::startReload)
@@ -109,6 +110,43 @@ final class Scenarios {
             .until(subject + " frames written", 600, mc -> !SelfTest.capturing())
             .server(server -> ChainView.finish(server, subject))
             .waitTicks(20);
+    }
+
+    /** Frame times on the client while a 64-block vein plays, against the same scene standing still. */
+    private static void chainPerf(Script s) {
+        s.server(server -> {
+                ChainView.vein(64);
+                ChainView.build(server, "small");
+            })
+            .waitTicks(100)
+            .run(ChainView::aim)
+            .waitTicks(20)
+            .run(mc -> SelfTest.frameTimes(true))
+            .waitTicks(100)
+            .run(mc -> report("idle"))
+            .run(mc -> SelfTest.frameTimes(true))
+            .server(ChainView::strike)
+            .until("the perf chain to end", 800, mc -> ChainView.done())
+            .waitTicks(30)
+            .run(mc -> report("vein"))
+            .run(mc -> SelfTest.frameTimes(false))
+            .server(server -> ChainView.finish(server, "small"))
+            .waitTicks(20);
+    }
+
+    private static void report(String what) {
+        double[] f = SelfTest.frameMs();
+        if (f.length < 20) {
+            SelfTest.record("chainperf " + what, false, "only " + f.length + " frames");
+            return;
+        }
+        double sum = 0;
+        for (double v : f) sum += v;
+        double p50 = f[f.length / 2], p99 = f[(int) (f.length * 0.99)], max = f[f.length - 1];
+        int slow = 0;
+        for (double v : f) if (v > 1000.0 / 60) slow++;
+        String line = String.format("%s: %d frames, avg %.0f fps, median %.1f ms, 1%% low %.0f fps (p99 %.1f ms), worst %.1f ms, %d frames over 16.7 ms", what, f.length, 1000.0 * f.length / sum, p50, 1000.0 / p99, p99, max, slow);
+        SelfTest.record("chainperf " + what, true, line);
     }
 
     private static void smoke(Script s) {

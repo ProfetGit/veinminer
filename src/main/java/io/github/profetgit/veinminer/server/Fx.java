@@ -51,14 +51,14 @@ public final class Fx {
     }
 
     /** A stand-in for the block at {@code block}, standing in the cell {@code block + n}, pose = the block's own place, a hair larger. */
-    static Display.BlockDisplay stand(Chain owner, ServerLevel level, BlockState state, BlockPos block, int[] n) {
+    static Display.BlockDisplay stand(Chain owner, ServerLevel level, BlockState state, BlockPos block, int[] n, Brightness light) {
         Display.BlockDisplay d = new Display.BlockDisplay(EntityTypes.BLOCK_DISPLAY, level);
         d.addTag(TAG);
         d.snapTo(block.getX() + n[0], block.getY() + n[1], block.getZ() + n[2]);
         ((BlockDisplayAccess) d).veinminer$setBlockState(state);
         double s = 1 + 2 * StandKeys.PAD;
         ((DisplayAccess) d).veinminer$setTransformation(of(-n[0] - StandKeys.PAD, -n[1] - StandKeys.PAD, -n[2] - StandKeys.PAD, NONE, s, s, s));
-        ((DisplayAccess) d).veinminer$setBrightnessOverride(lightAround(level, block));
+        ((DisplayAccess) d).veinminer$setBrightnessOverride(light);
         ((DisplayAccess) d).veinminer$setGlowColorOverride(StandKeys.MARK);
         level.addFreshEntity(d);
         LIVE.put(d, owner);
@@ -66,20 +66,25 @@ public final class Fx {
     }
 
     /**
-     * The light the real block shows, taken once while it still stands: the brightest of its own cell and the six around it.
-     * Pinned on the stand-in so it never re-lights when the block turns to air and the light floods in.
+     * The light the real block shows: the brightest of the six cells around it (a block face takes its light from the cell
+     * in front of it, never from its own cell). Re-read every tick by the chain, so a block deep in the vein lights up as the
+     * ones in front of it vanish, as it would without the animation, and never flickers when its own cell turns to air.
      */
-    private static Brightness lightAround(ServerLevel level, BlockPos block) {
+    static Brightness lightAround(ServerLevel level, BlockPos block) {
         int b = 0, s = 0;
         BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos();
-        for (int i = 0; i < 7; i++) {
-            int[] o = i == 0 ? new int[]{0, 0, 0} : StandKeys.offset(StandKeys.ORDER[i - 1]);
+        for (String c : StandKeys.ORDER) {
+            int[] o = StandKeys.offset(c);
             p.set(block.getX() + o[0], block.getY() + o[1], block.getZ() + o[2]);
             if (level.isOutsideBuildHeight(p) || !level.hasChunkAt(p)) continue;
             b = Math.max(b, level.getBrightness(LightLayer.BLOCK, p));
             s = Math.max(s, level.getBrightness(LightLayer.SKY, p));
         }
         return new Brightness(b, s);
+    }
+
+    static void setLight(Display d, Brightness light) {
+        ((DisplayAccess) d).veinminer$setBrightnessOverride(light);
     }
 
     /** One squash, stretch or vanish key: about the block centre, back by the cell offset. */
@@ -90,7 +95,7 @@ public final class Fx {
     }
 
     /** A ghost parked at {@code at}, invisible (scale 0), translated {@code from} away so a pop starts where the item spawned. */
-    static Display.ItemDisplay ghost(Chain owner, ServerLevel level, ItemStack stack, Vec3 at, Vec3 from) {
+    static Display.ItemDisplay ghost(Chain owner, ServerLevel level, ItemStack stack, Vec3 at, Vec3 from, Brightness light) {
         Display.ItemDisplay d = new Display.ItemDisplay(EntityTypes.ITEM_DISPLAY, level);
         d.addTag(TAG);
         d.addTag(GHOST_TAG);
@@ -101,6 +106,7 @@ public final class Fx {
 //? if >=1.20.2
         a.veinminer$setTeleportDuration(1);
         a.veinminer$setTransformation(of(from.x, from.y, from.z, NONE, 0, 0, 0));
+        a.veinminer$setBrightnessOverride(light);
         level.addFreshEntity(d);
         LIVE.put(d, owner);
         return d;

@@ -26,7 +26,11 @@ import net.minecraft.world.phys.Vec3;
  */
 final class ChainView {
     static final String[] SUBJECTS = {"small", "cave", "modded"};
-    private static final int VEIN = 30;
+    private static int VEIN = 30;
+
+    static void vein(int n) {
+        VEIN = n;
+    }
 
     private static Vec3 home;
     private static volatile boolean started;

@@ -3,7 +3,8 @@
 ## 2.1.1 — 2026-11-22
 
 ### Fixed
-- **No more colour change when a block turns into the chain animation.** The block that squashes and vanishes now keeps exactly the light of the block it replaced, so it no longer brightens or darkens as the vein opens up. On 26.2 and 26.3 with the mod installed on your side, it also gets the same face shading as a placed block (the sides and underside used to look slightly darker). Players without the mod on their side still get the steady light.
+- **No more colour change when a block turns into the chain animation.** The block that squashes and vanishes now keeps the light of the block it replaced, and it no longer brightens or darkens as the vein opens up. On 26.2 and 26.3 with the mod installed on your side, it also gets the same face shading as a placed block (the sides and underside used to look slightly darker).
+- **No more black blocks, loot and particles deep in a vein.** Ores buried behind other ores, the flying loot, and the break particles used to come out black, because the light inside the rock is zero. They now show at least the light of the face you opened. On 26.2 and 26.3 the particles need the mod on your side too.
 
 ## 2.1.0 — 2026-11-12
 

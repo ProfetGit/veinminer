@@ -6,7 +6,8 @@
   "client": [
     "BlockDisplayRendererMixin",
     "BlockDisplayStateMixin",
-    "MinecraftMixin"
+    "MinecraftMixin",
+    "ParticleLightMixin"
   ],
   "injectors": {
     "defaultRequire": 1
