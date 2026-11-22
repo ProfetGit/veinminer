@@ -4,6 +4,8 @@
   "package": "io.github.profetgit.veinminer.mixin",
   "compatibilityLevel": "JAVA_21",
   "client": [
+    "BlockDisplayRendererMixin",
+    "BlockDisplayStateMixin",
     "MinecraftMixin"
   ],
   "injectors": {

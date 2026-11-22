@@ -11,6 +11,12 @@ public interface DisplayAccess {
     @Invoker("setTransformation")
     void veinminer$setTransformation(Transformation transformation);
 
+    @Invoker("setBrightnessOverride")
+    void veinminer$setBrightnessOverride(net.minecraft.util.Brightness brightness);
+
+    @Invoker("setGlowColorOverride")
+    void veinminer$setGlowColorOverride(int color);
+
     @Invoker("setTransformationInterpolationDuration")
     void veinminer$setInterpolationDuration(int duration);
 

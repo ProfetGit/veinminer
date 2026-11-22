@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.Map;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Brightness;
+import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.entity.Display;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityTypes;
@@ -56,9 +58,28 @@ public final class Fx {
         ((BlockDisplayAccess) d).veinminer$setBlockState(state);
         double s = 1 + 2 * StandKeys.PAD;
         ((DisplayAccess) d).veinminer$setTransformation(of(-n[0] - StandKeys.PAD, -n[1] - StandKeys.PAD, -n[2] - StandKeys.PAD, NONE, s, s, s));
+        ((DisplayAccess) d).veinminer$setBrightnessOverride(lightAround(level, block));
+        ((DisplayAccess) d).veinminer$setGlowColorOverride(StandKeys.MARK);
         level.addFreshEntity(d);
         LIVE.put(d, owner);
         return d;
+    }
+
+    /**
+     * The light the real block shows, taken once while it still stands: the brightest of its own cell and the six around it.
+     * Pinned on the stand-in so it never re-lights when the block turns to air and the light floods in.
+     */
+    private static Brightness lightAround(ServerLevel level, BlockPos block) {
+        int b = 0, s = 0;
+        BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos();
+        for (int i = 0; i < 7; i++) {
+            int[] o = i == 0 ? new int[]{0, 0, 0} : StandKeys.offset(StandKeys.ORDER[i - 1]);
+            p.set(block.getX() + o[0], block.getY() + o[1], block.getZ() + o[2]);
+            if (level.isOutsideBuildHeight(p) || !level.hasChunkAt(p)) continue;
+            b = Math.max(b, level.getBrightness(LightLayer.BLOCK, p));
+            s = Math.max(s, level.getBrightness(LightLayer.SKY, p));
+        }
+        return new Brightness(b, s);
     }
 
     /** One squash, stretch or vanish key: about the block centre, back by the cell offset. */

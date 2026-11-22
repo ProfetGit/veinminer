@@ -20,6 +20,8 @@ public final class StandKeys {
     public static final int KILL = 12;
     /** A stand-in is this much larger per side while the real block is still there, so the two don't z-fight. */
     public static final double PAD = 0.003;
+    /** Glow colour override a stand-in carries (never shown, it is not glowing) so a client with the mod knows to shade it like terrain. */
+    public static final int MARK = 0x4E564D01;
 
     /** Cell names and offsets: in front of the block toward the miner first, then this order, else the block's own cell. */
     public static final String[] ORDER = {"yp", "xp", "xn", "zp", "zn", "yn"};
