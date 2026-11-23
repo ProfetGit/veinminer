@@ -6,8 +6,12 @@
   "client": [
     "BlockDisplayRendererMixin",
     "BlockDisplayStateMixin",
+    "ItemDisplayRendererMixin",
+    "ItemDisplayStateMixin",
     "MinecraftMixin",
-    "ParticleLightMixin"
+    "MovingBlockFeatureRendererMixin",
+    "ParticleLightMixin",
+    "RenderTypeFeatureRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1

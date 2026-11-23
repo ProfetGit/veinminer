@@ -38,7 +38,7 @@ public final class ChainLight {
             for (Entity e : level.entitiesForRendering()) {
                 if (!(e instanceof Display d)) continue;
                 Display.RenderState rs = d.renderState();
-                if (rs == null || rs.glowColorOverride() != StandKeys.MARK || rs.brightnessOverride() == -1) continue;
+                if (rs == null || !StandKeys.isMark(rs.glowColorOverride()) || rs.brightnessOverride() == -1) continue;
                 AT.add(d.position());
                 LIGHT.add(rs.brightnessOverride());
             }

@@ -2,9 +2,9 @@ package io.github.profetgit.veinminer.mixin;
 
 //? if >=26.2 {
 import com.mojang.blaze3d.vertex.PoseStack;
-import io.github.profetgit.veinminer.client.render.StandShade;
-import io.github.profetgit.veinminer.core.StandKeys;
+import io.github.profetgit.veinminer.client.render.StandDraw;
 import io.github.profetgit.veinminer.client.render.StandState;
+import io.github.profetgit.veinminer.core.StandKeys;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.DisplayRenderer;
 import net.minecraft.client.renderer.entity.state.BlockDisplayEntityRenderState;
@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** A chain stand-in is drawn with terrain's face shading instead of the entity lighting, so the swap from the real block shows no colour step. */
+/** A chain stand-in is drawn as a moving block over the real level, so it looks exactly like the block it replaces. */
 @Mixin(DisplayRenderer.BlockDisplayRenderer.class)
 public abstract class BlockDisplayRendererMixin {
     @Inject(method = "extractRenderState(Lnet/minecraft/world/entity/Display$BlockDisplay;Lnet/minecraft/client/renderer/entity/state/BlockDisplayEntityRenderState;F)V", at = @At("TAIL"))
@@ -24,10 +24,11 @@ public abstract class BlockDisplayRendererMixin {
     }
 
     @Inject(method = "submitInner", at = @At("HEAD"), cancellable = true)
-    private void veinminer$terrainShade(BlockDisplayEntityRenderState state, PoseStack poseStack, SubmitNodeCollector collector, int lightCoords,
-                                        float progress, CallbackInfo ci) {
-        if (state.renderState == null || state.renderState.glowColorOverride() != StandKeys.MARK) return;
-        if (StandShade.submit(((StandState) state).veinminer$block(), poseStack, collector, lightCoords)) ci.cancel();
+    private void veinminer$moving(BlockDisplayEntityRenderState state, PoseStack poseStack, SubmitNodeCollector collector, int lightCoords,
+                                  float progress, CallbackInfo ci) {
+        if (state.renderState == null || !StandKeys.isMark(state.renderState.glowColorOverride())) return;
+        if (StandDraw.submit(((StandState) state).veinminer$block(), state.x, state.y, state.z, state.renderState.glowColorOverride(), false,
+            poseStack, collector, state.outlineColor)) ci.cancel();
     }
 }
 //?} else {

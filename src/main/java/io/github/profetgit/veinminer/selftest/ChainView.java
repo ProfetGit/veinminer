@@ -17,6 +17,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.WallTorchBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
 /**
@@ -25,13 +26,14 @@ import net.minecraft.world.phys.Vec3;
  * (or {@code chainview,cave} for one subject).
  */
 final class ChainView {
-    static final String[] SUBJECTS = {"small", "cave", "modded", "glow"};
+    static final String[] SUBJECTS = {"small", "cave", "modded", "glow", "still"};
     private static int VEIN = 30;
 
     static void vein(int n) {
         VEIN = n;
     }
 
+    private static boolean still;
     private static Vec3 home;
     private static volatile boolean started;
     private static List<BlockPos> cells;
@@ -48,6 +50,7 @@ final class ChainView {
         Config.use(Config.Values.DEFAULTS);
         Tune.reset();
         started = false;
+        still = subject.equals("still");
         command("time set noon");
         command("weather clear");
         command("gamerule advance_time false");
@@ -55,12 +58,12 @@ final class ChainView {
         Vec3 cam;
         Vec3 aim;
         switch (subject) {
-            case "cave", "glow" -> {
+            case "cave", "glow", "still" -> {
                 Rig.cube(0, 0, 0, 12, 12, 12, Blocks.STONE);
                 Rig.cube(1, 1, 5, 10, 5, 6, Blocks.AIR);
                 Rig.set(Rig.at(2, 3, 5), Blocks.WALL_TORCH.defaultBlockState().setValue(WallTorchBlock.FACING, Direction.SOUTH));
                 Rig.set(Rig.at(9, 3, 5), Blocks.WALL_TORCH.defaultBlockState().setValue(WallTorchBlock.FACING, Direction.SOUTH));
-                boolean glow = subject.equals("glow");
+                boolean glow = !subject.equals("cave");
                 ore = glow ? Blocks.DIAMOND_ORE : Blocks.COAL_ORE;
                 drop = glow ? Items.DIAMOND : Items.COAL;
                 cells = blob(5.5, 3.5, 3.0);
@@ -141,6 +144,16 @@ final class ChainView {
     }
 
     static void strike(MinecraftServer server) {
+        if (still) {
+            for (BlockPos p : cells) {
+                if (p.getZ() != Rig.base.getZ() + 4) continue;
+                BlockState state = Rig.level.getBlockState(p);
+                Rig.set(p, Blocks.AIR.defaultBlockState());
+                Fx.still(Rig.level, state, p);
+            }
+            started = true;
+            return;
+        }
         BlockPos hit = cells.stream().filter(p -> p.getZ() == Rig.base.getZ() + 4)
             .min(Comparator.comparingDouble(p -> p.distToCenterSqr(eye))).orElse(cells.get(0));
         Rig.strike(hit, true);

@@ -85,10 +85,15 @@ public final class Fx {
         double c = d instanceof Display.ItemDisplay ? s / 2 : 0;
         ((DisplayAccess) d).veinminer$setTransformation(of(-n[0] - StandKeys.PAD + c, -n[1] - StandKeys.PAD + c, -n[2] - StandKeys.PAD + c, NONE, s, s, s));
         ((DisplayAccess) d).veinminer$setBrightnessOverride(light);
-        ((DisplayAccess) d).veinminer$setGlowColorOverride(StandKeys.MARK);
+        ((DisplayAccess) d).veinminer$setGlowColorOverride(StandKeys.mark(n));
         level.addFreshEntity(d);
         LIVE.put(d, owner);
         return d;
+    }
+
+    /** Test only: a stand-in at rest in its block's own cell, owned by no chain ({@link #clear} removes it). */
+    public static Display still(ServerLevel level, BlockState state, BlockPos block) {
+        return stand(null, level, state, block, new int[]{0, 0, 0}, lightAround(level, block));
     }
 
     /** Ores, the blocks a shader pack makes glow: shown as their item. */
@@ -178,7 +183,7 @@ public final class Fx {
         for (Iterator<Map.Entry<Display, Chain>> it = LIVE.entrySet().iterator(); it.hasNext();) {
             Map.Entry<Display, Chain> e = it.next();
             if (e.getKey().isRemoved()) it.remove();
-            else if (e.getValue().finished()) kill.add(e.getKey());
+            else if (e.getValue() != null && e.getValue().finished()) kill.add(e.getKey());
         }
         for (Display d : kill) kill(d);
     }

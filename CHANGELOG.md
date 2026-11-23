@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.1.4 — 2026-11-23
+
+### Fixed
+- **A block that turns into the chain animation now looks exactly like the block it replaced.** Before, the animated block could look lighter or washed out next to real blocks, with and without a shader pack, and ores lost their face shading. On 26.2 and 26.3 with the mod on your side, the animated block is now drawn the way the game draws the real block (same light, shading and shader-pack look, ore glow kept). Measured with Complementary: within 0.3 % of the real block's brightness.
+
 ## 2.1.3 — 2026-11-23
 
 ### Fixed

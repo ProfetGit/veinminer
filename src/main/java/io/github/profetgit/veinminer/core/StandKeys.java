@@ -20,8 +20,31 @@ public final class StandKeys {
     public static final int KILL = 12;
     /** A stand-in is this much larger per side while the real block is still there, so the two don't z-fight. */
     public static final double PAD = 0.003;
-    /** Glow colour override a stand-in carries (never shown, it is not glowing) so a client with the mod knows to shade it like terrain. */
-    public static final int MARK = 0x4E564D01;
+    /**
+     * Glow colour override a stand-in carries (never shown, it is not glowing): the high 24 bits mark it for a client with the
+     * mod, the low byte is 1 + the index of its cell in {@link #ORDER} (7 = the block's own cell), so the client knows which
+     * block cell the stand-in replaces and can draw it from the real level there.
+     */
+    public static final int MARK_BASE = 0x4E564D00;
+
+    public static int mark(int[] n) {
+        for (int i = 0; i < ORDER.length; i++) {
+            int[] o = offset(ORDER[i]);
+            if (o[0] == n[0] && o[1] == n[1] && o[2] == n[2]) return MARK_BASE | (i + 1);
+        }
+        return MARK_BASE | 7;
+    }
+
+    public static boolean isMark(int value) {
+        int low = value & 0xFF;
+        return (value & 0xFFFFFF00) == MARK_BASE && low >= 1 && low <= 7;
+    }
+
+    /** The cell offset a mark names. */
+    public static int[] cell(int value) {
+        int low = value & 0xFF;
+        return low >= 1 && low <= 6 ? offset(ORDER[low - 1]) : new int[]{0, 0, 0};
+    }
 
     /** Cell names and offsets: in front of the block toward the miner first, then this order, else the block's own cell. */
     public static final String[] ORDER = {"yp", "xp", "xn", "zp", "zn", "yn"};
