@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.1.2 — 2026-11-23
+
+### Added
+- **Minecraft 26.1.2** on Fabric, NeoForge and Forge. The chain, settings screen, block picker and server features are the same as on 26.2. The 26.2+ client-only render fixes (shading and light of the chain stand-ins, break particles) are not on 26.1.2.
+
 ## 2.1.1 — 2026-11-22
 
 ### Fixed

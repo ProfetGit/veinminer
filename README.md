@@ -7,7 +7,7 @@
 
 **Sneak, mine one ore, and the whole vein pops out in a chain, with any ore from any mod.**
 
-Veinminer is a mod for **Minecraft Java 26.3, 26.2, 1.21.1 and 1.20.1** on **Fabric, Quilt, NeoForge and Forge**. Put it on the server and everyone who joins sees the chain, even with an unmodified game. In your own game it also adds a settings screen.
+Veinminer is a mod for **Minecraft Java 26.3, 26.2, 26.1.2, 1.21.1 and 1.20.1** on **Fabric, Quilt, NeoForge and Forge**. Put it on the server and everyone who joins sees the chain, even with an unmodified game. In your own game it also adds a settings screen.
 
 **New in 2.1:** a settings screen, so you never have to edit a file; dirt, sand, gravel and clay with any shovel; and your own list of blocks that vein too.
 
@@ -59,7 +59,7 @@ Put the jar in the `mods` folder of the server (or your singleplayer game). Fabr
 
 **Conflicts.** FTB Ultimine, Liteminer, OreVein and Ore Excavation also mine veins. If one is installed, Veinminer warns the operators and the log. Use only one of them.
 
-**Tested.** Every version on every loader boots and passes the self-test; an ore mod (Immersive Ores) was tried on 1.20.1 Fabric and Quilt. Not yet tested: the function-tag hooks and the 1.3.x migration on 1.21.1 and 1.20.1 (on 1.20.1 the `#veinminer:api/cancel` function tag cannot veto, the Java hook can), real land-claim mods, and a mod with `#c:ores/<name>` subtags. New in 2.1 and not yet tested: "Add the block I'm looking at" and adding a `#tag` through the block picker, the Mod Menu and Config buttons pressed by hand anywhere but Fabric 26.3, and your own blocks in multiplayer. On 1.21.1 and 1.20.1 the settings screen has no section headings (on 1.20.1 your own blocks sit between Clay and the ores) and no notice when you open it on a server.
+**Tested.** Every version on every loader boots and passes the self-test (26.1.2 is new and has only been compiled, unit-tested and built so far); an ore mod (Immersive Ores) was tried on 1.20.1 Fabric and Quilt. Not yet tested: the function-tag hooks and the 1.3.x migration on 1.21.1 and 1.20.1 (on 1.20.1 the `#veinminer:api/cancel` function tag cannot veto, the Java hook can), real land-claim mods, and a mod with `#c:ores/<name>` subtags. New in 2.1 and not yet tested: "Add the block I'm looking at" and adding a `#tag` through the block picker, the Mod Menu and Config buttons pressed by hand anywhere but Fabric 26.3, and your own blocks in multiplayer. On 1.21.1 and 1.20.1 the settings screen has no section headings (on 1.20.1 your own blocks sit between Clay and the ores) and no notice when you open it on a server.
 
 ![More from Profet](https://raw.githubusercontent.com/ProfetGit/veinminer/main/docs/desc/title-more-from-profet.webp)
 

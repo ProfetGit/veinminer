@@ -77,10 +77,31 @@ public final class TestBlocks {
     }
 
     public static void registerEntityTypes(BiConsumer<ResourceKey<BlockEntityType<?>>, BlockEntityType<?>> sink) {
+//? if >=26.1 <26.2 {
+/*        beType = newBlockEntityType();
+*///?} else {
         beType = new BlockEntityType<>(TestBe::new, Set.of(be));
+//?}
         sink.accept(ResourceKey.create(Registries.BLOCK_ENTITY_TYPE, Identifier.fromNamespaceAndPath(Veinminer.ID, "test_ore_be")), beType);
     }
 
+//? if >=26.1 <26.2 {
+/*    // 26.1's BlockEntityType constructor and its supplier type are private (26.2 opened them), so the test type is built by reflection
+    @SuppressWarnings("unchecked")
+    private static BlockEntityType<TestBe> newBlockEntityType() {
+        try {
+            Class<?> supplier = Class.forName("net.minecraft.world.level.block.entity.BlockEntityType$BlockEntitySupplier");
+            Object factory = java.lang.reflect.Proxy.newProxyInstance(supplier.getClassLoader(), new Class<?>[] {supplier},
+                (proxy, method, args) -> new TestBe((BlockPos) args[0], (BlockState) args[1]));
+            java.lang.reflect.Constructor<?> ctor = BlockEntityType.class.getDeclaredConstructor(supplier, Set.class);
+            ctor.setAccessible(true);
+            return (BlockEntityType<TestBe>) ctor.newInstance(factory, Set.of(be));
+        } catch (ReflectiveOperationException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+*///?}
     private static final Map<ResourceKey<Block>, Block> BLOCKS = new LinkedHashMap<>();
 
     private static Block ore(BiConsumer<ResourceKey<Block>, Block> sink, String name, boolean entity) {

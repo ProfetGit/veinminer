@@ -28,7 +28,7 @@ final class MpHost {
     }
 
     private static boolean joined(Minecraft mc) {
-        return mc.player != null && mc.level != null && mc.getSingleplayerServer() == null && mc.gui.screen() == null;
+        return mc.player != null && mc.level != null && mc.getSingleplayerServer() == null && TestCompat.screen(mc) == null;
     }
 
     private static int standIns(Minecraft mc) {

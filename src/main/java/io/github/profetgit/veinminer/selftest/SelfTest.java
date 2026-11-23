@@ -42,7 +42,7 @@ public final class SelfTest {
         if (finished) return;
         if (++ticks % 400 == 0) {
             VeinminerClient.LOG.info("[selftest] step {}/{} screen={}", index, steps == null ? 0 : steps.size(),
-                mc.gui.screen() == null ? null : mc.gui.screen().getClass().getSimpleName());
+                TestCompat.screen(mc) == null ? null : TestCompat.screen(mc).getClass().getSimpleName());
         }
         if (steps == null && MODE.equals("mp-host")) {
             if (!mc.isGameLoadFinished()) return;
@@ -51,7 +51,7 @@ public final class SelfTest {
             steps = MpHost.build().steps;
         }
         if (steps == null) {
-            if (!mc.isGameLoadFinished() || !(mc.gui.screen() instanceof TitleScreen) || ++titleTicks < 20) return;
+            if (!mc.isGameLoadFinished() || !(TestCompat.screen(mc) instanceof TitleScreen) || ++titleTicks < 20) return;
             ModTestHook.audit();
             record("boot", true, "title screen reached");
             if (MODE.equals("boot")) {
@@ -100,7 +100,7 @@ public final class SelfTest {
         captureLeft--;
         CAPTURE_TICKS.append(captureFrame - 1).append(' ').append(ticks).append('\n');
         if (captureLeft == 0) writeTicks();
-        TestCompat.screenshot(mc.gameRenderer.mainRenderTarget(), (NativeImage img) -> WRITER.execute(() -> {
+        TestCompat.screenshot(TestCompat.mainRenderTarget(mc), (NativeImage img) -> WRITER.execute(() -> {
             try (img) {
                 Files.createDirectories(out.getParent());
                 img.writeToFile(out);

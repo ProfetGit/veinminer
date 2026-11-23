@@ -17,7 +17,11 @@ import net.minecraft.util.Brightness;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.entity.Display;
 import net.minecraft.world.entity.Entity;
+//? if >=26.2 {
 import net.minecraft.world.entity.EntityTypes;
+//?} else {
+/*import net.minecraft.world.entity.EntityType;
+*///?}
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
@@ -52,7 +56,11 @@ public final class Fx {
 
     /** A stand-in for the block at {@code block}, standing in the cell {@code block + n}, pose = the block's own place, a hair larger. */
     static Display.BlockDisplay stand(Chain owner, ServerLevel level, BlockState state, BlockPos block, int[] n, Brightness light) {
+//? if >=26.2 {
         Display.BlockDisplay d = new Display.BlockDisplay(EntityTypes.BLOCK_DISPLAY, level);
+//?} else {
+/*        Display.BlockDisplay d = new Display.BlockDisplay(EntityType.BLOCK_DISPLAY, level);
+*///?}
         d.addTag(TAG);
         d.snapTo(block.getX() + n[0], block.getY() + n[1], block.getZ() + n[2]);
         ((BlockDisplayAccess) d).veinminer$setBlockState(state);
@@ -96,7 +104,11 @@ public final class Fx {
 
     /** A ghost parked at {@code at}, invisible (scale 0), translated {@code from} away so a pop starts where the item spawned. */
     static Display.ItemDisplay ghost(Chain owner, ServerLevel level, ItemStack stack, Vec3 at, Vec3 from, Brightness light) {
+//? if >=26.2 {
         Display.ItemDisplay d = new Display.ItemDisplay(EntityTypes.ITEM_DISPLAY, level);
+//?} else {
+/*        Display.ItemDisplay d = new Display.ItemDisplay(EntityType.ITEM_DISPLAY, level);
+*///?}
         d.addTag(TAG);
         d.addTag(GHOST_TAG);
         d.snapTo(at.x, at.y, at.z);
