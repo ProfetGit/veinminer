@@ -126,7 +126,7 @@
     "files": "^Rig\\.java$"
   },
   {
-    "regex": "\\.value\\(\\)\\.createWorldDimensions\\(\\), mc\\.screen\\);",
+    "regex": "\\.value\\(\\)\\.createWorldDimensions\\(\\), (?:mc\\.screen|screen\\(mc\\))\\);",
     "to": ".value().createWorldDimensions());",
     "when": "<1.21",
     "files": "^TestCompat\\.java$"
