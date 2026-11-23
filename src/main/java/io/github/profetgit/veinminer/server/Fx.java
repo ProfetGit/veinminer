@@ -82,7 +82,8 @@ public final class Fx {
         d.addTag(TAG);
         d.snapTo(block.getX() + n[0], block.getY() + n[1], block.getZ() + n[2]);
         double s = 1 + 2 * StandKeys.PAD;
-        ((DisplayAccess) d).veinminer$setTransformation(of(-n[0] - StandKeys.PAD, -n[1] - StandKeys.PAD, -n[2] - StandKeys.PAD, NONE, s, s, s));
+        double c = d instanceof Display.ItemDisplay ? s / 2 : 0;
+        ((DisplayAccess) d).veinminer$setTransformation(of(-n[0] - StandKeys.PAD + c, -n[1] - StandKeys.PAD + c, -n[2] - StandKeys.PAD + c, NONE, s, s, s));
         ((DisplayAccess) d).veinminer$setBrightnessOverride(light);
         ((DisplayAccess) d).veinminer$setGlowColorOverride(StandKeys.MARK);
         level.addFreshEntity(d);
@@ -122,7 +123,8 @@ public final class Fx {
     /** One squash, stretch or vanish key: about the block centre, back by the cell offset. */
     static void key(Display d, int[] n, StandKeys.Key k, double squash) {
         double sxz = StandKeys.tuned(k.scaleXz(), squash), sy = StandKeys.tuned(k.scaleY(), squash);
-        pose(d, new Vector3f(StandKeys.translation((float) sxz, n[0]), StandKeys.translation((float) sy, n[1]), StandKeys.translation((float) sxz, n[2])),
+        float cx = d instanceof Display.ItemDisplay ? (float) sxz / 2 : 0, cy = d instanceof Display.ItemDisplay ? (float) sy / 2 : 0;
+        pose(d, new Vector3f(StandKeys.translation((float) sxz, n[0]) + cx, StandKeys.translation((float) sy, n[1]) + cy, StandKeys.translation((float) sxz, n[2]) + cx),
             NONE, new Vector3f((float) sxz, (float) sy, (float) sxz), k.duration());
     }
 
