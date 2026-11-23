@@ -368,7 +368,7 @@ public final class Chain {
 
     /** An entity id that every entity created after this call is above (ids are per level from 1.21.2, one global counter before). */
     public static int mark(ServerLevel level) {
-//? if >=1.21.2 {
+//? if >=26.2 {
         return level.getNextEntityId();
 //?} else {
 /*        return new ItemEntity(net.minecraft.world.entity.EntityType.ITEM, level).getId();

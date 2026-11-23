@@ -40,6 +40,15 @@ final class Compat {
 *///?}
     }
 
+    /** Opens {@code screen}: the 26.2 client moved the current screen onto {@code Gui}. */
+    static void setScreen(Minecraft mc, Screen screen) {
+//? if >=26.2 {
+        mc.gui.setScreen(screen);
+//?} else {
+/*        mc.setScreen(screen);
+*///?}
+    }
+
     static void header(OptionsList list, String text) {
 //? if >=1.21.11 {
         list.addHeader(Component.literal(text));
@@ -48,7 +57,7 @@ final class Compat {
 
     /** A button row in the option list; before 1.21 the list takes no plain widgets, so the 1.20.1 screen puts the button in its footer. */
     static void button(OptionsList list, AbstractWidget button) {
-//? if >=1.21.11 {
+//? if >=26.2 {
         list.addBig(button);
 //?} else if >=1.21 {
 /*        list.addSmall(button, null);
@@ -56,7 +65,7 @@ final class Compat {
     }
 
     static void text(GuiGraphicsExtractor g, Font font, String text, int x, int y, int color) {
-//? if >=26.2 {
+//? if >=26.1 {
         g.text(font, text, x, y, color);
 //?} else {
 /*        g.drawString(font, text, x, y, color);
@@ -64,7 +73,7 @@ final class Compat {
     }
 
     static void item(GuiGraphicsExtractor g, ItemStack stack, int x, int y) {
-//? if >=26.2 {
+//? if >=26.1 {
         g.item(stack, x, y);
 //?} else {
 /*        g.renderItem(stack, x, y);
@@ -72,7 +81,7 @@ final class Compat {
     }
 
     static void tooltip(GuiGraphicsExtractor g, Font font, Component text, int x, int y) {
-//? if >=26.2 {
+//? if >=26.1 {
         g.setTooltipForNextFrame(font, text, x, y);
 //?} else {
 /*        g.renderTooltip(font, text, x, y);
@@ -87,7 +96,7 @@ final class Compat {
     }
 
     static Stream<HolderSet.Named<Block>> blockTags() {
-//? if >=26.2 {
+//? if >=1.21.2 {
         return BuiltInRegistries.BLOCK.getTags();
 //?} else {
 /*        return BuiltInRegistries.BLOCK.getTags().map(com.mojang.datafixers.util.Pair::getSecond);

@@ -93,7 +93,7 @@ public final class BlockPickerScreen extends Screen {
 
     @Override
     public void onClose() {
-        minecraft.gui.setScreen(parent.withBlocks(entries));
+        Compat.setScreen(minecraft, parent.withBlocks(entries));
     }
 
     private Block looked() {
@@ -232,7 +232,7 @@ public final class BlockPickerScreen extends Screen {
     }
 *///?}
 
-//? if >=26.2 {
+//? if >=26.1 {
     @Override
     public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partial) {
         panel(g);

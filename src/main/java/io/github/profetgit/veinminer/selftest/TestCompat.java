@@ -25,15 +25,44 @@ final class TestCompat {
     private TestCompat() {}
 
     static void createWorld(Minecraft mc, String name) {
-//? if >=1.21.2 {
+//? if >=26.2 {
         mc.createWorldOpenFlows().createFreshLevel(name,
             new LevelSettings(name, GameType.SURVIVAL, new LevelSettings.DifficultySettings(Difficulty.PEACEFUL, false, false), true, WorldDataConfiguration.DEFAULT),
-            new WorldOptions(42L, false, false), WorldPresets::createTestWorldDimensions, mc.gui.screen());
-//?} else {
+            new WorldOptions(42L, false, false), WorldPresets::createTestWorldDimensions, screen(mc));
+//?} else if >=26.1 {
+/*        mc.createWorldOpenFlows().createFreshLevel(name,
+            new LevelSettings(name, GameType.SURVIVAL, new LevelSettings.DifficultySettings(Difficulty.PEACEFUL, false, false), true, WorldDataConfiguration.DEFAULT),
+            new WorldOptions(42L, false, false), WorldPresets::createFlatWorldDimensions, screen(mc));
+*///?} else {
 /*        mc.createWorldOpenFlows().createFreshLevel(name,
             new LevelSettings(name, GameType.SURVIVAL, false, Difficulty.PEACEFUL, true, new GameRules(), WorldDataConfiguration.DEFAULT),
             new WorldOptions(42L, false, false),
-            access -> access.registryOrThrow(Registries.WORLD_PRESET).getHolderOrThrow(WorldPresets.FLAT).value().createWorldDimensions(), mc.gui.screen());
+            access -> access.registryOrThrow(Registries.WORLD_PRESET).getHolderOrThrow(WorldPresets.FLAT).value().createWorldDimensions(), screen(mc));
+*///?}
+    }
+
+    /** The screen on show: 26.2 moved it onto {@code Minecraft.gui}. */
+    static net.minecraft.client.gui.screens.Screen screen(Minecraft mc) {
+//? if >=26.2 {
+        return mc.gui.screen();
+//?} else {
+/*        return mc.screen;
+*///?}
+    }
+
+    static void setScreen(Minecraft mc, net.minecraft.client.gui.screens.Screen screen) {
+//? if >=26.2 {
+        mc.gui.setScreen(screen);
+//?} else {
+/*        mc.setScreen(screen);
+*///?}
+    }
+
+    static RenderTarget mainRenderTarget(Minecraft mc) {
+//? if >=26.2 {
+        return mc.gameRenderer.mainRenderTarget();
+//?} else {
+/*        return mc.getMainRenderTarget();
 *///?}
     }
 

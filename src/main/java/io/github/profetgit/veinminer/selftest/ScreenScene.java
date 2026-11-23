@@ -37,22 +37,22 @@ final class ScreenScene {
     /** Before the world is created: open and close the screen on the title screen. */
     static void title(Script s) {
         s.run(mc -> {
-                screen = new VeinminerScreen(mc.gui.screen());
-                mc.gui.setScreen(screen);
+                screen = new VeinminerScreen(TestCompat.screen(mc));
+                TestCompat.setScreen(mc, screen);
             })
             .waitTicks(10)
-            .check("screen: opens from the title screen", mc -> mc.gui.screen() == screen && widget("Sneak to vein") != null ? null : "screen " + mc.gui.screen())
+            .check("screen: opens from the title screen", mc -> TestCompat.screen(mc) == screen && widget("Sneak to vein") != null ? null : "screen " + TestCompat.screen(mc))
             .check("screen: dirt shows its default off before any world", ScreenScene::dirtOff)
             .run(mc -> screen.onClose())
             .waitTicks(5)
-            .check("screen: closes back to the title screen", mc -> mc.gui.screen() instanceof TitleScreen ? null : "screen " + mc.gui.screen());
+            .check("screen: closes back to the title screen", mc -> TestCompat.screen(mc) instanceof TitleScreen ? null : "screen " + TestCompat.screen(mc));
     }
 
     static void world(Script s) {
         s.server(server -> Config.save(Config.Values.DEFAULTS))
             .run(mc -> {
                 screen = new VeinminerScreen(null);
-                mc.gui.setScreen(screen);
+                TestCompat.setScreen(mc, screen);
             })
             .waitTicks(40)
             .check("screen: opens in the world with every row", ScreenScene::rows)
@@ -72,7 +72,7 @@ final class ScreenScene {
             .check("screen: the rows show the new values", ScreenScene::shown)
             .run(mc -> screen.onClose())
             .waitTicks(10)
-            .check("screen: closes into the world", mc -> mc.gui.screen() == null ? null : "screen " + mc.gui.screen())
+            .check("screen: closes into the world", mc -> TestCompat.screen(mc) == null ? null : "screen " + TestCompat.screen(mc))
             .server(ScreenScene::verify);
     }
 
@@ -81,7 +81,7 @@ final class ScreenScene {
     }
 
     private static BlockPickerScreen picker() {
-        return Minecraft.getInstance().gui.screen() instanceof BlockPickerScreen p ? p : null;
+        return TestCompat.screen(Minecraft.getInstance()) instanceof BlockPickerScreen p ? p : null;
     }
 
     private static void openPicker(Minecraft mc) {
@@ -117,13 +117,13 @@ final class ScreenScene {
         s.server(server -> Config.save(Config.Values.DEFAULTS))
             .run(mc -> {
                 screen = new VeinminerScreen(null);
-                mc.gui.setScreen(screen);
+                TestCompat.setScreen(mc, screen);
             })
             .waitTicks(40)
             .check("picker: no Netherrack row yet", mc -> widget("Netherrack") == null ? null : "row already there")
             .run(ScreenScene::openPicker)
             .waitTicks(10)
-            .check("picker: the button opens the picker", mc -> picker() != null ? null : "screen " + mc.gui.screen())
+            .check("picker: the button opens the picker", mc -> picker() != null ? null : "screen " + TestCompat.screen(mc))
             .check("picker: empty list has no rows", mc -> picker().entries().isEmpty() ? null : "entries " + picker().entries())
             .run(mc -> search("nether"))
             .waitTicks(5);
@@ -158,8 +158,8 @@ final class ScreenScene {
             .run(mc -> search(""))
             .run(mc -> picker().onClose())
             .waitTicks(40)
-            .check("picker: Done returns to the settings screen", mc -> mc.gui.screen() instanceof VeinminerScreen ? null : "screen " + mc.gui.screen())
-            .run(mc -> screen = (VeinminerScreen) mc.gui.screen())
+            .check("picker: Done returns to the settings screen", mc -> TestCompat.screen(mc) instanceof VeinminerScreen ? null : "screen " + TestCompat.screen(mc))
+            .run(mc -> screen = (VeinminerScreen) TestCompat.screen(mc))
             .check("picker: the main screen has a Netherrack row", mc -> widget("Netherrack") != null ? null : "no row")
             .check("picker: still one options list", mc -> {
                 long lists = screen.children().stream().filter(c -> c instanceof net.minecraft.client.gui.components.OptionsList).count();
@@ -173,7 +173,7 @@ final class ScreenScene {
             .server(server -> verifyBlocks(List.of("minecraft:netherrack")))
             .run(mc -> {
                 screen = new VeinminerScreen(null);
-                mc.gui.setScreen(screen);
+                TestCompat.setScreen(mc, screen);
             })
             .waitTicks(40)
             .check("picker: reopened with the Netherrack row", mc -> widget("Netherrack") != null ? null : "no row")
@@ -184,7 +184,7 @@ final class ScreenScene {
             .waitTicks(3)
             .run(mc -> picker().onClose())
             .waitTicks(40)
-            .run(mc -> screen = (VeinminerScreen) mc.gui.screen())
+            .run(mc -> screen = (VeinminerScreen) TestCompat.screen(mc))
             .check("picker: the Netherrack row is gone", mc -> widget("Netherrack") == null ? null : "row still there")
             .run(mc -> screen.onClose())
             .waitTicks(20)
@@ -220,7 +220,7 @@ final class ScreenScene {
     }
 
     private static String rows(Minecraft mc) {
-        if (mc.gui.screen() != screen) return "screen " + mc.gui.screen();
+        if (TestCompat.screen(mc) != screen) return "screen " + TestCompat.screen(mc);
         for (String row : new String[] {"Sneak to vein", "Most blocks", "Corners count", "Tool wear", "Chain animation", "Loot lands: In front", "Messages",
             "Dirt and grass", "Sand", "Gravel", "Clay", "Coal ore", "Iron ore", "Copper ore", "Gold ore", "Redstone ore", "Lapis ore", "Diamond ore", "Emerald ore",
             "Nether quartz ore", "Ancient debris"}) {

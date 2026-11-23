@@ -11,7 +11,7 @@ final class Scenarios {
         String only = System.getProperty("veinminer.selftest.scene", "all");
         if (ScreenScene.wanted(only)) ScreenScene.title(s);
         s.run(mc -> TestCompat.createWorld(mc, "veinminertest-" + System.currentTimeMillis()))
-            .until("world to load", 2400, mc -> mc.player != null && mc.level != null && mc.gui.screen() == null)
+            .until("world to load", 2400, mc -> mc.player != null && mc.level != null && TestCompat.screen(mc) == null)
             .waitTicks(40)
             .check("world loaded", mc -> mc.player.isAlive() ? null : "player not alive");
         if (only.equals("all") || only.contains("smoke")) smoke(s);
