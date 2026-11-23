@@ -33,7 +33,7 @@ final class MpHost {
 
     private static int standIns(Minecraft mc) {
         int n = 0;
-        for (Entity e : mc.level.entitiesForRendering()) if (e instanceof Display.BlockDisplay) n++;
+        for (Entity e : mc.level.entitiesForRendering()) if (e instanceof Display) n++;
         return n;
     }
 

@@ -52,7 +52,7 @@ public final class Chain {
         public final BlockPos pos;
         public final int delay;
         private BlockState state;
-        private Display.BlockDisplay stand;
+        private Display stand;
         private int[] offset = StandKeys.offset("0");
         private int turned = -1;
         private int light = -1;
@@ -62,7 +62,7 @@ public final class Chain {
             this.delay = delay;
         }
 
-        public Display.BlockDisplay stand() {
+        public Display stand() {
             return stand;
         }
 

@@ -25,7 +25,7 @@ import net.minecraft.world.phys.Vec3;
  * (or {@code chainview,cave} for one subject).
  */
 final class ChainView {
-    static final String[] SUBJECTS = {"small", "cave", "modded"};
+    static final String[] SUBJECTS = {"small", "cave", "modded", "glow"};
     private static int VEIN = 30;
 
     static void vein(int n) {
@@ -55,13 +55,14 @@ final class ChainView {
         Vec3 cam;
         Vec3 aim;
         switch (subject) {
-            case "cave" -> {
+            case "cave", "glow" -> {
                 Rig.cube(0, 0, 0, 12, 12, 12, Blocks.STONE);
                 Rig.cube(1, 1, 5, 10, 5, 6, Blocks.AIR);
                 Rig.set(Rig.at(2, 3, 5), Blocks.WALL_TORCH.defaultBlockState().setValue(WallTorchBlock.FACING, Direction.SOUTH));
                 Rig.set(Rig.at(9, 3, 5), Blocks.WALL_TORCH.defaultBlockState().setValue(WallTorchBlock.FACING, Direction.SOUTH));
-                ore = Blocks.COAL_ORE;
-                drop = Items.COAL;
+                boolean glow = subject.equals("glow");
+                ore = glow ? Blocks.DIAMOND_ORE : Blocks.COAL_ORE;
+                drop = glow ? Items.DIAMOND : Items.COAL;
                 cells = blob(5.5, 3.5, 3.0);
                 cam = new Vec3(8.0, 1, 8.5);
                 aim = new Vec3(5.5, 3.6, 5.0);

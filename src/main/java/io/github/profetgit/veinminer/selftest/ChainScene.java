@@ -313,8 +313,8 @@ final class ChainScene {
         for (int t = 0; t < 14; t++) Chain.tickAll();
         int blocks = 0, ghosts = 0, saved = 0;
         for (Display d : Rig.level.getEntitiesOfClass(Display.class, Rig.box())) {
-            if (d instanceof Display.BlockDisplay) blocks++;
-            if (d instanceof Display.ItemDisplay) ghosts++;
+            if (d.entityTags().contains(Fx.GHOST_TAG)) ghosts++;
+            else if (d.entityTags().contains(Fx.TAG)) blocks++;
             if (d.shouldBeSaved()) saved++;
         }
         Rig.check("unsaved: stand-ins and ghosts are in the world", blocks > 0 && ghosts > 0, "block displays " + blocks + " item displays " + ghosts);

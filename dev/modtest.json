@@ -120,7 +120,18 @@
       ]
     }
   },
+  "shader_options": "GLOWING_ORE_MASTER=2\n",
   "addons": {
+    "shaders": {
+      "profile": {
+        "26.3": "Fabric 26.3"
+      },
+      "mods": [
+        "iris-fabric-*.jar",
+        "sodium-fabric-*.jar"
+      ],
+      "shaders": true
+    },
     "fa": {
       "profile": {
         "26.3": "Fabric 26.3"

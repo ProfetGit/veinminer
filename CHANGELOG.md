@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.1.3 — 2026-11-23
+
+### Fixed
+- **Ores keep their shader glow while the chain runs.** With a shader pack that makes ores glow (Complementary's "Glowing Ores"), an ore used to go dark the moment it turned into the chain animation. Ore stand-ins now show as the ore's own item, which the shader treats as the ore, so the glow stays. Without a shader pack the ore sides can look a touch different in shade while the chain runs.
+
 ## 2.1.2 — 2026-11-23
 
 ### Added

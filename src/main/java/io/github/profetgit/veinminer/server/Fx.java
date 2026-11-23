@@ -54,16 +54,33 @@ public final class Fx {
         return LIVE.size();
     }
 
-    /** A stand-in for the block at {@code block}, standing in the cell {@code block + n}, pose = the block's own place, a hair larger. */
-    static Display.BlockDisplay stand(Chain owner, ServerLevel level, BlockState state, BlockPos block, int[] n, Brightness light) {
+    /**
+     * A stand-in for the block at {@code block}, standing in the cell {@code block + n}, pose = the block's own place, a hair larger.
+     * An ore is an item display of its block item: shader packs give a held or displayed ore item the glow of the placed ore,
+     * and give a block display nothing, so a block display would lose the glow the moment the ore turns into the chain.
+     */
+    static Display stand(Chain owner, ServerLevel level, BlockState state, BlockPos block, int[] n, Brightness light) {
+        Display d;
+        if (glows(state)) {
 //? if >=26.2 {
-        Display.BlockDisplay d = new Display.BlockDisplay(EntityTypes.BLOCK_DISPLAY, level);
+            Display.ItemDisplay i = new Display.ItemDisplay(EntityTypes.ITEM_DISPLAY, level);
 //?} else {
-/*        Display.BlockDisplay d = new Display.BlockDisplay(EntityType.BLOCK_DISPLAY, level);
+/*            Display.ItemDisplay i = new Display.ItemDisplay(EntityType.ITEM_DISPLAY, level);
 *///?}
+            ((ItemDisplayAccess) i).veinminer$setItemStack(new ItemStack(state.getBlock().asItem()));
+            ((ItemDisplayAccess) i).veinminer$setItemTransform(ItemDisplayContext.NONE);
+            d = i;
+        } else {
+//? if >=26.2 {
+            Display.BlockDisplay b = new Display.BlockDisplay(EntityTypes.BLOCK_DISPLAY, level);
+//?} else {
+/*            Display.BlockDisplay b = new Display.BlockDisplay(EntityType.BLOCK_DISPLAY, level);
+*///?}
+            ((BlockDisplayAccess) b).veinminer$setBlockState(state);
+            d = b;
+        }
         d.addTag(TAG);
         d.snapTo(block.getX() + n[0], block.getY() + n[1], block.getZ() + n[2]);
-        ((BlockDisplayAccess) d).veinminer$setBlockState(state);
         double s = 1 + 2 * StandKeys.PAD;
         ((DisplayAccess) d).veinminer$setTransformation(of(-n[0] - StandKeys.PAD, -n[1] - StandKeys.PAD, -n[2] - StandKeys.PAD, NONE, s, s, s));
         ((DisplayAccess) d).veinminer$setBrightnessOverride(light);
@@ -71,6 +88,13 @@ public final class Fx {
         level.addFreshEntity(d);
         LIVE.put(d, owner);
         return d;
+    }
+
+    /** Ores, the blocks a shader pack makes glow: shown as their item. */
+    static boolean glows(BlockState state) {
+        if (state.getBlock().asItem() == net.minecraft.world.item.Items.AIR) return false;
+        String path = net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(state.getBlock()).getPath();
+        return path.endsWith("_ore") || path.equals("ancient_debris") || path.equals("gilded_blackstone");
     }
 
     /**
