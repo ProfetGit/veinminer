@@ -37,6 +37,26 @@ public final class ShaderPack {
         }
     }
 
+    private static MethodHandle separateAo;
+    private static boolean aoTried;
+
+    /** Whether the active pack asked Iris for separate AO (colour in rgb, occlusion in alpha), as its chunk meshes then carry it. */
+    public static boolean separateAo() {
+        if (!active()) return false;
+        try {
+            if (!aoTried) {
+                aoTried = true;
+                Class<?> w = Class.forName("net.irisshaders.iris.shaderpack.materialmap.WorldRenderingSettings");
+                separateAo = MethodHandles.publicLookup().findVirtual(w, "shouldUseSeparateAo", MethodType.methodType(boolean.class))
+                    .bindTo(w.getField("INSTANCE").get(null));
+            }
+            return separateAo != null && (boolean) separateAo.invoke();
+        } catch (Throwable t) {
+            separateAo = null;
+            return false;
+        }
+    }
+
     private static MethodHandle stateIds, idOf, beginBlock;
     private static Class<?> sensitive;
     private static boolean tagTried;
@@ -54,8 +74,8 @@ public final class ShaderPack {
      * the section). Iris writes those from {@code BlockSensitiveBufferBuilder.beginBlock}, which only its own chunk meshing calls;
      * moving blocks arrive with the terrain program but no id, so id-driven looks such as an ore's glow would be missing.
      */
-    public static void tag(VertexConsumer vc) {
-        if (tagState == null || !active()) return;
+    public static VertexConsumer tag(VertexConsumer vc) {
+        if (tagState == null || !active()) return vc;
         try {
             if (!tagTried) {
                 tagTried = true;
@@ -67,16 +87,18 @@ public final class ShaderPack {
                 sensitive = Class.forName("net.irisshaders.iris.vertices.BlockSensitiveBufferBuilder");
                 beginBlock = l.findVirtual(sensitive, "beginBlock", MethodType.methodType(void.class, int.class, byte.class, byte.class, int.class, int.class, int.class));
             }
-            if (beginBlock == null || !sensitive.isInstance(vc)) return;
+            if (beginBlock == null || !sensitive.isInstance(vc)) return vc;
             Object ids = stateIds.invoke();
-            if (ids == null) return;
+            if (ids == null) return vc;
             int id = (int) idOf.invoke(ids, tagState, -1);
-            if (id < 0) return;
+            if (id < 0) return vc;
             beginBlock.invoke(vc, id, (byte) 0, (byte) tagState.getLightEmission(), tagPos.getX() & 15, tagPos.getY() & 15, tagPos.getZ() & 15);
+            return separateAo() ? new AoBuffer(vc) : vc;
         } catch (Throwable t) {
             beginBlock = null;
             Veinminer.LOG.warn("Veinminer: can't give stand-ins their shader-pack id ({})", t.toString());
         }
+        return vc;
     }
 }
 //?} else {

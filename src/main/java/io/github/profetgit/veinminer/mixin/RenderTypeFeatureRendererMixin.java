@@ -13,9 +13,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 /** Every moving-block quad gets its buffer here; a stand-in's buffer is given its Iris block id (ore glow). */
 @Mixin(RenderTypeFeatureRenderer.class)
 public abstract class RenderTypeFeatureRendererMixin {
-    @Inject(method = "getVertexBuilder", require = 0, at = @At("RETURN"))
+    @Inject(method = "getVertexBuilder", require = 0, cancellable = true, at = @At("RETURN"))
     private void veinminer$tag(RenderType renderType, CallbackInfoReturnable<VertexConsumer> cir) {
-        ShaderPack.tag(cir.getReturnValue());
+        cir.setReturnValue(ShaderPack.tag(cir.getReturnValue()));
     }
 }
 //?} else {

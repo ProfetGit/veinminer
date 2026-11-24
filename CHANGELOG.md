@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.1.5 — 2026-11-24
+
+### Fixed
+- **Glowing ores no longer dim when they turn into the chain animation.** With a shader pack that makes ores glow (Complementary's "Glowing Ores"), the yellow glow of gold ore (and other glowing ores) turned dull and olive on the side and lower faces for the moment the ore was animating. The animated ore now keeps exactly the glow of the real block. Measured with Complementary on gold ore: the glow brightness matches the real block on every face (within 2 %).
+
 ## 2.1.4 — 2026-11-23
 
 ### Fixed
