@@ -130,7 +130,10 @@ public final class Hooks {
             try {
                 if (Api.cancelled(s.level, s.player, s.pos, s.state, s.group)) continue;
                 if (Config.get().animation()) Chain.start(s.level, s.player, s.pos, s.group, s.tool, s.mark);
-                else Vein.run(s.level, s.player, s.pos, s.group, s.tool);
+                else {
+                    Vein.run(s.level, s.player, s.pos, s.group, s.tool);
+                    if (Config.get().drops() == 1) Vein.toFeet(s.level, s.player, s.pos, s.mark);
+                }
             } catch (RuntimeException e) {
                 Veinminer.LOG.error("Veinminer: a vein failed, the rest stays ore", e);
             }

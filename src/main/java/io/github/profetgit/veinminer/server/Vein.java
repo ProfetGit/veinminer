@@ -11,8 +11,11 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.world.entity.ExperienceOrb;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 /** PRD 5.2 and 5.4: the scan of a vein and the break of its blocks through the real player break path. */
@@ -121,6 +124,23 @@ public final class Vein {
         if (cfg.feedback()) feedback(player, mined, group, stop);
         for (VeinminerEvents.AfterVein a : VeinminerEvents.AFTER_VEIN.listeners()) a.after(level, player, origin, group, mined);
         return mined;
+    }
+
+    /**
+     * Without the chain animation the vein breaks at once and every block drops where it stood, so the {@code drops} option
+     * (loot at the player's feet) is applied here: whatever the break dropped (entity ids above {@code mark}) moves to the player.
+     */
+    static void toFeet(ServerLevel level, ServerPlayer player, BlockPos origin, int mark) {
+        AABB box = new AABB(origin).inflate(REACH + 1.0);
+        Vec3 feet = player.position();
+        for (ItemEntity e : level.getEntitiesOfClass(ItemEntity.class, box, e -> e.getId() > mark && !e.isRemoved())) {
+            e.setPos(feet.x, feet.y, feet.z);
+            e.setDeltaMovement(Vec3.ZERO);
+            e.setPickUpDelay(0);
+        }
+        for (ExperienceOrb o : level.getEntitiesOfClass(ExperienceOrb.class, box, o -> o.getId() > mark && !o.isRemoved())) {
+            o.setPos(feet.x, feet.y, feet.z);
+        }
     }
 
     /** The action-bar message at the end of a vein or chain. */
