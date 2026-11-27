@@ -111,9 +111,12 @@ public final class Vein {
         running = true;
         try {
             for (BlockPos pos : scan(level, player.position(), origin, group, Lag.maxBlocks(GroupData.cap(group, cfg.maxBlocks())) - 1, cfg.visitCap(), cfg.diagonal())) {
+                int mark = cfg.drops() == 1 ? Chain.mark(level) : 0;
                 Result r = breakOne(player, tool, pos, group);
-                if (r == Result.BROKEN) mined++;
-                else if (r != Result.SKIPPED) {
+                if (r == Result.BROKEN) {
+                    mined++;
+                    if (cfg.drops() == 1) toFeet(level, player, pos, mark);
+                } else if (r != Result.SKIPPED) {
                     stop = r;
                     break;
                 }
@@ -127,11 +130,11 @@ public final class Vein {
     }
 
     /**
-     * Without the chain animation the vein breaks at once and every block drops where it stood, so the {@code drops} option
-     * (loot at the player's feet) is applied here: whatever the break dropped (entity ids above {@code mark}) moves to the player.
+     * The {@code drops} option (loot at the player's feet) without the chain animation: what the break at {@code pos} dropped
+     * (entities near it with an id above the mark taken before it) moves to the player.
      */
-    static void toFeet(ServerLevel level, ServerPlayer player, BlockPos origin, int mark) {
-        AABB box = new AABB(origin).inflate(REACH + 1.0);
+    static void toFeet(ServerLevel level, ServerPlayer player, BlockPos pos, int mark) {
+        AABB box = new AABB(pos).inflate(1.0);
         Vec3 feet = player.position();
         for (ItemEntity e : level.getEntitiesOfClass(ItemEntity.class, box, e -> e.getId() > mark && !e.isRemoved())) {
             e.setPos(feet.x, feet.y, feet.z);

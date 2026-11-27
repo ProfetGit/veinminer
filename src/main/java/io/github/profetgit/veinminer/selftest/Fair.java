@@ -2,15 +2,18 @@ package io.github.profetgit.veinminer.selftest;
 
 import io.github.profetgit.veinminer.server.Config;
 import io.github.profetgit.veinminer.server.Groups;
+import io.github.profetgit.veinminer.server.Hooks;
 import io.github.profetgit.veinminer.server.Vein;
 import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.gamerules.GameRules;
+import net.minecraft.world.phys.AABB;
 
 /** PRD 13 M1 {@code fair}: a vein loses and costs exactly what mining every block by hand would. */
 final class Fair {
@@ -29,6 +32,7 @@ final class Fair {
         durabilityOff();
         cap();
         noDrops();
+        dropsAtFeet();
         Config.use(Rig.PLAIN);
         Rig.clear();
     }
@@ -145,5 +149,36 @@ final class Fair {
         Rig.level.getGameRules().set(GameRules.BLOCK_DROPS, true, Rig.server);
         Rig.eq("block_drops off: blocks gone", 9, Rig.air(cells));
         Rig.eq("block_drops off: no loot", 0, loot.total());
+    }
+
+    /** {@code drops} = 1 with the chain off: the vein's loot moves to the miner, and nothing that is not its loot does. */
+    private static void dropsAtFeet() {
+        Rig.clear();
+        Rig.hold(Rig.pick(0, 0));
+        Config.use(Rig.PLAIN.drops(1));
+        Rig.cube(1, 1, 1, 2, 2, 2, Blocks.COAL_ORE);
+        BlockPos far = Rig.at(10, 1, 10);
+        Rig.set(far.below(), Blocks.STONE.defaultBlockState());
+        Rig.player.setShiftKeyDown(true);
+        Rig.player.gameMode.destroyBlock(Rig.at(1, 1, 1));
+        ItemEntity other = new ItemEntity(Rig.level, far.getX() + 0.5, far.getY() + 0.1, far.getZ() + 0.5, new ItemStack(Items.STICK), 0, 0, 0);
+        Rig.level.addFreshEntity(other);
+        Hooks.drain();
+        Rig.player.setShiftKeyDown(false);
+        AABB feet = new AABB(Rig.player.position(), Rig.player.position()).inflate(0.5);
+        int atFeet = 0;
+        for (ItemEntity e : Rig.level.getEntitiesOfClass(ItemEntity.class, feet, e -> e.getItem().is(Items.COAL))) {
+            atFeet += e.getItem().getCount();
+            e.discard();
+        }
+        Rig.eq("at your feet, chain off: all 8 coal by the miner", 8, atFeet);
+        Rig.check("at your feet, chain off: another drop stays put", !other.isRemoved() && other.blockPosition().equals(far), "at " + other.blockPosition() + " want " + far);
+        other.discard();
+        Rig.eq("at your feet, chain off: no coal left at the vein", 0, Rig.grab().count(Items.COAL));
+
+        Rig.clear();
+        Rig.cube(1, 1, 1, 1, 1, 1, Blocks.COAL_ORE);
+        Rig.strike(Rig.at(1, 1, 1), true);
+        Rig.eq("at your feet, chain off: a lone ore drops where it stood", 1, Rig.grab().count(Items.COAL));
     }
 }
