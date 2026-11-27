@@ -81,3 +81,6 @@ tasks.named<Jar>("jar") {
 // target of the same sources (:26.3-fabric:test)
 tasks.named("compileTestJava") { enabled = false }
 tasks.test { enabled = false }
+
+// The shared Profet settings screen, nested in the jar (tools/ProfetSettings/STATUS.md)
+apply(from = rootProject.file("../../tools/ProfetSettings/mod/consumer.gradle.kts"))

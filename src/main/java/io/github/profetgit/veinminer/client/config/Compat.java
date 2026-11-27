@@ -40,6 +40,14 @@ final class Compat {
 *///?}
     }
 
+    static Screen screen(Minecraft mc) {
+//? if >=26.2 {
+        return mc.gui.screen();
+//?} else {
+/*        return mc.screen;
+*///?}
+    }
+
     /** Opens {@code screen}: the 26.2 client moved the current screen onto {@code Gui}. */
     static void setScreen(Minecraft mc, Screen screen) {
 //? if >=26.2 {
@@ -81,7 +89,7 @@ final class Compat {
     }
 
     static void tooltip(GuiGraphicsExtractor g, Font font, Component text, int x, int y) {
-//? if >=26.1 {
+//? if >=1.21.11 {
         g.setTooltipForNextFrame(font, text, x, y);
 //?} else {
 /*        g.renderTooltip(font, text, x, y);

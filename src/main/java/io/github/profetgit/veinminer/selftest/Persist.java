@@ -66,7 +66,7 @@ final class Persist {
 
     /** Saves, then reads the file with a second storage over the same folder, as a restart would. */
     private static void reopened(MinecraftServer s, String name, boolean expectOff) {
-//? if >=26.1 {
+//? if >=1.21.11 {
         s.overworld().getDataStorage().saveAndJoin();
 //?} else {
 /*        s.overworld().getDataStorage().save();
@@ -104,7 +104,10 @@ final class Persist {
 //? if >=26.1 {
         try (SavedDataStorage fresh = new SavedDataStorage(file.getParent().getParent(), s.getFixerUpper(), s.registryAccess())) {
             Players read = fresh.computeIfAbsent(Players.type());
-//?} else {
+//?} else if >=1.21.11 {
+/*        try (DimensionDataStorage fresh = new DimensionDataStorage(file.getParent(), s.getFixerUpper(), s.registryAccess())) {
+            Players read = fresh.computeIfAbsent(Players.type());
+*///?} else {
 /*        {
             DimensionDataStorage fresh = new DimensionDataStorage(file.getParent().toFile(), s.getFixerUpper(), s.registryAccess());
             Players read = Players.open(fresh);

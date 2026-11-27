@@ -10,6 +10,7 @@ final class Scenarios {
         Script s = new Script();
         String only = System.getProperty("veinminer.selftest.scene", "all");
         if (ScreenScene.wanted(only)) ScreenScene.title(s);
+        if (UiScenes.wanted(only)) UiScenes.title(s);
         s.run(mc -> TestCompat.createWorld(mc, "veinminertest-" + System.currentTimeMillis()))
             .until("world to load", 2400, mc -> mc.player != null && mc.level != null && TestCompat.screen(mc) == null)
             .waitTicks(40)
@@ -17,8 +18,11 @@ final class Scenarios {
         if (only.equals("all") || only.contains("smoke")) smoke(s);
         if (ScreenScene.wanted(only)) ScreenScene.world(s);
         if (ScreenScene.pickerWanted(only)) ScreenScene.picker(s);
+        if (UiScenes.wanted(only)) UiScenes.world(s);
+        if (PreviewScenes.wanted(only)) PreviewScenes.world(s);
         if (only.equals("all") || only.contains("modded")) s.server(Modded::run);
         if (only.equals("all") || only.contains("fair")) s.server(Fair::run);
+        if (only.contains("addonjar")) s.server(AddonJar::run);
         if (only.equals("all") || List.of(only.split(",")).contains("chain")) {
             s.server(ChainScene::manual)
                 .server(ChainScene::realStart)
@@ -82,6 +86,7 @@ final class Scenarios {
                 .server(Gates::hooksCheck).waitTicks(80)
                 .server(Gates::hooksGone);
         }
+        if (only.equals("enchanted") || List.of(only.split(",")).contains("enchanted")) EnchantedAddon.build(s);
         if (M4.want(only, "migrate")) {
             s.server(Persist::migrateInstall).waitTicks(100)
                 .server(Persist::migrateRun).waitTicks(100)

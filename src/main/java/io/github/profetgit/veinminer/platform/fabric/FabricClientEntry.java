@@ -8,6 +8,7 @@ import net.fabricmc.api.ClientModInitializer;
 public final class FabricClientEntry implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
+        VeinminerClient.register();
         VeinminerClient.LOG.info("Veinminer client loaded");
     }
 }

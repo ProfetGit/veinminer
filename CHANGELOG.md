@@ -1,6 +1,23 @@
 # Changelog
 
+## 2.2.0 — 2026-11-27
+
+### Changed
+- **New settings screen**, shared by all Profet mods: every Veinminer option has a live preview that shows what it does (the vein popping, how many blocks, corners, tool wear, where the loot lands, the message), Quick setup presets, search, reset per option and an in-game bug report button. Same options, same `config/veinminer.json`. Open it from Mod Menu, the mod list's Config button, or the golem button in the pause menu. On every supported Minecraft version and loader.
+- On a server the options are locked: the server's own settings apply (operators change them with `/veinminer set`).
+
+### Fixed
+- **"Loot lands: At your feet" now works with the chain animation off.** The loot of a vein that breaks all at once moves to you, the same setting as with the chain on.
+
+## 2.1.6 — 2026-11-26
+
+### Fixed
+- **Minecraft 1.21.11 Forge no longer logs "Couldn't load mod:veinminer pack metadata".** The 1.21.11 Forge file declared a pack format the game rejects. Other versions and loaders are unchanged.
+
 ## 2.1.5 — 2026-11-24
+
+### Added
+- **Minecraft 1.21.11 support** on Fabric, Quilt, NeoForge and Forge. Same vein mining, chain animation, settings screen and custom blocks as the other versions. (Like 1.21.1 and 1.20.1, the glowing-ore shader fix from 2.1.5 is a 26.2+ client feature and does not apply here.)
 
 ### Fixed
 - **Glowing ores no longer dim when they turn into the chain animation.** With a shader pack that makes ores glow (Complementary's "Glowing Ores"), the yellow glow of gold ore (and other glowing ores) turned dull and olive on the side and lower faces for the moment the ore was animating. The animated ore now keeps exactly the glow of the real block. Measured with Complementary on gold ore: the glow brightness matches the real block on every face (within 2 %).

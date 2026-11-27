@@ -74,3 +74,6 @@ tasks.processResources {
 tasks.named<Jar>("jar") {
     from(rootProject.file("LICENSE"))
 }
+
+// The shared Profet settings screen, nested in the jar (tools/ProfetSettings/STATUS.md)
+apply(from = rootProject.file("../../tools/ProfetSettings/mod/consumer.gradle.kts"))

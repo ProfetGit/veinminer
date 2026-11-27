@@ -8,4 +8,9 @@ public final class VeinminerClient {
     public static final Logger LOG = LoggerFactory.getLogger("Veinminer");
 
     private VeinminerClient() {}
+
+    /** Client init on every loader: puts Veinminer into the shared Profet settings screen. */
+    public static void register() {
+        io.github.profetgit.profetsettings.ProfetSettings.register(io.github.profetgit.veinminer.Veinminer.ID, io.github.profetgit.veinminer.client.config.VeinminerSettings::create);
+    }
 }

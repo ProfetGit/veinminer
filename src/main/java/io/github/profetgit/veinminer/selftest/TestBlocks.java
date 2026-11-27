@@ -46,7 +46,7 @@ public final class TestBlocks {
     public static boolean wanted() {
         if (System.getProperty("veinminer.selftest") == null) return false;
         String scene = System.getProperty("veinminer.selftest.scene", "all");
-        return scene.equals("all") || scene.contains("modded") || scene.contains("groups") || scene.contains("blockentity") || scene.contains("chainview");
+        return scene.equals("all") || scene.contains("modded") || scene.contains("groups") || scene.contains("blockentity") || scene.contains("chainview") || scene.contains("enchanted");
     }
 
     public static void register() {
@@ -77,7 +77,7 @@ public final class TestBlocks {
     }
 
     public static void registerEntityTypes(BiConsumer<ResourceKey<BlockEntityType<?>>, BlockEntityType<?>> sink) {
-//? if >=26.1 <26.2 {
+//? if >=1.21.11 <26.2 {
 /*        beType = newBlockEntityType();
 *///?} else {
         beType = new BlockEntityType<>(TestBe::new, Set.of(be));
@@ -85,7 +85,13 @@ public final class TestBlocks {
         sink.accept(ResourceKey.create(Registries.BLOCK_ENTITY_TYPE, Identifier.fromNamespaceAndPath(Veinminer.ID, "test_ore_be")), beType);
     }
 
-//? if >=26.1 <26.2 {
+//? if >=1.21.11 <26.2 && fabric {
+/*    private static BlockEntityType<TestBe> newBlockEntityType() {
+        return net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder.create(TestBe::new, be).build();
+    }
+
+*///?}
+//? if >=1.21.11 <26.2 && !fabric {
 /*    // 26.1's BlockEntityType constructor and its supplier type are private (26.2 opened them), so the test type is built by reflection
     @SuppressWarnings("unchecked")
     private static BlockEntityType<TestBe> newBlockEntityType() {

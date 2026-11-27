@@ -1,7 +1,8 @@
 package io.github.profetgit.veinminer.platform.forge;
 
 //? forge {
-/*import io.github.profetgit.veinminer.client.config.VeinminerScreen;
+/*import io.github.profetgit.veinminer.client.VeinminerClient;
+import io.github.profetgit.veinminer.client.config.ConfigScreens;
 import net.minecraftforge.client.ConfigScreenHandler;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
@@ -12,7 +13,8 @@ final class ForgeClient {
 
     static void register(FMLJavaModLoadingContext context) {
         context.registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class,
-            () -> new ConfigScreenHandler.ConfigScreenFactory((mc, parent) -> new VeinminerScreen(parent)));
+            () -> new ConfigScreenHandler.ConfigScreenFactory((mc, parent) -> ConfigScreens.create(parent)));
+        VeinminerClient.register();
     }
 }
 *///?}

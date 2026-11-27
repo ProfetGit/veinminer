@@ -7,9 +7,9 @@
 
 **Sneak, mine one ore, and the whole vein pops out in a chain, with any ore from any mod.**
 
-Veinminer is a mod for **Minecraft Java 26.3, 26.2, 26.1.2, 1.21.1 and 1.20.1** on **Fabric, Quilt, NeoForge and Forge**. Put it on the server and everyone who joins sees the chain, even with an unmodified game. In your own game it also adds a settings screen.
+Veinminer is a mod for **Minecraft Java 26.3, 26.2, 26.1.2, 1.21.11, 1.21.1 and 1.20.1** on **Fabric, Quilt, NeoForge and Forge**. Put it on the server and everyone who joins sees the chain, even with an unmodified game. In your own game it also adds a settings screen.
 
-**New in 2.1:** a settings screen, so you never have to edit a file; dirt, sand, gravel and clay with any shovel; and your own list of blocks that vein too.
+**New in 2.2:** a new settings screen with a live preview of every option and one-press quick setups, on every supported version.
 
 <p align="center">
 <img src="https://raw.githubusercontent.com/ProfetGit/veinminer/main/docs/showcase/veinminer_copper.webp" alt="One swing breaks a whole copper blob" width="49%">
@@ -36,7 +36,7 @@ Creative mode never starts a vein, so building stays instant. When the vein is d
 
 ![Settings](https://raw.githubusercontent.com/ProfetGit/veinminer/main/docs/desc/title-settings.webp)
 
-**In game:** on Fabric, open Mod Menu and press Veinminer's configure button (Mod Menu is optional); on NeoForge and Forge, press Config in the mod list. Every setting is a button, and changes apply right away in your world and on a LAN world you host. "Add or remove blocks..." opens the block picker: search every installed block, modded ones included, or add the block you're looking at.
+**In game:** open Veinminer's settings from the golem button in the pause menu, from Mod Menu on Fabric (optional), or with Config in the mod list on NeoForge and Forge. Every option has a live preview that shows what it does, Quick setup applies a ready-made set, and there is search, per-option reset and a bug report button. "Your blocks" opens the block picker: search every installed block, modded ones included, or add the block you're looking at. Changes apply in your world and on a LAN world you host; on someone else's server the options are locked.
 
 <p align="center">
 <img src="https://raw.githubusercontent.com/ProfetGit/veinminer/main/docs/showcase/settings-screen.png" alt="The settings screen" width="49%">
@@ -49,7 +49,7 @@ Modpack makers can add or move groups with a data pack: `data/<namespace>/veinmi
 
 ![Add-ons](https://raw.githubusercontent.com/ProfetGit/veinminer/main/docs/desc/title-add-ons.webp)
 
-**[Enchanted Veinminer](https://www.curseforge.com/minecraft/mc-mods/enchanted-veinminer)** turns veinmining into a pickaxe enchantment you have to find first. It uses the data pack hooks that 2.0 keeps (`#veinminer:api/cancel`, `#veinminer:api/loaded`); they are tested here with a stand-in add-on, and the real add-on is not yet re-tested on 2.0. Making your own add-on? See the [add-on API](https://github.com/ProfetGit/veinminer/blob/main/docs/api.md). Mods get a Java hook, `VeinminerEvents.BEFORE_VEIN`.
+**[Enchanted Veinminer](https://www.curseforge.com/minecraft/mc-mods/enchanted-veinminer)** turns veinmining into a pickaxe enchantment you have to find first. It uses the data pack hooks that 2.0 keeps (`#veinminer:api/cancel`, `#veinminer:api/loaded`); the add-on was checked in game with 2.2.0 on 1.21.1 NeoForge, and not re-tested on the other versions. Making your own add-on? See the [add-on API](https://github.com/ProfetGit/veinminer/blob/main/docs/api.md). Mods get a Java hook, `VeinminerEvents.BEFORE_VEIN`.
 
 ![Installation](https://raw.githubusercontent.com/ProfetGit/veinminer/main/docs/desc/title-installation.webp)
 
@@ -59,7 +59,7 @@ Put the jar in the `mods` folder of the server (or your singleplayer game). Fabr
 
 **Conflicts.** FTB Ultimine, Liteminer, OreVein and Ore Excavation also mine veins. If one is installed, Veinminer warns the operators and the log. Use only one of them.
 
-**Tested.** Every version on every loader boots and passes the self-test (26.1.2 is new and has only been compiled, unit-tested and built so far); an ore mod (Immersive Ores) was tried on 1.20.1 Fabric and Quilt. Not yet tested: the function-tag hooks and the 1.3.x migration on 1.21.1 and 1.20.1 (on 1.20.1 the `#veinminer:api/cancel` function tag cannot veto, the Java hook can), real land-claim mods, and a mod with `#c:ores/<name>` subtags. New in 2.1 and not yet tested: "Add the block I'm looking at" and adding a `#tag` through the block picker, the Mod Menu and Config buttons pressed by hand anywhere but Fabric 26.3, and your own blocks in multiplayer. On 1.21.1 and 1.20.1 the settings screen has no section headings (on 1.20.1 your own blocks sit between Clay and the ores) and no notice when you open it on a server.
+**Tested.** Every version on every loader boots and passes the self-test; an ore mod (Immersive Ores) was tried on 1.20.1 Fabric and Quilt. Not yet tested: the function-tag hooks beyond the add-on check above, the 1.3.x migration on 1.21.1 and 1.20.1 (on 1.20.1 the `#veinminer:api/cancel` function tag cannot veto, the Java hook can), real land-claim mods, and a mod with `#c:ores/<name>` subtags. Also not yet tested by hand: "Add the block I'm looking at", adding a `#tag` through the block picker, and your own blocks in multiplayer.
 
 ![More from Profet](https://raw.githubusercontent.com/ProfetGit/veinminer/main/docs/desc/title-more-from-profet.webp)
 

@@ -12,7 +12,7 @@
   {
     "regex": "\\b(ServerLevel level|level) = player\\.level\\(\\);",
     "to": "$1 = player.serverLevel();",
-    "when": "<26.1",
+    "when": "<1.21.11",
     "files": "^(Vein|Rig)\\.java$",
     "groups": "1"
   },
@@ -44,7 +44,7 @@
   {
     "regex": "Rig\\.server\\.getRandomSequences\\(\\)\\.reset\\(COAL_SEQUENCE, seed\\)",
     "to": "Rig.level.getRandomSequences().reset(COAL_SEQUENCE, (int) seed, true, true)",
-    "when": ">=1.21 <26.1",
+    "when": ">=1.21 <1.21.11",
     "files": "^(Fair|ChainScene)\\.java$"
   },
   {
@@ -134,12 +134,12 @@
   {
     "regex": "net\\.neoforged\\.neoforge\\.event\\.level\\.block\\.BreakBlockEvent",
     "to": "net.neoforged.neoforge.event.level.BlockEvent.BreakEvent",
-    "when": "<1.21.2"
+    "when": "<26.1"
   },
   {
     "from": "BreakBlockEvent",
     "to": "BreakEvent",
-    "when": "<1.21.2"
+    "when": "<26.1"
   },
   {
     "from": "AddServerReloadListenersEvent",
@@ -282,5 +282,36 @@
     "to": "if (TestBlocks.wanted()) {\n                e.register(Registries.BLOCK, h -> TestBlocks.registerBlocks((key, block) -> h.register(key.location(), block)));\n                e.register(Registries.ITEM, h -> TestBlocks.registerItems((key, item) -> h.register(key.location(), item)));\n                e.register(Registries.BLOCK_ENTITY_TYPE, h -> TestBlocks.registerEntityTypes((key, type) -> h.register(key.location(), type)));\n            }",
     "when": "<1.21.2",
     "files": "^NeoForgeEntry\\.java$"
+  },
+  {
+    "regex": "Rig\\.server\\.getRandomSequences\\(\\)\\.reset\\(COAL_SEQUENCE, seed\\)",
+    "to": "Rig.level.getRandomSequences().reset(COAL_SEQUENCE, seed)",
+    "when": ">=1.21.11 <26.1",
+    "files": "^(Fair|ChainScene)\\.java$"
+  },
+  {
+    "regex": "new SavedDataType<>\\(Identifier\\.fromNamespaceAndPath\\(Veinminer\\.ID, \"(\\w+)\"\\)",
+    "to": "new SavedDataType<>(\"veinminer_$1\"",
+    "when": ">=1.21.5 <26.1",
+    "files": "^(Players|Migrate)\\.java$",
+    "groups": "1"
+  },
+  {
+    "regex": "\\.registerReloadListener\\(GroupData\\.ID",
+    "to": ".registerReloader(GroupData.ID",
+    "when": ">=1.21.11 <26.1",
+    "files": "^FabricEntry\\.java$"
+  },
+  {
+    "regex": "ModList\\.isLoaded\\(",
+    "to": "ModList.get().isLoaded(",
+    "when": ">=1.21.11 <26.1",
+    "files": "^ForgeEntry\\.java$"
+  },
+  {
+    "regex": "ModList\\.getModContainerById\\(",
+    "to": "ModList.get().getModContainerById(",
+    "when": ">=1.21.11 <26.1",
+    "files": "^ForgeEntry\\.java$"
   }
 ]

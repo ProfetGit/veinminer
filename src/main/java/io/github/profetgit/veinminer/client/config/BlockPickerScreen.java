@@ -33,7 +33,8 @@ public final class BlockPickerScreen extends Screen {
 
     private record Row(String entry, String name, String detail, ItemStack icon, Kind kind) {}
 
-    private final VeinminerScreen parent;
+    private final Screen parent;
+    private final java.util.function.Consumer<List<String>> done;
     private final List<String> entries;
     private final List<BlockIndex.Entry> index = new ArrayList<>();
     private final List<Row> rows = new ArrayList<>();
@@ -47,9 +48,11 @@ public final class BlockPickerScreen extends Screen {
     private int listBottom;
     private int visible;
 
-    BlockPickerScreen(VeinminerScreen parent, List<String> entries) {
+    /** {@code done} gets the final list when the player leaves the picker and must show the next screen itself. */
+    BlockPickerScreen(Screen parent, List<String> entries, java.util.function.Consumer<List<String>> done) {
         super(Component.literal("Your blocks"));
         this.parent = parent;
+        this.done = done;
         this.entries = new ArrayList<>(entries);
         index.addAll(BlockIndex.blocks());
     }
@@ -93,7 +96,7 @@ public final class BlockPickerScreen extends Screen {
 
     @Override
     public void onClose() {
-        Compat.setScreen(minecraft, parent.withBlocks(entries));
+        done.accept(new ArrayList<>(entries));
     }
 
     private Block looked() {

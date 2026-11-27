@@ -33,6 +33,10 @@ final class TestCompat {
 /*        mc.createWorldOpenFlows().createFreshLevel(name,
             new LevelSettings(name, GameType.SURVIVAL, new LevelSettings.DifficultySettings(Difficulty.PEACEFUL, false, false), true, WorldDataConfiguration.DEFAULT),
             new WorldOptions(42L, false, false), WorldPresets::createFlatWorldDimensions, screen(mc));
+*///?} else if >=1.21.2 {
+/*        mc.createWorldOpenFlows().createFreshLevel(name,
+            new LevelSettings(name, GameType.SURVIVAL, false, Difficulty.PEACEFUL, true, new net.minecraft.world.level.gamerules.GameRules(WorldDataConfiguration.DEFAULT.enabledFeatures()), WorldDataConfiguration.DEFAULT),
+            new WorldOptions(42L, false, false), WorldPresets::createFlatWorldDimensions, screen(mc));
 *///?} else {
 /*        mc.createWorldOpenFlows().createFreshLevel(name,
             new LevelSettings(name, GameType.SURVIVAL, false, Difficulty.PEACEFUL, true, new GameRules(), WorldDataConfiguration.DEFAULT),

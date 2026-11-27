@@ -15,3 +15,5 @@ forge-*/run/
 forge-*/.gradle/
 versions/*/logs/
 release-art/
+
+dev/preview/out/

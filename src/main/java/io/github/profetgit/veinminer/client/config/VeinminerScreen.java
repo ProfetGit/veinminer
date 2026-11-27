@@ -148,7 +148,7 @@ public final class VeinminerScreen extends OptionsSubScreen {
 
     private void openPicker() {
         handedOver = true;
-        Compat.setScreen(minecraft, new BlockPickerScreen(this, pending.customBlocks()));
+        Compat.setScreen(minecraft, new BlockPickerScreen(this, pending.customBlocks(), entries -> Compat.setScreen(minecraft, withBlocks(entries))));
     }
 
     /** The settings screen again with the picker's list; this one is dropped without saving, the new one saves on close. */

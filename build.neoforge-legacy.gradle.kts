@@ -84,3 +84,6 @@ apply(from = rootProject.file("../../tools/Backport/renames.gradle.kts"))
 // the Fabric targets of the same sources (:1.21.1-fabric:test), which is the same code
 tasks.named("compileTestJava") { enabled = false }
 tasks.test { enabled = false }
+
+// The shared Profet settings screen, nested in the jar (tools/ProfetSettings/STATUS.md)
+apply(from = rootProject.file("../../tools/ProfetSettings/mod/consumer.gradle.kts"))

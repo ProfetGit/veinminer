@@ -26,7 +26,7 @@ import net.minecraft.world.phys.Vec3;
  * (or {@code chainview,cave} for one subject).
  */
 final class ChainView {
-    static final String[] SUBJECTS = {"small", "cave", "modded", "glow", "still"};
+    static final String[] SUBJECTS = {"small", "cave", "modded", "glow", "still", "stilldown", "goldcube"};
     private static int VEIN = 30;
 
     static void vein(int n) {
@@ -34,6 +34,8 @@ final class ChainView {
     }
 
     private static boolean still;
+    private static String subject0 = "";
+    private static volatile boolean swapped;
     private static Vec3 home;
     private static volatile boolean started;
     private static List<BlockPos> cells;
@@ -50,7 +52,9 @@ final class ChainView {
         Config.use(Config.Values.DEFAULTS);
         Tune.reset();
         started = false;
-        still = subject.equals("still");
+        still = subject.startsWith("still") || subject.equals("goldcube");
+        subject0 = subject;
+        swapped = false;
         command("time set noon");
         command("weather clear");
         command("gamerule advance_time false");
@@ -58,17 +62,35 @@ final class ChainView {
         Vec3 cam;
         Vec3 aim;
         switch (subject) {
-            case "cave", "glow", "still" -> {
+            case "cave", "glow", "still", "stilldown", "goldcube" -> {
                 Rig.cube(0, 0, 0, 12, 12, 12, Blocks.STONE);
                 Rig.cube(1, 1, 5, 10, 5, 6, Blocks.AIR);
-                Rig.set(Rig.at(2, 3, 5), Blocks.WALL_TORCH.defaultBlockState().setValue(WallTorchBlock.FACING, Direction.SOUTH));
-                Rig.set(Rig.at(9, 3, 5), Blocks.WALL_TORCH.defaultBlockState().setValue(WallTorchBlock.FACING, Direction.SOUTH));
+                if (subject.startsWith("still") || subject.equals("goldcube")) {
+                    Rig.cube(5, 6, 8, 2, 6, 2, Blocks.AIR);
+                    Rig.set(Rig.at(5, 3, 7), Blocks.LIGHT.defaultBlockState().setValue(net.minecraft.world.level.block.LightBlock.LEVEL, 3));
+                } else {
+                    Rig.set(Rig.at(2, 3, 5), Blocks.WALL_TORCH.defaultBlockState().setValue(WallTorchBlock.FACING, Direction.SOUTH));
+                    Rig.set(Rig.at(9, 3, 5), Blocks.WALL_TORCH.defaultBlockState().setValue(WallTorchBlock.FACING, Direction.SOUTH));
+                }
                 boolean glow = !subject.equals("cave");
-                ore = glow ? Blocks.DIAMOND_ORE : Blocks.COAL_ORE;
+                ore = subject.equals("goldcube") ? Blocks.GOLD_ORE : subject.startsWith("still") ? Blocks.COPPER_ORE : glow ? Blocks.DIAMOND_ORE : Blocks.COAL_ORE;
                 drop = glow ? Items.DIAMOND : Items.COAL;
                 cells = blob(5.5, 3.5, 3.0);
                 cam = new Vec3(8.0, 1, 8.5);
                 aim = new Vec3(5.5, 3.6, 5.0);
+                if (subject.equals("goldcube")) {
+                    cells = new ArrayList<>();
+                    for (int x = 4; x <= 6; x++) for (int y = 1; y <= 3; y++) for (int z = 6; z <= 8; z++) cells.add(Rig.at(x, y, z));
+                    cam = new Vec3(9.3, 3.2, 10.3);
+                    aim = new Vec3(5.6, 2.4, 7.4);
+                    Rig.set(Rig.at(9, 5, 10), Blocks.LIGHT.defaultBlockState().setValue(net.minecraft.world.level.block.LightBlock.LEVEL, 9));
+                }
+                if (subject.equals("stilldown")) {
+                    cells = new ArrayList<>();
+                    for (int x = 4; x <= 7; x++) for (int z = 6; z <= 8; z++) cells.add(Rig.at(x, 0, z));
+                    cam = new Vec3(5.5, 4.2, 10.5);
+                    aim = new Vec3(5.5, 0.5, 7.0);
+                }
             }
             case "modded" -> {
                 backdrop(Blocks.GRASS_BLOCK);
@@ -89,6 +111,7 @@ final class ChainView {
                 aim = new Vec3(5.5, 3.6, 5.0);
             }
         }
+        if (subject.equals("still")) ore = Blocks.COPPER_ORE;
         if (!subject.equals("modded")) for (BlockPos p : cells) Rig.set(p, ore.defaultBlockState());
         Rig.hold(Rig.pick(0, 0));
         Vec3 b = Vec3.atLowerCornerOf(Rig.base);
@@ -145,13 +168,26 @@ final class ChainView {
 
     static void strike(MinecraftServer server) {
         if (still) {
-            for (BlockPos p : cells) {
-                if (p.getZ() != Rig.base.getZ() + 4) continue;
-                BlockState state = Rig.level.getBlockState(p);
-                Rig.set(p, Blocks.AIR.defaultBlockState());
-                Fx.still(Rig.level, state, p);
-            }
             started = true;
+            Thread t = new Thread(() -> {
+                try {
+                    Thread.sleep(1800);
+                } catch (InterruptedException e) {
+                    return;
+                }
+                server.execute(() -> {
+                    for (BlockPos p : cells) {
+                        if (!subject0.equals("stilldown") && !subject0.equals("goldcube") && p.getZ() != Rig.base.getZ() + 4) continue;
+                        BlockState state = Rig.level.getBlockState(p);
+                        io.github.profetgit.veinminer.Veinminer.LOG.info("still swap {} {}", p, state.getBlock());
+                        Rig.set(p, Blocks.AIR.defaultBlockState());
+                        Fx.still(Rig.level, state, p);
+                    }
+                    swapped = true;
+                });
+            });
+            t.setDaemon(true);
+            t.start();
             return;
         }
         BlockPos hit = cells.stream().filter(p -> p.getZ() == Rig.base.getZ() + 4)
@@ -162,7 +198,7 @@ final class ChainView {
     }
 
     static boolean done() {
-        return started && Chain.count() == 0;
+        return started && Chain.count() == 0 && (!still || swapped);
     }
 
     static void finish(MinecraftServer server, String subject) {
