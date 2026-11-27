@@ -11,10 +11,7 @@ Veinminer is a mod for **Minecraft Java 26.3, 26.2, 26.1.2, 1.21.11, 1.21.1 and 
 
 **New in 2.2:** a new settings screen with a live preview of every option and one-press quick setups, on every supported version.
 
-<p align="center">
-<img src="https://raw.githubusercontent.com/ProfetGit/veinminer/main/docs/showcase/veinminer_copper.webp" alt="One swing breaks a whole copper blob" width="49%">
-<img src="https://raw.githubusercontent.com/ProfetGit/veinminer/main/docs/showcase/veinminer_diamond.webp" alt="A deepslate diamond vein with Fortune III" width="49%">
-</p>
+![One swing breaks a whole copper blob, and a Fortune III diamond vein drops every block's loot](https://raw.githubusercontent.com/ProfetGit/veinminer/main/docs/clips/showcase.webp)
 
 ![Features](https://raw.githubusercontent.com/ProfetGit/veinminer/main/docs/desc/title-features.webp)
 
