@@ -1,0 +1,1 @@
+Veinminer 2.0 as a Java mod. Add modded block (ore) support to the Veinminer data pack 1.3.3 (packs/Veinminer): mining a modded ore with a pickaxe mines the connected vein, no id list, via #c:ores/* tags. Keep the staged chain animation, loot arcs, config, add-on API ideas. Modeled on Timber 2.0 (mods/Timber).
