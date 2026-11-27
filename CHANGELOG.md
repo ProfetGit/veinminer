@@ -8,6 +8,7 @@
 
 ### Fixed
 - **"Loot lands: At your feet" now works with the chain animation off.** The loot of a vein that breaks all at once moves to you, the same setting as with the chain on.
+- **Minecraft 1.21.11 Forge no longer logs "Couldn't load mod:veinminer pack metadata".**
 
 ## 2.1.6 — 2026-11-26
 
