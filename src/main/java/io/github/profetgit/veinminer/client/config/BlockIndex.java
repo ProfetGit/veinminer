@@ -30,14 +30,22 @@ final class BlockIndex {
         for (Block block : BuiltInRegistries.BLOCK) {
             if (block.defaultBlockState().isAir() || block instanceof LiquidBlock || block instanceof BubbleColumnBlock) continue;
             // no item form (portals, fire, moving pistons) or unbreakable (bedrock, barriers): never mined, so never veined
-            if (block.asItem() == net.minecraft.world.item.Items.AIR
-                || block.defaultBlockState().getDestroySpeed(net.minecraft.world.level.EmptyBlockGetter.INSTANCE, net.minecraft.core.BlockPos.ZERO) < 0) continue;
+            if (block.asItem() == net.minecraft.world.item.Items.AIR || unbreakable(block)) continue;
             String id = BuiltInRegistries.BLOCK.getKey(block).toString();
             String name = block.getName().getString();
             out.add(new Entry(id, name, name.toLowerCase(Locale.ROOT), block));
         }
         out.sort(Comparator.comparing(Entry::lower).thenComparing(Entry::id));
         return out;
+    }
+
+    /** True for bedrock-like blocks. A block that throws while computing its hardness (Dynamic Trees branches read their config, which is not loaded in the menus) stays listed. */
+    private static boolean unbreakable(Block block) {
+        try {
+            return block.defaultBlockState().getDestroySpeed(net.minecraft.world.level.EmptyBlockGetter.INSTANCE, net.minecraft.core.BlockPos.ZERO) < 0;
+        } catch (RuntimeException e) {
+            return false;
+        }
     }
 
     static List<Tag> tags() {
